@@ -47,7 +47,7 @@
 ## 📁 Proje Klasör Yapısı
 
 ```
-C:\Users\ervat\OneDrive\Desktop\orbicorp-full\
+orbicorp-full/
 ├── orbicorp-frontend\              # Frontend (statik dosyalar)
 │   ├── index.html                  # Ana layout (iframe container)
 │   ├── orbicorp-login.html         # Login sayfası

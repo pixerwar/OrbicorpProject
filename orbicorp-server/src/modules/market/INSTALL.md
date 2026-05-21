@@ -26,7 +26,7 @@ orbicorp-packages/
 
 ```powershell
 # Proje dizinine git
-cd C:\Users\ervat\OneDrive\Desktop\orbicorp-full\orbicorp-server
+cd orbicorp-full/orbicorp-server
 
 # Schema dosyasını güncelle
 # ZIP'ten çıkan database/schema.prisma → prisma/schema.prisma

@@ -67,7 +67,7 @@ Swagger:   http://localhost:3001/docs
 ## 3. Klasör Yapısı
 
 ```
-C:\Users\ervat\OneDrive\Desktop\orbicorp-full\
+orbicorp-full/
 ├── orbicorp-frontend\
 │   ├── index.html                  # Ana layout (iframe container)
 │   ├── orbicorp-login.html
@@ -109,7 +109,7 @@ C:\Users\ervat\OneDrive\Desktop\orbicorp-full\
 
 ```powershell
 # Backend
-cd C:\Users\ervat\OneDrive\Desktop\orbicorp-full\orbicorp-server
+cd orbicorp-full/orbicorp-server
 docker compose up -d
 npm install
 npx prisma migrate dev --name init
