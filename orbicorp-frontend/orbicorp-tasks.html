@@ -1,0 +1,1300 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orbicorp — Görev Takip</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--primary:#635BFF;--primary-light:#7A73FF;--primary-bg:#F0EEFF;--primary-bg-subtle:#F8F7FF;--navy:#0A2540;--surface:#F6F9FC;--white:#FFFFFF;--border:#E3E8EE;--border-light:#EBEEF2;--text-primary:#0A2540;--text-secondary:#425466;--text-tertiary:#8792A2;--text-muted:#A3ACB9;--green:#0EA371;--green-bg:#EEFBF4;--green-text:#0C7D58;--amber:#D97706;--amber-bg:#FEF7E6;--amber-text:#92510A;--red:#DF1B41;--red-bg:#FDE8EC;--red-text:#A11534;--blue:#0570DE;--blue-bg:#E8F2FD;--blue-text:#0455A9;--radius-sm:6px;--radius-md:8px;--radius-lg:12px;--radius-xl:16px;--font:'Google Sans',-apple-system,BlinkMacSystemFont,sans-serif;--font-mono:'Google Sans Mono','SF Mono',monospace;--transition:0.2s cubic-bezier(0.4,0,0.2,1)}
+body{font-family:var(--font);background:var(--surface);color:var(--text-primary);-webkit-font-smoothing:antialiased}
+.topnav{height:56px;background:var(--white);border-bottom:0.5px solid var(--border);display:flex;align-items:center;padding:0 24px;position:sticky;top:0;z-index:100}
+.topnav-brand{display:flex;align-items:center;gap:10px;margin-right:32px;text-decoration:none}
+.topnav-logo{width:32px;height:32px;background:linear-gradient(135deg,var(--primary),var(--navy));border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:14px}
+.topnav-name{font-size:16px;font-weight:700;color:var(--navy);letter-spacing:-0.3px}
+.topnav-tabs{display:flex;gap:4px;flex:1}
+.topnav-tab{padding:8px 14px;font-size:14px;color:var(--text-secondary);border-radius:var(--radius-sm);cursor:pointer;transition:all var(--transition);text-decoration:none}
+.topnav-tab:hover{background:var(--surface);color:var(--text-primary)}
+.topnav-tab.active{background:var(--primary-bg);color:var(--primary);font-weight:500}
+.topnav-right{display:flex;align-items:center;gap:12px;margin-left:auto}
+.topnav-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-light));color:white;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center}
+.layout{display:flex;min-height:calc(100vh - 56px)}
+.sidebar{width:240px;background:var(--white);border-right:0.5px solid var(--border);padding:16px 12px;flex-shrink:0;overflow-y:auto}
+.sidebar-label{font-size:11px;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;padding:0 10px;margin-bottom:6px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--radius-sm);font-size:13px;color:var(--text-secondary);cursor:pointer;transition:all var(--transition)}
+.nav-item:hover{background:var(--surface);color:var(--text-primary)}
+.nav-item.active{background:var(--primary-bg);color:var(--primary);font-weight:500}
+.nav-item svg{width:16px;height:16px;flex-shrink:0}
+.nav-badge{margin-left:auto;font-size:10px;background:var(--amber-bg);color:var(--amber-text);padding:1px 7px;border-radius:999px;font-weight:600}
+.nav-section{margin-bottom:20px}
+.main{flex:1;padding:24px 32px;overflow-y:auto;overflow-x:hidden}
+
+.page-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.page-head h2{font-size:18px;font-weight:600;color:var(--navy)}
+.page-head p{font-size:13px;color:var(--text-tertiary);margin-top:2px}
+.btn{padding:8px 16px;border-radius:var(--radius-sm);font-size:12px;font-weight:500;cursor:pointer;transition:all var(--transition);border:0.5px solid var(--border);font-family:var(--font);display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:var(--primary);color:white;border-color:var(--primary)}
+.btn-primary:hover{background:var(--primary-light)}
+.btn-secondary{background:var(--white);color:var(--text-secondary)}
+.btn-secondary:hover{background:var(--surface)}
+.btn-sm{padding:6px 12px;font-size:11px}
+.btn svg{width:14px;height:14px}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;padding:3px 10px;border-radius:999px;font-weight:500}
+.badge-green{background:var(--green-bg);color:var(--green-text)}
+.badge-amber{background:var(--amber-bg);color:var(--amber-text)}
+.badge-red{background:var(--red-bg);color:var(--red-text)}
+.badge-blue{background:var(--blue-bg);color:var(--blue-text)}
+.badge-gray{background:#F1EFE8;color:#5F5E5A}
+.badge-purple{background:var(--primary-bg);color:var(--primary)}
+
+/* KPIs */
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px}
+.kpi{background:var(--white);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px}
+.kpi-val{font-size:22px;font-weight:700;color:var(--text-primary)}
+.kpi-label{font-size:11px;color:var(--text-tertiary);margin-top:2px}
+
+/* Toolbar */
+.toolbar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.date-pills{display:flex;gap:2px;background:var(--surface);padding:3px;border-radius:var(--radius-sm);border:0.5px solid var(--border)}
+.date-pill{padding:6px 14px;font-size:12px;border-radius:4px;cursor:pointer;border:none;background:none;color:var(--text-tertiary);font-family:var(--font);font-weight:500;transition:all var(--transition)}
+.date-pill.active{background:var(--white);color:var(--text-primary);box-shadow:0 1px 2px rgba(0,0,0,0.04)}
+.filter-btn{padding:6px 14px;font-size:12px;border-radius:var(--radius-sm);border:0.5px solid var(--border);background:var(--white);color:var(--text-secondary);cursor:pointer;font-family:var(--font);transition:all var(--transition)}
+.filter-btn:hover{border-color:var(--primary);color:var(--primary)}
+.filter-btn.active{background:var(--primary-bg);border-color:var(--primary);color:var(--primary)}
+
+/* TIMELINE */
+.timeline-wrap{position:relative;padding:0 0 0 32px}
+.timeline-line{position:absolute;left:11px;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,var(--border),var(--primary),var(--border))}
+.timeline-cards{display:flex;flex-direction:column;gap:12px}
+
+/* Timeline Groups */
+.timeline-group{margin-bottom:24px}
+.timeline-group:last-child{margin-bottom:0}
+.timeline-group-header{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:12px;padding-left:32px}
+
+/* Timeline Card */
+.timeline-card{background:var(--white);border:0.5px solid var(--border);border-radius:var(--radius-md);padding:12px 16px;position:relative;cursor:pointer;transition:all var(--transition);margin-left:0}
+.timeline-card:hover{border-color:var(--primary);box-shadow:0 2px 8px rgba(99,91,255,0.08)}
+.timeline-card::before{content:'';position:absolute;left:-26px;top:16px;width:12px;height:12px;border-radius:50%;border:2px solid var(--white);z-index:2;box-shadow:0 0 0 2px var(--surface)}
+.timeline-card::after{content:'';position:absolute;left:-14px;top:21px;width:14px;height:2px;background:var(--border);z-index:1}
+.timeline-card.running{border-left:3px solid var(--primary)}
+.timeline-card.running::before{background:var(--primary)}
+.timeline-card.running::after{background:var(--primary)}
+.timeline-card.approval{border-left:3px solid var(--amber)}
+.timeline-card.approval::before{background:var(--amber)}
+.timeline-card.approval::after{background:var(--amber)}
+.timeline-card.completed{border-left:3px solid var(--green)}
+.timeline-card.completed::before{background:var(--green)}
+.timeline-card.completed::after{background:var(--green)}
+.timeline-card.failed{border-left:3px solid var(--red)}
+.timeline-card.failed::before{background:var(--red)}
+.timeline-card.failed::after{background:var(--red)}
+.timeline-card.pending{border-left:3px solid var(--text-muted);opacity:0.7}
+.timeline-card.pending::before{background:var(--text-muted)}
+.timeline-card.pending::after{background:var(--text-muted)}
+.timeline-card.cancelled{border-left:3px solid var(--text-muted);opacity:0.5}
+.timeline-card.cancelled::before{background:var(--text-muted)}
+.timeline-card.cancelled::after{background:var(--text-muted)}
+
+.timeline-card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+.timeline-card-title{font-size:13px;font-weight:500;color:var(--text-primary)}
+.timeline-card-status{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:500}
+.timeline-card-status.running{background:var(--primary-bg);color:var(--primary)}
+.timeline-card-status.approval{background:var(--amber-bg);color:var(--amber-text)}
+.timeline-card-status.completed{background:var(--green-bg);color:var(--green-text)}
+.timeline-card-status.failed{background:var(--red-bg);color:var(--red-text)}
+.timeline-card-status.pending{background:var(--surface);color:var(--text-muted)}
+.timeline-card-status.cancelled{background:var(--surface);color:var(--text-muted)}
+
+.timeline-card-meta{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--text-tertiary);margin-bottom:8px}
+.timeline-card-agent{display:flex;align-items:center;gap:6px}
+.timeline-card-agent-icon{width:18px;height:18px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:600;color:white}
+.timeline-card-time{display:flex;align-items:center;gap:4px}
+
+.timeline-card-progress{height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.timeline-card-progress-bar{height:100%;border-radius:2px;transition:width 0.3s ease}
+.timeline-card-progress-bar.running{background:var(--primary)}
+.timeline-card-progress-bar.completed{background:var(--green)}
+
+/* Empty State */
+.timeline-empty{text-align:center;padding:60px 20px;color:var(--text-muted)}
+.timeline-empty svg{width:48px;height:48px;margin-bottom:12px;opacity:0.5}
+.timeline-empty p{font-size:14px}
+
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(99,91,255,0.4)}50%{opacity:0.8;box-shadow:0 0 0 4px rgba(99,91,255,0)}}
+.timeline-card.running::before{animation:pulse 2s infinite}
+
+/* Priority dots */
+.priority-dot{width:8px;height:8px;border-radius:50%}
+.priority-dot.critical{background:var(--red)}
+.priority-dot.high{background:var(--amber)}
+.priority-dot.medium{background:var(--blue)}
+.priority-dot.low{background:var(--text-muted)}
+
+/* Spinner */
+.spinner{width:24px;height:24px;border:2px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(10,37,64,0.45);z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(3px)}
+.modal-overlay.open{display:flex}
+.modal{background:var(--white);border-radius:var(--radius-xl);width:640px;max-width:94vw;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 24px 80px rgba(0,0,0,0.18);animation:modalIn 0.25s ease}
+.modal.wizard{width:720px}
+@keyframes modalIn{from{opacity:0;transform:translateY(16px) scale(0.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+.modal-header{display:flex;align-items:center;gap:12px;padding:18px 24px;border-bottom:0.5px solid var(--border)}
+.modal-header h2{flex:1;font-size:16px;font-weight:600;color:var(--text-primary)}
+.modal-close{width:32px;height:32px;border-radius:var(--radius-sm);border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-tertiary);transition:all var(--transition)}
+.modal-close:hover{background:var(--surface);color:var(--text-primary)}
+.modal-body{flex:1;overflow-y:auto;padding:20px 24px}
+.modal-footer{padding:14px 24px;border-top:0.5px solid var(--border);display:flex;justify-content:space-between}
+
+/* Wizard Steps Indicator */
+.wizard-steps{display:flex;gap:8px;padding:16px 24px;background:var(--surface);border-bottom:0.5px solid var(--border)}
+.wizard-step{display:flex;align-items:center;gap:8px;flex:1}
+.wizard-step-num{width:28px;height:28px;border-radius:50%;background:var(--border);color:var(--text-muted);font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;transition:all var(--transition)}
+.wizard-step.active .wizard-step-num{background:var(--primary);color:white}
+.wizard-step.completed .wizard-step-num{background:var(--green);color:white}
+.wizard-step-label{font-size:12px;color:var(--text-muted);font-weight:500}
+.wizard-step.active .wizard-step-label{color:var(--text-primary)}
+.wizard-step.completed .wizard-step-label{color:var(--green-text)}
+.wizard-step-line{flex:1;height:2px;background:var(--border);margin:0 8px}
+.wizard-step.completed .wizard-step-line{background:var(--green)}
+.wizard-step:last-child .wizard-step-line{display:none}
+
+/* Wizard Content */
+.wizard-content{min-height:320px}
+.wizard-page{display:none;animation:fadeIn 0.3s ease}
+.wizard-page.active{display:block}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+/* Form Elements */
+.form-group{margin-bottom:20px}
+.form-label{display:block;font-size:12px;font-weight:500;color:var(--text-secondary);margin-bottom:6px}
+.form-label .required{color:var(--red)}
+.form-input{width:100%;padding:10px 14px;border:0.5px solid var(--border);border-radius:var(--radius-md);font-size:14px;font-family:var(--font);color:var(--text-primary);transition:all var(--transition);background:var(--white)}
+.form-input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-bg)}
+.form-input::placeholder{color:var(--text-muted)}
+textarea.form-input{resize:vertical;min-height:80px}
+select.form-input{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23425466' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+.form-hint{font-size:11px;color:var(--text-muted);margin-top:4px}
+
+/* Priority Pills */
+.priority-pills{display:flex;gap:8px}
+.priority-pill{flex:1;padding:12px;border:0.5px solid var(--border);border-radius:var(--radius-md);background:var(--white);cursor:pointer;text-align:center;transition:all var(--transition)}
+.priority-pill:hover{border-color:var(--primary)}
+.priority-pill.active{border-color:var(--primary);background:var(--primary-bg)}
+.priority-pill-dot{width:10px;height:10px;border-radius:50%;margin:0 auto 6px}
+.priority-pill-label{font-size:12px;font-weight:500;color:var(--text-primary)}
+.priority-pill.low .priority-pill-dot{background:var(--text-muted)}
+.priority-pill.medium .priority-pill-dot{background:var(--blue)}
+.priority-pill.high .priority-pill-dot{background:var(--amber)}
+.priority-pill.urgent .priority-pill-dot{background:var(--red)}
+
+/* Agent/Workflow Cards */
+.select-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.select-card{padding:16px;border:0.5px solid var(--border);border-radius:var(--radius-md);cursor:pointer;transition:all var(--transition)}
+.select-card:hover{border-color:var(--primary);background:var(--primary-bg-subtle)}
+.select-card.active{border-color:var(--primary);background:var(--primary-bg);box-shadow:0 0 0 3px var(--primary-bg)}
+.select-card-icon{width:36px;height:36px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;margin-bottom:10px;font-size:14px;font-weight:600}
+.select-card-title{font-size:14px;font-weight:500;color:var(--text-primary)}
+.select-card-desc{font-size:12px;color:var(--text-tertiary);margin-top:2px}
+
+/* Trigger Options */
+.trigger-options{display:flex;flex-direction:column;gap:12px}
+.trigger-option{display:flex;align-items:flex-start;gap:12px;padding:16px;border:0.5px solid var(--border);border-radius:var(--radius-md);cursor:pointer;transition:all var(--transition)}
+.trigger-option:hover{border-color:var(--primary)}
+.trigger-option.active{border-color:var(--primary);background:var(--primary-bg)}
+.trigger-radio{width:18px;height:18px;border:2px solid var(--border);border-radius:50%;flex-shrink:0;margin-top:2px;position:relative;transition:all var(--transition)}
+.trigger-option.active .trigger-radio{border-color:var(--primary)}
+.trigger-option.active .trigger-radio::after{content:'';position:absolute;inset:3px;background:var(--primary);border-radius:50%}
+.trigger-content{flex:1}
+.trigger-title{font-size:14px;font-weight:500;color:var(--text-primary)}
+.trigger-desc{font-size:12px;color:var(--text-tertiary);margin-top:2px}
+.trigger-config{margin-top:12px;padding-top:12px;border-top:0.5px solid var(--border)}
+
+/* Schedule Config */
+.schedule-row{display:flex;gap:12px;margin-bottom:12px}
+.schedule-row .form-group{flex:1;margin-bottom:0}
+.repeat-pills{display:flex;gap:6px}
+.repeat-pill{padding:8px 14px;border:0.5px solid var(--border);border-radius:var(--radius-sm);background:var(--white);font-size:12px;cursor:pointer;transition:all var(--transition)}
+.repeat-pill:hover{border-color:var(--primary)}
+.repeat-pill.active{background:var(--primary);color:white;border-color:var(--primary)}
+
+/* Summary */
+.summary-section{margin-bottom:20px}
+.summary-title{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px}
+.summary-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:0.5px solid var(--border-light);font-size:13px}
+.summary-row:last-child{border-bottom:none}
+.summary-label{color:var(--text-tertiary)}
+.summary-value{color:var(--text-primary);font-weight:500}
+.detail-section{margin-bottom:20px}
+.detail-section-title{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px}
+.detail-field{display:flex;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--border-light);font-size:13px}
+.detail-field:last-child{border-bottom:none}
+.detail-field .label{color:var(--text-tertiary)}
+.detail-field .value{color:var(--text-primary);font-weight:500}
+
+/* Steps */
+.step-list{display:flex;flex-direction:column;gap:0}
+.step-item{display:flex;gap:12px;padding:10px 0;position:relative}
+.step-line{position:absolute;left:13px;top:34px;bottom:-10px;width:1.5px;background:var(--border)}
+.step-item:last-child .step-line{display:none}
+.step-icon{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-weight:600;z-index:1}
+.step-icon.done{background:var(--green-bg);color:var(--green)}
+.step-icon.active{background:var(--primary-bg);color:var(--primary);animation:stepPulse 1.5s infinite}
+.step-icon.wait{background:var(--surface);color:var(--text-muted)}
+.step-icon.approval-needed{background:var(--amber-bg);color:var(--amber);animation:stepPulse 1.5s infinite}
+.step-icon.err{background:var(--red-bg);color:var(--red)}
+@keyframes stepPulse{0%,100%{box-shadow:0 0 0 0 rgba(99,91,255,0.3)}50%{box-shadow:0 0 0 6px rgba(99,91,255,0)}}
+.step-content{flex:1;min-width:0}
+.step-name{font-size:13px;font-weight:500;color:var(--text-primary)}
+.step-desc{font-size:12px;color:var(--text-tertiary);margin-top:1px}
+.step-time{font-size:11px;color:var(--text-muted);margin-top:3px}
+
+/* Live log */
+.live-log{background:var(--navy);border-radius:var(--radius-md);padding:14px 16px;font-family:var(--font-mono);font-size:11px;color:#A3FFCB;line-height:1.7;max-height:140px;overflow-y:auto}
+.log-line{opacity:0.7}
+.log-line:last-child{opacity:1}
+.log-time{color:#8792A2}
+.log-warn{color:#F5D89A}
+.log-err{color:#F5A0B0}
+.log-ok{color:#6EE7B7}
+
+.live-dot{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;animation:livePulse 2s infinite}
+@keyframes livePulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(14,163,113,0.4)}50%{opacity:0.8;box-shadow:0 0 0 6px rgba(14,163,113,0)}}
+</style>
+<link rel="stylesheet" href="orbicorp-dark.css">
+<style>
+.in-iframe .topnav{display:none!important}
+.in-iframe .sidebar{display:none!important}
+.in-iframe .layout{margin-top:0!important;height:100vh!important}
+.in-iframe .settings-nav{top:0!important;height:100vh!important}
+.in-iframe .chat-panel{top:0!important;height:100vh!important}
+</style>
+</head>
+<body>
+<script>
+(function(){
+  // If in iframe, hide own nav/sidebar and sync theme from parent
+  if(window.self!==window.top){
+    document.body.classList.add("in-iframe");
+    try{
+      var pt=window.parent.document.documentElement.getAttribute("data-theme");
+      if(pt)document.documentElement.setAttribute("data-theme",pt);
+    }catch(e){}
+    // Listen for theme changes from parent
+    window.addEventListener("message",function(e){
+      if(e.data&&e.data.type==="theme")document.documentElement.setAttribute("data-theme",e.data.value);
+      if(e.data&&e.data.type==="lang")window._orbicorpLang=e.data.value;
+    });
+  }
+})();
+</script>
+<nav class="topnav">
+  <a class="topnav-brand" href="#"><div class="topnav-logo">O</div><span class="topnav-name">Orbicorp</span></a>
+  <div class="topnav-tabs"><a class="topnav-tab">Overview</a><a class="topnav-tab">Agents</a><a class="topnav-tab">Company Profile</a><a class="topnav-tab">Chat</a><a class="topnav-tab">Skills</a><a class="topnav-tab">Analytics</a></div>
+  <div class="topnav-right"><div class="topnav-avatar">AY</div></div>
+</nav>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="nav-section">
+      <div class="sidebar-label">Ana Menü</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42"/></svg>Agent'lar</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Chat</div>
+    </div>
+    <div class="nav-section">
+      <div class="sidebar-label">Operasyon</div>
+      <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Görev Takip<span class="nav-badge">3</span></div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>Analitik</div>
+    </div>
+    <div class="nav-section">
+      <div class="sidebar-label">Sistem</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82"/></svg>Ayarlar</div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="page-head">
+      <div><h2 data-i18n="tasks.title">Görev Takip</h2><p data-i18n="tasks.subtitle">Otonom agent görevlerini izleyin, onaylayın ve yönetin</p></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-secondary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg><span data-i18n="tasks.filter">Filtrele</span></button>
+        <button class="btn btn-primary" onclick="openNewTaskWizard()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span data-i18n="tasks.newTask">Yeni Görev</span></button>
+      </div>
+    </div>
+
+    <div class="kpi-row">
+      <div class="kpi"><div class="kpi-val" id="kpiTotal">0</div><div class="kpi-label" data-i18n="tasks.total">Toplam Görev</div></div>
+      <div class="kpi"><div class="kpi-val" id="kpiRunning" style="color:var(--primary)">0</div><div class="kpi-label" data-i18n="tasks.running">Çalışıyor</div></div>
+      <div class="kpi"><div class="kpi-val" id="kpiApproval" style="color:var(--amber)">0</div><div class="kpi-label" data-i18n="tasks.approval">Onay Bekliyor</div></div>
+      <div class="kpi"><div class="kpi-val" id="kpiCompleted" style="color:var(--green)">0</div><div class="kpi-label" data-i18n="tasks.completed">Tamamlandı</div></div>
+      <div class="kpi"><div class="kpi-val" id="kpiFailed" style="color:var(--red)">0</div><div class="kpi-label" data-i18n="tasks.failed">Hata</div></div>
+    </div>
+
+    <div class="toolbar">
+      <div class="date-pills">
+        <button class="date-pill active" onclick="setScale(this)" data-i18n="tasks.day">Gün</button>
+        <button class="date-pill" onclick="setScale(this)" data-i18n="tasks.week">Hafta</button>
+        <button class="date-pill" onclick="setScale(this)" data-i18n="tasks.month">Ay</button>
+      </div>
+      <button class="filter-btn active" onclick="filterTasks('all')" data-i18n="tasks.all">Tümü</button>
+      <button class="filter-btn" onclick="filterTasks('running')" data-i18n="tasks.running">Çalışıyor</button>
+      <button class="filter-btn" onclick="filterTasks('approval')" data-i18n="tasks.approval">Onay Bekliyor</button>
+      <button class="filter-btn" onclick="filterTasks('completed')" data-i18n="tasks.completed">Tamamlandı</button>
+      <button class="filter-btn" onclick="filterTasks('failed')" data-i18n="tasks.failed">Hata</button>
+    </div>
+
+    <div id="timelineContainer"></div>
+  </main>
+</div>
+
+<!-- TASK DETAIL MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-header"><h2 id="modalTitle">Görev Detayı</h2><button class="modal-close" onclick="closeModal()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer" id="modalFooter"></div>
+  </div>
+</div>
+
+<!-- NEW TASK WIZARD MODAL -->
+<div class="modal-overlay" id="wizardOverlay" onclick="if(event.target===this)closeWizard()">
+  <div class="modal wizard">
+    <div class="modal-header">
+      <h2>Yeni Görev Oluştur</h2>
+      <button class="modal-close" onclick="closeWizard()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    
+    <!-- Wizard Steps Indicator -->
+    <div class="wizard-steps">
+      <div class="wizard-step active" data-step="1">
+        <div class="wizard-step-num">1</div>
+        <span class="wizard-step-label">Temel Bilgiler</span>
+        <div class="wizard-step-line"></div>
+      </div>
+      <div class="wizard-step" data-step="2">
+        <div class="wizard-step-num">2</div>
+        <span class="wizard-step-label">Agent & Workflow</span>
+        <div class="wizard-step-line"></div>
+      </div>
+      <div class="wizard-step" data-step="3">
+        <div class="wizard-step-num">3</div>
+        <span class="wizard-step-label">Tetikleme</span>
+        <div class="wizard-step-line"></div>
+      </div>
+      <div class="wizard-step" data-step="4">
+        <div class="wizard-step-num">4</div>
+        <span class="wizard-step-label">Özet</span>
+      </div>
+    </div>
+    
+    <div class="modal-body">
+      <div class="wizard-content">
+        <!-- Step 1: Basic Info -->
+        <div class="wizard-page active" data-page="1">
+          <div class="form-group">
+            <label class="form-label">Görev Adı <span class="required">*</span></label>
+            <input type="text" class="form-input" id="taskName" placeholder="Örn: Haftalık satış raporu oluştur">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Açıklama</label>
+            <textarea class="form-input" id="taskDesc" placeholder="Görevin ne yapacağını açıklayın..."></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Öncelik</label>
+            <div class="priority-pills">
+              <div class="priority-pill low" onclick="selectPriority('LOW', this)">
+                <div class="priority-pill-dot"></div>
+                <div class="priority-pill-label">Düşük</div>
+              </div>
+              <div class="priority-pill medium active" onclick="selectPriority('MEDIUM', this)">
+                <div class="priority-pill-dot"></div>
+                <div class="priority-pill-label">Normal</div>
+              </div>
+              <div class="priority-pill high" onclick="selectPriority('HIGH', this)">
+                <div class="priority-pill-dot"></div>
+                <div class="priority-pill-label">Yüksek</div>
+              </div>
+              <div class="priority-pill urgent" onclick="selectPriority('CRITICAL', this)">
+                <div class="priority-pill-dot"></div>
+                <div class="priority-pill-label">Acil</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Step 2: Agent & Workflow -->
+        <div class="wizard-page" data-page="2">
+          <div class="form-group">
+            <label class="form-label">Agent Seçin <span class="required">*</span></label>
+            <div class="select-cards" id="agentCards">
+              <!-- Filled by JS -->
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Workflow Seçin</label>
+            <div class="select-cards" id="workflowCards">
+              <!-- Filled by JS -->
+            </div>
+            <p class="form-hint">Workflow seçmezseniz basit görev olarak oluşturulur</p>
+          </div>
+        </div>
+        
+        <!-- Step 3: Trigger -->
+        <div class="wizard-page" data-page="3">
+          <div class="trigger-options">
+            <div class="trigger-option active" onclick="selectTrigger('manual', this)">
+              <div class="trigger-radio"></div>
+              <div class="trigger-content">
+                <div class="trigger-title">Manuel Başlat</div>
+                <div class="trigger-desc">Görevi şimdi veya daha sonra manuel olarak başlatın</div>
+                <div class="trigger-config" id="manualConfig">
+                  <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+                    <input type="checkbox" id="startNow" checked> Hemen başlat
+                  </label>
+                </div>
+              </div>
+            </div>
+            
+            <div class="trigger-option" onclick="selectTrigger('scheduled', this)">
+              <div class="trigger-radio"></div>
+              <div class="trigger-content">
+                <div class="trigger-title">Zamanlanmış</div>
+                <div class="trigger-desc">Belirlenen tarih ve saatte otomatik başlat</div>
+                <div class="trigger-config" id="scheduleConfig" style="display:none">
+                  <div class="schedule-row">
+                    <div class="form-group">
+                      <label class="form-label">Tarih</label>
+                      <input type="date" class="form-input" id="scheduleDate">
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Saat</label>
+                      <input type="time" class="form-input" id="scheduleTime" value="09:00">
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Tekrarlama</label>
+                    <div class="repeat-pills">
+                      <div class="repeat-pill active" onclick="selectRepeat('none', this)">Tekrarlama Yok</div>
+                      <div class="repeat-pill" onclick="selectRepeat('daily', this)">Günlük</div>
+                      <div class="repeat-pill" onclick="selectRepeat('weekly', this)">Haftalık</div>
+                      <div class="repeat-pill" onclick="selectRepeat('monthly', this)">Aylık</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="trigger-option" onclick="selectTrigger('webhook', this)">
+              <div class="trigger-radio"></div>
+              <div class="trigger-content">
+                <div class="trigger-title">Webhook</div>
+                <div class="trigger-desc">Harici bir sistem bu URL'i çağırdığında başlat</div>
+                <div class="trigger-config" id="webhookConfig" style="display:none">
+                  <div class="form-group">
+                    <label class="form-label">Webhook URL (oluşturulacak)</label>
+                    <input type="text" class="form-input" readonly placeholder="Görev oluşturulduktan sonra URL görüntülenecek" style="background:var(--surface)">
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="trigger-option" onclick="selectTrigger('email', this)">
+              <div class="trigger-radio"></div>
+              <div class="trigger-content">
+                <div class="trigger-title">Email Tetikleyici</div>
+                <div class="trigger-desc">Belirli bir adrese email geldiğinde başlat</div>
+                <div class="trigger-config" id="emailConfig" style="display:none">
+                  <div class="form-group">
+                    <label class="form-label">Dinlenecek Email (oluşturulacak)</label>
+                    <input type="text" class="form-input" readonly placeholder="task-xxx@trigger.orbicorp.ai" style="background:var(--surface)">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Step 4: Summary -->
+        <div class="wizard-page" data-page="4">
+          <div class="summary-section">
+            <div class="summary-title">Görev Bilgileri</div>
+            <div class="summary-row"><span class="summary-label">Görev Adı</span><span class="summary-value" id="sumName">-</span></div>
+            <div class="summary-row"><span class="summary-label">Açıklama</span><span class="summary-value" id="sumDesc">-</span></div>
+            <div class="summary-row"><span class="summary-label">Öncelik</span><span class="summary-value" id="sumPriority">-</span></div>
+          </div>
+          <div class="summary-section">
+            <div class="summary-title">Çalıştırma</div>
+            <div class="summary-row"><span class="summary-label">Agent</span><span class="summary-value" id="sumAgent">-</span></div>
+            <div class="summary-row"><span class="summary-label">Workflow</span><span class="summary-value" id="sumWorkflow">-</span></div>
+          </div>
+          <div class="summary-section">
+            <div class="summary-title">Tetikleme</div>
+            <div class="summary-row"><span class="summary-label">Tip</span><span class="summary-value" id="sumTrigger">-</span></div>
+            <div class="summary-row" id="sumScheduleRow" style="display:none"><span class="summary-label">Zamanlama</span><span class="summary-value" id="sumSchedule">-</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="modal-footer">
+      <button class="btn btn-secondary" id="wizardPrev" onclick="wizardPrev()" style="visibility:hidden">← Geri</button>
+      <button class="btn btn-primary" id="wizardNext" onclick="wizardNext()">İleri →</button>
+    </div>
+  </div>
+</div>
+
+<script src="orbicorp-api.js"></script>
+<script src="i18n.js"></script>
+<script>
+// ═══ STATE ═══
+let tasks = [];
+let stats = { byStatus: {}, byPriority: {}, todayCount: 0 };
+let currentFilter = 'all';
+let isLoading = false;
+
+// Wizard state
+let wizardStep = 1;
+let wizardData = {
+  name: '',
+  description: '',
+  priority: 'MEDIUM',
+  agentId: null,
+  workflowId: null,
+  trigger: 'manual',
+  startNow: true,
+  scheduleDate: '',
+  scheduleTime: '09:00',
+  repeat: 'none'
+};
+let agents = [];
+let workflows = [];
+
+const statusLabels = {
+  RUNNING: {label:'running', cls:'running'},
+  COMPLETED: {label:'completed', cls:'completed'},
+  PENDING: {label:'pending', cls:'pending'},
+  APPROVAL: {label:'approval', cls:'approval'},
+  FAILED: {label:'failed', cls:'failed'},
+  CANCELLED: {label:'cancelled', cls:'cancelled'}
+};
+const priorityLabels = {CRITICAL:'critical', HIGH:'high', MEDIUM:'medium', LOW:'low'};
+
+// i18n helper
+function t(key, fallback) {
+  if (window.i18n && typeof window.i18n.t === 'function') {
+    return window.i18n.t(key) || fallback || key;
+  }
+  // Fallback translations
+  const fallbacks = {
+    'tasks.title': 'Görev Takip',
+    'tasks.subtitle': 'Otonom agent görevlerini izleyin, onaylayın ve yönetin',
+    'tasks.filter': 'Filtrele',
+    'tasks.newTask': 'Yeni Görev',
+    'tasks.total': 'Toplam Görev',
+    'tasks.running': 'Çalışıyor',
+    'tasks.approval': 'Onay Bekliyor',
+    'tasks.completed': 'Tamamlandı',
+    'tasks.failed': 'Hata',
+    'tasks.pending': 'Bekleyen',
+    'tasks.cancelled': 'İptal',
+    'tasks.all': 'Tümü',
+    'tasks.today': 'Bugün',
+    'tasks.yesterday': 'Dün',
+    'tasks.thisWeek': 'Bu Hafta',
+    'tasks.older': 'Daha Eski',
+    'tasks.noTasks': 'Henüz görev yok',
+    'tasks.ongoing': 'devam ediyor',
+    'tasks.scheduled': 'Planlandı',
+    'tasks.progress': 'İlerleme',
+    'priority.critical': 'Kritik',
+    'priority.high': 'Yüksek',
+    'priority.medium': 'Orta',
+    'priority.low': 'Düşük'
+  };
+  return fallbacks[key] || fallback || key;
+}
+
+// Agent colors
+const agentColors = [
+  {bg:'linear-gradient(135deg,#635BFF,#4F46E5)', text:'white'},
+  {bg:'linear-gradient(135deg,#0EA371,#059669)', text:'white'},
+  {bg:'linear-gradient(135deg,#0570DE,#0455A9)', text:'white'},
+  {bg:'linear-gradient(135deg,#D97706,#B45309)', text:'white'}
+];
+
+// ═══ API FUNCTIONS ═══
+async function loadTasks() {
+  try {
+    isLoading = true;
+    const params = currentFilter !== 'all' ? { status: currentFilter.toUpperCase() } : {};
+    const result = await window.orbicorpAPI.getTasks(params);
+    
+    if (result.success) {
+      tasks = result.data.map((t, index) => {
+        const steps = Array.isArray(t.steps) ? t.steps : [];
+        const logs = Array.isArray(t.logs) ? t.logs : [];
+        
+        const startedAt = t.startedAt ? new Date(t.startedAt) : (t.createdAt ? new Date(t.createdAt) : new Date());
+        const completedAt = t.completedAt ? new Date(t.completedAt) : null;
+        const color = agentColors[index % agentColors.length];
+        
+        return {
+          id: t.id,
+          name: t.name,
+          desc: t.description || '',
+          agent: t.workflow?.name || t.agentId?.split('-').pop() || 'Agent',
+          agentColor: color.bg,
+          agentText: color.text,
+          status: t.status,
+          priority: t.priority,
+          progress: t.progress || 0,
+          startedAt,
+          completedAt,
+          createdAt: t.createdAt ? new Date(t.createdAt) : new Date(),
+          steps: steps.map(s => ({
+            s: s.status === 'done' ? 'done' : s.status === 'running' ? 'active' : s.status === 'error' ? 'err' : s.status === 'approval-needed' ? 'approval-needed' : 'wait',
+            name: s.name,
+            desc: s.output || '',
+            time: s.completedAt ? new Date(s.completedAt).toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'}) : ''
+          })),
+          log: logs.map(l => `[${new Date(l.timestamp).toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'})}] ${l.message}`)
+        };
+      });
+      
+      // Sort by newest first
+      tasks.sort((a, b) => b.createdAt - a.createdAt);
+      
+      render();
+    }
+  } catch (error) {
+    console.error('Load tasks error:', error);
+    showToast(t('tasks.loadError', 'Görevler yüklenemedi'), 'error');
+  } finally {
+    isLoading = false;
+  }
+}
+
+async function loadStats() {
+  try {
+    const result = await window.orbicorpAPI.getTaskStats();
+    if (result.success) {
+      stats = result.data;
+      updateKPIs();
+    }
+  } catch (error) {
+    console.error('Load stats error:', error);
+  }
+}
+
+function updateKPIs() {
+  const total = Object.values(stats.byStatus).reduce((a, b) => a + b, 0);
+  const running = stats.byStatus.running || stats.byStatus.RUNNING || 0;
+  const approval = stats.byStatus.approval || stats.byStatus.APPROVAL || 0;
+  const completed = stats.byStatus.completed || stats.byStatus.COMPLETED || 0;
+  const failed = stats.byStatus.failed || stats.byStatus.FAILED || 0;
+  
+  // Update KPI values by ID
+  const kpiTotal = document.getElementById('kpiTotal');
+  const kpiRunning = document.getElementById('kpiRunning');
+  const kpiApproval = document.getElementById('kpiApproval');
+  const kpiCompleted = document.getElementById('kpiCompleted');
+  const kpiFailed = document.getElementById('kpiFailed');
+  
+  if (kpiTotal) kpiTotal.textContent = total;
+  if (kpiRunning) kpiRunning.textContent = running;
+  if (kpiApproval) kpiApproval.textContent = approval;
+  if (kpiCompleted) kpiCompleted.textContent = completed;
+  if (kpiFailed) kpiFailed.textContent = failed;
+}
+
+async function cancelTask(id) {
+  if (!confirm('Bu görevi iptal etmek istediğinizden emin misiniz?')) return;
+  
+  try {
+    const result = await window.orbicorpAPI.cancelTask(id);
+    if (result.success) {
+      showToast('Görev iptal edildi', 'success');
+      closeModal();
+      loadTasks();
+      loadStats();
+    }
+  } catch (error) {
+    console.error('Cancel task error:', error);
+    showToast('İptal edilemedi', 'error');
+  }
+}
+
+async function approveTask(id, stepId, approved) {
+  try {
+    const result = await window.orbicorpAPI.approveTaskStep(id, stepId, approved);
+    if (result.success) {
+      showToast(approved ? 'Adım onaylandı' : 'Adım reddedildi', 'success');
+      closeModal();
+      loadTasks();
+      loadStats();
+    }
+  } catch (error) {
+    console.error('Approve task error:', error);
+    showToast('İşlem başarısız', 'error');
+  }
+}
+
+function showToast(message, type = 'info') {
+  const toast = document.createElement('div');
+  toast.className = 'toast toast-' + type;
+  toast.textContent = message;
+  toast.style.cssText = 'position:fixed;bottom:20px;right:20px;padding:12px 20px;border-radius:8px;font-size:13px;z-index:9999;animation:fadeIn 0.3s;';
+  toast.style.background = type === 'error' ? 'var(--red)' : type === 'success' ? 'var(--green)' : 'var(--primary)';
+  toast.style.color = 'white';
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+
+function filterTasks(status) {
+  currentFilter = status;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  loadTasks();
+}
+
+// ═══ RENDER ═══
+function render() {
+  const container = document.getElementById('timelineContainer');
+  
+  if (tasks.length === 0) {
+    container.innerHTML = `
+      <div class="timeline-empty">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+        <p>${t('tasks.noTasks')}</p>
+      </div>`;
+    return;
+  }
+  
+  // Group tasks by date
+  const groups = groupTasksByDate(tasks);
+  
+  let html = '';
+  
+  for (const [groupKey, groupTasks] of Object.entries(groups)) {
+    if (groupTasks.length === 0) continue;
+    
+    html += `<div class="timeline-group">
+      <div class="timeline-group-header">${t('tasks.' + groupKey, groupKey)}</div>
+      <div class="timeline-wrap">
+        <div class="timeline-line"></div>
+        <div class="timeline-cards">`;
+    
+    for (const task of groupTasks) {
+      html += renderTaskCard(task);
+    }
+    
+    html += `</div></div></div>`;
+  }
+  
+  container.innerHTML = html;
+}
+
+function groupTasksByDate(tasks) {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
+  const weekAgo = new Date(today); weekAgo.setDate(weekAgo.getDate() - 7);
+  
+  const groups = {
+    today: [],
+    yesterday: [],
+    thisWeek: [],
+    older: []
+  };
+  
+  for (const task of tasks) {
+    const taskDate = new Date(task.createdAt);
+    const taskDay = new Date(taskDate.getFullYear(), taskDate.getMonth(), taskDate.getDate());
+    
+    if (taskDay.getTime() === today.getTime()) {
+      groups.today.push(task);
+    } else if (taskDay.getTime() === yesterday.getTime()) {
+      groups.yesterday.push(task);
+    } else if (taskDay >= weekAgo) {
+      groups.thisWeek.push(task);
+    } else {
+      groups.older.push(task);
+    }
+  }
+  
+  return groups;
+}
+
+function renderTaskCard(task) {
+  const statusClass = task.status.toLowerCase();
+  const statusLabel = t('tasks.' + statusLabels[task.status]?.label, task.status);
+  const initials = task.agent.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+  
+  // Format time
+  const startTime = task.startedAt ? formatTime(task.startedAt) : '';
+  const endTime = task.completedAt ? formatTime(task.completedAt) : (task.status === 'RUNNING' ? t('tasks.ongoing') : '');
+  const timeDisplay = startTime ? (endTime && task.status !== 'RUNNING' ? `${startTime} - ${endTime}` : `${startTime} → ${endTime}`) : '';
+  
+  // Progress bar (show for running and completed)
+  const showProgress = task.status === 'RUNNING' || task.status === 'COMPLETED';
+  const progressPercent = task.status === 'COMPLETED' ? 100 : task.progress;
+  
+  return `
+    <div class="timeline-card ${statusClass}" onclick="openTask('${task.id}')">
+      <div class="timeline-card-header">
+        <span class="timeline-card-title">${escapeHtml(task.name)}</span>
+        <span class="timeline-card-status ${statusClass}">${statusLabel}</span>
+      </div>
+      <div class="timeline-card-meta">
+        <div class="timeline-card-agent">
+          <div class="timeline-card-agent-icon" style="background:${task.agentColor}">${initials}</div>
+          <span>${escapeHtml(task.agent)}</span>
+        </div>
+        <div class="timeline-card-time">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          <span>${timeDisplay}</span>
+        </div>
+      </div>
+      ${showProgress ? `
+      <div class="timeline-card-progress">
+        <div class="timeline-card-progress-bar ${statusClass}" style="width:${progressPercent}%"></div>
+      </div>` : ''}
+    </div>`;
+}
+
+function formatTime(date) {
+  if (!(date instanceof Date)) date = new Date(date);
+  return date.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function openTask(id) {
+  // Show loading state
+  document.getElementById('modalTitle').textContent = t('common.loading', 'Yükleniyor...');
+  document.getElementById('modalBody').innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-muted)"><div class="spinner"></div></div>';
+  document.getElementById('modalFooter').innerHTML = '';
+  document.getElementById('modalOverlay').classList.add('open');
+  
+  // Fetch fresh data from API
+  fetchTaskDetails(id);
+}
+
+async function fetchTaskDetails(id) {
+  try {
+    const result = await window.orbicorpAPI.getTask(id);
+    
+    if (!result.success) {
+      throw new Error('Task not found');
+    }
+    
+    const t_data = result.data;
+    const steps = Array.isArray(t_data.steps) ? t_data.steps : [];
+    const logs = Array.isArray(t_data.logs) ? t_data.logs : [];
+    
+    const task = {
+      id: t_data.id,
+      name: t_data.name,
+      desc: t_data.description || '',
+      agent: t_data.workflow?.name || t_data.agentId?.split('-').pop() || 'Agent',
+      status: t_data.status,
+      priority: t_data.priority,
+      progress: t_data.progress || 0,
+      steps: steps.map(s => ({
+        s: s.status === 'done' ? 'done' : s.status === 'running' ? 'active' : s.status === 'error' ? 'err' : s.status === 'approval-needed' ? 'approval-needed' : 'wait',
+        name: s.name,
+        desc: s.output || '',
+        time: s.completedAt ? new Date(s.completedAt).toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'}) : ''
+      })),
+      log: logs.map(l => `[${new Date(l.timestamp).toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'})}] ${l.message}`)
+    };
+    
+    renderTaskModal(task);
+    
+  } catch (error) {
+    console.error('Fetch task details error:', error);
+    document.getElementById('modalBody').innerHTML = `<div style="padding:40px;text-align:center;color:var(--red)">${t('common.error', 'Hata')}: ${error.message}</div>`;
+    document.getElementById('modalFooter').innerHTML = `<div></div><button class="btn btn-sm btn-secondary" onclick="closeModal()">${t('modal.close', 'Kapat')}</button>`;
+  }
+}
+
+function renderTaskModal(task) {
+  const st = statusLabels[task.status] || statusLabels.PENDING;
+  document.getElementById('modalTitle').textContent = task.name;
+  const stepIcons = {done:'&#10003;',active:'&#9654;',wait:'&bull;','approval-needed':'!',err:'&#10007;'};
+  
+  const approvalStep = task.steps.find(s => s.s === 'approval-needed');
+  const approvalStepId = approvalStep ? task.steps.indexOf(approvalStep) : -1;
+  
+  const statusLabel = t('tasks.' + st.label, st.label);
+  const priorityLabel = t('priority.' + task.priority.toLowerCase(), task.priority);
+  
+  document.getElementById('modalBody').innerHTML = `
+    <div class="detail-section"><div class="detail-section-title">${t('modal.generalInfo', 'Genel Bilgiler')}</div>
+      <div class="detail-field"><span class="label">${t('modal.workflow', 'Workflow')}</span><span class="value">${escapeHtml(task.agent)}</span></div>
+      <div class="detail-field"><span class="label">${t('modal.status', 'Durum')}</span><span class="timeline-card-status ${st.cls}">${statusLabel}</span></div>
+      <div class="detail-field"><span class="label">${t('modal.priority', 'Öncelik')}</span><span class="value"><span class="priority-dot ${task.priority.toLowerCase()}" style="display:inline-block;vertical-align:middle;margin-right:4px"></span>${priorityLabel}</span></div>
+      <div class="detail-field"><span class="label">${t('modal.progress', 'İlerleme')}</span><span class="value">${task.progress}%</span></div>
+      <div class="detail-field"><span class="label">${t('modal.description', 'Açıklama')}</span><span class="value">${escapeHtml(task.desc) || '-'}</span></div>
+    </div>
+    <div class="detail-section"><div class="detail-section-title">${t('modal.steps', 'Adımlar')}</div>
+      <div class="step-list">${task.steps.length > 0 ? task.steps.map(s => `<div class="step-item"><div class="step-line"></div><div class="step-icon ${s.s}">${stepIcons[s.s]||'&bull;'}</div><div class="step-content"><div class="step-name">${escapeHtml(s.name)}</div>${s.desc?`<div class="step-desc">${escapeHtml(s.desc)}</div>`:''}${s.time?`<div class="step-time">${s.time}</div>`:''}</div></div>`).join('') : `<div style="color:var(--text-muted);font-size:13px">${t('modal.noSteps', 'Adım bilgisi yok')}</div>`}</div>
+    </div>
+    <div class="detail-section"><div class="detail-section-title">${t('modal.liveLog', 'Canlı Log')}</div>
+      <div class="live-log">${task.log.length > 0 ? task.log.map(l => {
+        const cls = l.includes('✗') || l.includes('HATA') || l.includes('error') ? 'log-err' : l.includes('⚠') || l.includes('warn') ? 'log-warn' : l.includes('✓') ? 'log-ok' : '';
+        return `<div class="log-line ${cls}">${escapeHtml(l)}</div>`;
+      }).join('') : `<div style="color:var(--text-muted);font-size:13px">${t('modal.noLog', 'Log yok')}</div>`}</div>
+    </div>`;
+
+  const hasApproval = approvalStep !== undefined;
+  const hasError = task.status === 'FAILED';
+  const isRunning = task.status === 'RUNNING';
+  
+  document.getElementById('modalFooter').innerHTML = `
+    <div>${hasError ? `<button class="btn btn-sm btn-secondary" style="color:var(--amber)">${t('modal.retry', 'Yeniden Dene')}</button>` : ''}</div>
+    <div style="display:flex;gap:8px">
+      ${hasApproval ? `<button class="btn btn-sm btn-primary" style="background:var(--green);border-color:var(--green)" onclick="approveTask('${task.id}', ${approvalStepId}, true)">${t('modal.approve', 'Onayla')}</button><button class="btn btn-sm btn-secondary" style="color:var(--red)" onclick="approveTask('${task.id}', ${approvalStepId}, false)">${t('modal.reject', 'Reddet')}</button>` : ''}
+      ${isRunning || hasError ? `<button class="btn btn-sm btn-secondary" style="color:var(--red)" onclick="cancelTask('${task.id}')">${t('modal.cancel', 'Görevi İptal Et')}</button>` : ''}
+      <button class="btn btn-sm btn-secondary" onclick="closeModal()">${t('modal.close', 'Kapat')}</button>
+    </div>`;
+}
+
+function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
+function setScale(btn) { document.querySelectorAll('.date-pill').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
+
+// ═══ WIZARD FUNCTIONS ═══
+async function openNewTaskWizard() {
+  // Reset wizard state
+  wizardStep = 1;
+  wizardData = {
+    name: '',
+    description: '',
+    priority: 'MEDIUM',
+    agentId: null,
+    workflowId: null,
+    trigger: 'manual',
+    startNow: true,
+    scheduleDate: new Date().toISOString().split('T')[0],
+    scheduleTime: '09:00',
+    repeat: 'none'
+  };
+  
+  // Reset form
+  document.getElementById('taskName').value = '';
+  document.getElementById('taskDesc').value = '';
+  document.querySelectorAll('.priority-pill').forEach(p => p.classList.remove('active'));
+  document.querySelector('.priority-pill.medium').classList.add('active');
+  
+  // Load agents and workflows
+  await loadAgentsAndWorkflows();
+  
+  // Set default schedule date to today
+  document.getElementById('scheduleDate').value = wizardData.scheduleDate;
+  
+  // Reset wizard UI
+  updateWizardUI();
+  document.getElementById('wizardOverlay').classList.add('open');
+}
+
+function closeWizard() {
+  document.getElementById('wizardOverlay').classList.remove('open');
+}
+
+async function loadAgentsAndWorkflows() {
+  try {
+    // Load agents
+    const agentResult = await window.orbicorpAPI.getAgents();
+    if (agentResult.success) {
+      agents = agentResult.data.filter(a => a.status === 'ACTIVE');
+      renderAgentCards();
+    }
+    
+    // Load workflows
+    const workflowResult = await window.orbicorpAPI.getWorkflows();
+    if (workflowResult.success) {
+      workflows = workflowResult.data.filter(w => w.status === 'ACTIVE');
+      renderWorkflowCards();
+    }
+  } catch (error) {
+    console.error('Load agents/workflows error:', error);
+  }
+}
+
+function renderAgentCards() {
+  const container = document.getElementById('agentCards');
+  if (agents.length === 0) {
+    container.innerHTML = '<p style="color:var(--text-muted);font-size:13px;grid-column:span 2">Aktif agent bulunamadı</p>';
+    return;
+  }
+  
+  const colors = [
+    {bg:'linear-gradient(135deg,#635BFF,#4F46E5)', text:'white'},
+    {bg:'linear-gradient(135deg,#0EA371,#059669)', text:'white'},
+    {bg:'linear-gradient(135deg,#0570DE,#0455A9)', text:'white'},
+    {bg:'linear-gradient(135deg,#D97706,#B45309)', text:'white'}
+  ];
+  
+  container.innerHTML = agents.map((a, i) => {
+    const color = colors[i % colors.length];
+    const initials = a.name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+    const isActive = wizardData.agentId === a.id;
+    return `
+      <div class="select-card ${isActive ? 'active' : ''}" onclick="selectAgent('${a.id}', this)">
+        <div class="select-card-icon" style="background:${color.bg};color:${color.text}">${initials}</div>
+        <div class="select-card-title">${a.name}</div>
+        <div class="select-card-desc">${a.description || a.department || 'Agent'}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderWorkflowCards() {
+  const container = document.getElementById('workflowCards');
+  
+  // Add "No Workflow" option
+  let html = `
+    <div class="select-card ${!wizardData.workflowId ? 'active' : ''}" onclick="selectWorkflow(null, this)">
+      <div class="select-card-icon" style="background:var(--surface);color:var(--text-muted)">—</div>
+      <div class="select-card-title">Workflow Yok</div>
+      <div class="select-card-desc">Basit görev olarak çalıştır</div>
+    </div>
+  `;
+  
+  html += workflows.map(w => {
+    const isActive = wizardData.workflowId === w.id;
+    const stepCount = Array.isArray(w.steps) ? w.steps.length : 0;
+    return `
+      <div class="select-card ${isActive ? 'active' : ''}" onclick="selectWorkflow('${w.id}', this)">
+        <div class="select-card-icon" style="background:var(--primary-bg);color:var(--primary)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        </div>
+        <div class="select-card-title">${w.name}</div>
+        <div class="select-card-desc">${stepCount} adım</div>
+      </div>
+    `;
+  }).join('');
+  
+  container.innerHTML = html;
+}
+
+function selectAgent(id, el) {
+  wizardData.agentId = id;
+  document.querySelectorAll('#agentCards .select-card').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function selectWorkflow(id, el) {
+  wizardData.workflowId = id;
+  document.querySelectorAll('#workflowCards .select-card').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function selectPriority(priority, el) {
+  wizardData.priority = priority;
+  document.querySelectorAll('.priority-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function selectTrigger(trigger, el) {
+  wizardData.trigger = trigger;
+  document.querySelectorAll('.trigger-option').forEach(o => o.classList.remove('active'));
+  el.classList.add('active');
+  
+  // Show/hide config sections
+  document.getElementById('manualConfig').style.display = trigger === 'manual' ? 'block' : 'none';
+  document.getElementById('scheduleConfig').style.display = trigger === 'scheduled' ? 'block' : 'none';
+  document.getElementById('webhookConfig').style.display = trigger === 'webhook' ? 'block' : 'none';
+  document.getElementById('emailConfig').style.display = trigger === 'email' ? 'block' : 'none';
+}
+
+function selectRepeat(repeat, el) {
+  wizardData.repeat = repeat;
+  document.querySelectorAll('.repeat-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function updateWizardUI() {
+  // Update step indicators
+  document.querySelectorAll('.wizard-step').forEach(s => {
+    const step = parseInt(s.dataset.step);
+    s.classList.remove('active', 'completed');
+    if (step === wizardStep) s.classList.add('active');
+    else if (step < wizardStep) s.classList.add('completed');
+  });
+  
+  // Update pages
+  document.querySelectorAll('.wizard-page').forEach(p => {
+    const page = parseInt(p.dataset.page);
+    p.classList.toggle('active', page === wizardStep);
+  });
+  
+  // Update buttons
+  const prevBtn = document.getElementById('wizardPrev');
+  const nextBtn = document.getElementById('wizardNext');
+  
+  prevBtn.style.visibility = wizardStep === 1 ? 'hidden' : 'visible';
+  
+  if (wizardStep === 4) {
+    nextBtn.textContent = 'Görevi Oluştur';
+    nextBtn.style.background = 'var(--green)';
+    nextBtn.style.borderColor = 'var(--green)';
+  } else {
+    nextBtn.textContent = 'İleri →';
+    nextBtn.style.background = '';
+    nextBtn.style.borderColor = '';
+  }
+}
+
+function wizardPrev() {
+  if (wizardStep > 1) {
+    wizardStep--;
+    updateWizardUI();
+  }
+}
+
+async function wizardNext() {
+  // Validate current step
+  if (wizardStep === 1) {
+    wizardData.name = document.getElementById('taskName').value.trim();
+    wizardData.description = document.getElementById('taskDesc').value.trim();
+    
+    if (!wizardData.name) {
+      showToast('Görev adı zorunludur', 'error');
+      return;
+    }
+  }
+  
+  if (wizardStep === 2) {
+    if (!wizardData.agentId) {
+      showToast('Bir agent seçmelisiniz', 'error');
+      return;
+    }
+  }
+  
+  if (wizardStep === 3) {
+    wizardData.startNow = document.getElementById('startNow')?.checked ?? true;
+    wizardData.scheduleDate = document.getElementById('scheduleDate')?.value || '';
+    wizardData.scheduleTime = document.getElementById('scheduleTime')?.value || '09:00';
+    
+    if (wizardData.trigger === 'scheduled' && !wizardData.scheduleDate) {
+      showToast('Tarih seçmelisiniz', 'error');
+      return;
+    }
+  }
+  
+  if (wizardStep === 4) {
+    // Submit
+    await createTask();
+    return;
+  }
+  
+  // Next step
+  wizardStep++;
+  
+  // If going to summary, populate it
+  if (wizardStep === 4) {
+    populateSummary();
+  }
+  
+  updateWizardUI();
+}
+
+function populateSummary() {
+  document.getElementById('sumName').textContent = wizardData.name;
+  document.getElementById('sumDesc').textContent = wizardData.description || '-';
+  
+  const priorityLabels = {LOW: 'Düşük', MEDIUM: 'Normal', HIGH: 'Yüksek', CRITICAL: 'Acil'};
+  document.getElementById('sumPriority').textContent = priorityLabels[wizardData.priority];
+  
+  const agent = agents.find(a => a.id === wizardData.agentId);
+  document.getElementById('sumAgent').textContent = agent?.name || '-';
+  
+  const workflow = workflows.find(w => w.id === wizardData.workflowId);
+  document.getElementById('sumWorkflow').textContent = workflow?.name || 'Basit görev';
+  
+  const triggerLabels = {
+    manual: wizardData.startNow ? 'Manuel - Hemen başlat' : 'Manuel - Sonra başlat',
+    scheduled: 'Zamanlanmış',
+    webhook: 'Webhook tetikleyici',
+    email: 'Email tetikleyici'
+  };
+  document.getElementById('sumTrigger').textContent = triggerLabels[wizardData.trigger];
+  
+  const scheduleRow = document.getElementById('sumScheduleRow');
+  if (wizardData.trigger === 'scheduled') {
+    scheduleRow.style.display = 'flex';
+    const repeatLabels = {none: '', daily: ' (Günlük)', weekly: ' (Haftalık)', monthly: ' (Aylık)'};
+    document.getElementById('sumSchedule').textContent = 
+      `${wizardData.scheduleDate} ${wizardData.scheduleTime}${repeatLabels[wizardData.repeat]}`;
+  } else {
+    scheduleRow.style.display = 'none';
+  }
+}
+
+async function createTask() {
+  try {
+    const taskData = {
+      name: wizardData.name,
+      description: wizardData.description,
+      priority: wizardData.priority,
+      agentId: wizardData.agentId,
+      triggerType: wizardData.trigger.toUpperCase(),
+      status: 'PENDING'
+    };
+    
+    // Only add workflowId if it's not null
+    if (wizardData.workflowId) {
+      taskData.workflowId = wizardData.workflowId;
+    }
+    
+    // Add schedule info if scheduled
+    if (wizardData.trigger === 'scheduled') {
+      taskData.scheduledAt = new Date(`${wizardData.scheduleDate}T${wizardData.scheduleTime}`).toISOString();
+      if (wizardData.repeat !== 'none') {
+        taskData.repeatInterval = wizardData.repeat.toUpperCase();
+      }
+    }
+    
+    // If start now, set status to RUNNING
+    if (wizardData.trigger === 'manual' && wizardData.startNow) {
+      taskData.status = 'RUNNING';
+      taskData.startedAt = new Date().toISOString();
+    }
+    
+    const result = await window.orbicorpAPI.createTask(taskData);
+    
+    if (result.success) {
+      showToast('Görev oluşturuldu!', 'success');
+      closeWizard();
+      loadTasks();
+      loadStats();
+    } else {
+      showToast(result.error || 'Görev oluşturulamadı', 'error');
+    }
+  } catch (error) {
+    console.error('Create task error:', error);
+    showToast('Bir hata oluştu', 'error');
+  }
+}
+
+// ═══ INIT ═══
+document.addEventListener('DOMContentLoaded', async () => {
+  await Promise.all([loadTasks(), loadStats()]);
+  
+  // Auto-refresh every 30 seconds
+  setInterval(() => {
+    loadTasks();
+    loadStats();
+  }, 30000);
+});
+</script>
+</body>
+</html>

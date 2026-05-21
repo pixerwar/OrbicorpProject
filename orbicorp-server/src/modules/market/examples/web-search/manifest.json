@@ -1,0 +1,87 @@
+{
+  "name": "web-search",
+  "version": "1.0.0",
+  "type": "tool",
+  "displayName": "Web Arama",
+  "description": "İnternette arama yaparak güncel bilgilere erişim sağlar.",
+  
+  "author": {
+    "name": "Orbicorp",
+    "email": "dev@orbicorp.ai"
+  },
+  
+  "icon": "🔍",
+  "category": "integration",
+  "tags": ["search", "web", "google", "arama", "internet"],
+  
+  "pricing": {
+    "model": "subscription",
+    "price": 9.99,
+    "currency": "USD"
+  },
+  
+  "compatibility": {
+    "orbicorpVersion": ">=1.0.0",
+    "providers": ["anthropic", "openai", "google"]
+  },
+  
+  "permissions": ["network.fetch"],
+  
+  "config": {
+    "apiKey": {
+      "type": "secret",
+      "label": "API Anahtarı",
+      "description": "Tavily veya SerpAPI anahtarı",
+      "required": true
+    },
+    "provider": {
+      "type": "string",
+      "label": "Arama Sağlayıcı",
+      "description": "Kullanılacak arama servisi",
+      "default": "tavily"
+    },
+    "maxResults": {
+      "type": "number",
+      "label": "Maksimum Sonuç",
+      "description": "Döndürülecek maksimum sonuç sayısı",
+      "default": 5
+    }
+  },
+  
+  "tools": [
+    {
+      "name": "web_search",
+      "description": "İnternette arama yap ve güncel bilgileri getir. Haberler, güncel olaylar, teknik bilgiler için kullan.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Arama sorgusu"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["general", "news", "images"],
+            "description": "Arama tipi"
+          }
+        },
+        "required": ["query"]
+      },
+      "handler": "custom:webSearch",
+      "examples": [
+        {
+          "input": { "query": "İstanbul hava durumu", "type": "general" },
+          "output": { 
+            "results": [
+              { "title": "İstanbul Hava Durumu", "snippet": "Bugün 22°C, parçalı bulutlu...", "url": "..." }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  
+  "systemPromptAddition": "Güncel bilgi gerektiğinde 'web_search' tool'unu kullan. Hava durumu, haberler, güncel olaylar için arama yap.",
+  
+  "readme": "# Web Arama\n\nBu tool, agent'ınıza internet araması yapma yeteneği kazandırır.\n\n## Kurulum\n1. Tavily veya SerpAPI hesabı oluşturun\n2. API anahtarınızı paket ayarlarına girin\n\n## Kullanım\nAgent otomatik olarak güncel bilgi gerektiğinde arama yapar."
+}

@@ -1,0 +1,62 @@
+{
+  "name": "lang-de",
+  "version": "1.0.0",
+  "type": "language-pack",
+  "displayName": "Deutsch (Almanca)",
+  "description": "Orbicorp arayüzü için Almanca dil paketi",
+  
+  "author": {
+    "name": "Community",
+    "email": "community@orbicorp.ai"
+  },
+  
+  "icon": "🇩🇪",
+  "category": "core",
+  "tags": ["language", "german", "deutsch", "dil"],
+  
+  "pricing": {
+    "model": "free"
+  },
+  
+  "translations": {
+    "locale": "de",
+    "name": "Deutsch",
+    "strings": {
+      "common.save": "Speichern",
+      "common.cancel": "Abbrechen",
+      "common.delete": "Löschen",
+      "common.edit": "Bearbeiten",
+      "common.create": "Erstellen",
+      "common.search": "Suchen",
+      "common.loading": "Wird geladen...",
+      "common.error": "Fehler",
+      "common.success": "Erfolg",
+      
+      "nav.dashboard": "Dashboard",
+      "nav.agents": "Agenten",
+      "nav.chat": "Chat",
+      "nav.tasks": "Aufgaben",
+      "nav.workflows": "Workflows",
+      "nav.settings": "Einstellungen",
+      "nav.market": "Marktplatz",
+      
+      "agent.name": "Name",
+      "agent.description": "Beschreibung",
+      "agent.status": "Status",
+      "agent.department": "Abteilung",
+      "agent.create": "Agent erstellen",
+      "agent.edit": "Agent bearbeiten",
+      
+      "chat.placeholder": "Nachricht eingeben...",
+      "chat.send": "Senden",
+      "chat.newSession": "Neuer Chat",
+      
+      "auth.login": "Anmelden",
+      "auth.logout": "Abmelden",
+      "auth.email": "E-Mail",
+      "auth.password": "Passwort"
+    }
+  },
+  
+  "readme": "# Deutsch (Almanca) Dil Paketi\n\nOrbicorp arayüzünün Almanca çevirisi.\n\n## Katkıda Bulunma\nÇevirileri geliştirmek için PR gönderebilirsiniz."
+}

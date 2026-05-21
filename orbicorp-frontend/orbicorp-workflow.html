@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orbicorp — Workflow Builder</title>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="orbicorp-dark.css">
+<style>
+/* ═══ IFRAME MODE ═══ */
+body.in-iframe .topnav{display:none !important}
+body.in-iframe .sidebar{display:none !important}
+body.in-iframe .layout{margin-top:0;height:100vh}
+
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--primary:#635BFF;--primary-light:#7A73FF;--primary-bg:#F0EEFF;--primary-bg-subtle:#F8F7FF;--navy:#0A2540;--surface:#F6F9FC;--white:#FFFFFF;--border:#E3E8EE;--border-light:#EBEEF2;--text-primary:#0A2540;--text-secondary:#425466;--text-tertiary:#8792A2;--text-muted:#A3ACB9;--green:#0EA371;--green-bg:#EEFBF4;--green-text:#0C7D58;--amber:#D97706;--amber-bg:#FEF7E6;--amber-text:#92510A;--red:#DF1B41;--red-bg:#FDE8EC;--red-text:#A11534;--blue:#0570DE;--blue-bg:#E8F2FD;--blue-text:#0455A9;--radius-sm:6px;--radius-md:8px;--radius-lg:12px;--font:'Google Sans',-apple-system,BlinkMacSystemFont,sans-serif;--font-mono:'Google Sans Mono','SF Mono',monospace;--transition:0.2s cubic-bezier(0.4,0,0.2,1)}
+body{font-family:var(--font);background:var(--surface);color:var(--text-primary);-webkit-font-smoothing:antialiased;overflow:hidden;height:100vh}
+.topnav{height:56px;background:var(--white);border-bottom:0.5px solid var(--border);display:flex;align-items:center;padding:0 24px;position:relative;z-index:100}
+.topnav-brand{display:flex;align-items:center;gap:10px;margin-right:24px;text-decoration:none}
+.topnav-logo{width:32px;height:32px;background:linear-gradient(135deg,var(--primary),var(--navy));border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:14px}
+.topnav-name{font-size:16px;font-weight:700;color:var(--navy);letter-spacing:-0.3px}
+.topnav-tabs{display:flex;gap:4px;flex:1}
+.topnav-tab{padding:8px 14px;font-size:14px;color:var(--text-secondary);border-radius:var(--radius-sm);cursor:pointer;transition:all var(--transition);text-decoration:none}
+.topnav-tab:hover{background:var(--surface);color:var(--text-primary)}
+.topnav-tab.active{background:var(--primary-bg);color:var(--primary);font-weight:500}
+.topnav-right{display:flex;align-items:center;gap:8px;margin-left:auto}
+.topnav-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-light));color:white;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.btn{padding:8px 16px;border-radius:var(--radius-sm);font-size:12px;font-weight:500;cursor:pointer;transition:all var(--transition);border:0.5px solid var(--border);font-family:var(--font);display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:var(--primary);color:white;border-color:var(--primary)}
+.btn-primary:hover{background:var(--primary-light)}
+.btn-secondary{background:var(--white);color:var(--text-secondary)}
+.btn-secondary:hover{background:var(--surface)}
+.btn-sm{padding:6px 12px;font-size:11px}
+.btn-ghost{background:none;border:none;color:var(--text-tertiary);padding:8px}
+.btn-ghost:hover{color:var(--text-primary);background:var(--surface)}
+.btn svg{width:14px;height:14px}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;padding:3px 10px;border-radius:999px;font-weight:500}
+.badge-green{background:var(--green-bg);color:var(--green-text)}
+.badge-amber{background:var(--amber-bg);color:var(--amber-text)}
+
+.layout{display:flex;height:calc(100vh - 56px)}
+
+/* SIDEBAR */
+.sidebar{width:200px;background:var(--white);border-right:0.5px solid var(--border);padding:16px 12px;flex-shrink:0;overflow-y:auto;transition:width 0.3s}
+.sidebar.collapsed{width:56px;padding:16px 8px}
+.sidebar-toggle{display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:var(--radius-sm);border:0.5px solid var(--border);background:var(--white);cursor:pointer;margin-bottom:16px;margin-left:auto;transition:all var(--transition)}
+.sidebar-toggle:hover{background:var(--surface)}
+.sidebar-toggle svg{width:14px;height:14px;color:var(--text-tertiary);transition:transform 0.3s}
+.sidebar.collapsed .sidebar-toggle{margin:0 auto 16px}
+.sidebar.collapsed .sidebar-toggle svg{transform:rotate(180deg)}
+.sidebar-label{font-size:10px;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;padding:0 10px;margin-bottom:6px;white-space:nowrap}
+.sidebar.collapsed .sidebar-label{opacity:0;height:0;margin:0}
+.nav-section{margin-bottom:20px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:var(--radius-sm);font-size:13px;color:var(--text-secondary);cursor:pointer;transition:all var(--transition);white-space:nowrap}
+.nav-item:hover{background:var(--surface);color:var(--text-primary)}
+.nav-item.active{background:var(--primary-bg);color:var(--primary);font-weight:500}
+.nav-item svg{width:16px;height:16px;flex-shrink:0}
+.sidebar.collapsed .nav-item span{opacity:0;width:0}
+.sidebar.collapsed .nav-item{justify-content:center;padding:10px}
+
+/* BLOCK PALETTE */
+.palette{width:240px;background:var(--white);border-right:0.5px solid var(--border);padding:16px 12px;overflow-y:auto;flex-shrink:0;z-index:10}
+.palette h3{font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;padding:0 6px;margin-bottom:10px}
+.palette-section{margin-bottom:20px}
+.palette-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--radius-sm);cursor:grab;transition:all var(--transition);font-size:13px;color:var(--text-secondary);margin-bottom:2px}
+.palette-item:hover{background:var(--surface);color:var(--text-primary)}
+.palette-item:active{cursor:grabbing;opacity:0.7}
+.palette-icon{width:32px;height:32px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.palette-icon svg{width:16px;height:16px}
+.palette-divider{height:0.5px;background:var(--border);margin:12px 6px}
+.template-card{padding:12px;border:0.5px solid var(--border);border-radius:var(--radius-md);cursor:pointer;transition:all var(--transition);margin-bottom:8px}
+.template-card:hover{border-color:var(--primary);background:var(--primary-bg-subtle)}
+.template-card h4{font-size:12px;font-weight:500;color:var(--text-primary);margin-bottom:2px}
+.template-card p{font-size:10px;color:var(--text-tertiary)}
+
+/* WORKFLOW LIST */
+.wf-list-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--radius-sm);cursor:pointer;transition:all var(--transition);margin-bottom:2px;border:0.5px solid transparent}
+.wf-list-item:hover{background:var(--surface)}
+.wf-list-item.active{background:var(--primary-bg-subtle);border-color:var(--primary);color:var(--primary)}
+.wf-list-icon{width:24px;height:24px;border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px}
+.wf-list-icon svg{width:12px;height:12px}
+.wf-list-info{flex:1;min-width:0}
+.wf-list-name{font-size:12px;font-weight:500;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wf-list-item.active .wf-list-name{color:var(--primary)}
+.wf-list-meta{font-size:10px;color:var(--text-muted);display:flex;align-items:center;gap:4px}
+.wf-list-status{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.wf-add-btn{width:22px;height:22px;border-radius:var(--radius-sm);border:0.5px solid var(--border);background:var(--white);color:var(--primary);font-size:16px;font-weight:400;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;transition:all var(--transition)}
+.wf-add-btn:hover{background:var(--primary-bg);border-color:var(--primary)}
+
+/* CANVAS TOOLBAR */
+.canvas-toolbar{display:flex;align-items:center;gap:12px;padding:10px 18px;background:var(--white);border-bottom:0.5px solid var(--border);flex-shrink:0}
+.canvas-toolbar .wf-name{font-size:14px;font-weight:600;color:var(--text-primary);padding:5px 10px;border:0.5px solid transparent;border-radius:var(--radius-sm);cursor:text;transition:all var(--transition)}
+.canvas-toolbar .wf-name:hover{border-color:var(--border);background:var(--surface)}
+.canvas-toolbar-right{display:flex;align-items:center;gap:8px;margin-left:auto}
+
+/* CANVAS */
+.canvas-area{flex:1;position:relative;overflow:hidden;background:#FAFBFC;background-image:radial-gradient(circle,#ddd 1px,transparent 1px);background-size:24px 24px}
+.canvas{position:absolute;inset:0;transform-origin:0 0;z-index:1}
+.canvas-controls{position:absolute;bottom:20px;right:20px;display:flex;gap:4px;background:var(--white);border:0.5px solid var(--border);border-radius:var(--radius-md);padding:4px;box-shadow:0 2px 8px rgba(0,0,0,0.06);z-index:20}
+.canvas-controls button{width:32px;height:32px;border:none;background:none;border-radius:var(--radius-sm);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-tertiary);transition:all var(--transition);font-family:var(--font);font-size:12px;font-weight:600}
+.canvas-controls button:hover{background:var(--surface);color:var(--text-primary)}
+
+/* NODES */
+.node{position:absolute;background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius-md);cursor:move;transition:box-shadow var(--transition);min-width:140px;user-select:none;z-index:10}
+.node:hover{box-shadow:0 4px 16px rgba(0,0,0,0.08)}
+.node.selected{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-bg)}
+.node-header{display:flex;align-items:center;gap:8px;padding:10px 12px}
+.node-icon{width:28px;height:28px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.node-icon svg{width:14px;height:14px}
+.node-title{font-size:12px;font-weight:500;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.node-subtitle{font-size:10px;color:var(--text-muted);padding:0 12px 8px;margin-top:-4px}
+.node-port{position:absolute;width:14px;height:14px;border-radius:50%;background:var(--white);border:2px solid var(--border);cursor:crosshair;z-index:15;transition:all var(--transition)}
+.node-port:hover{border-color:var(--primary);background:var(--primary-bg);transform:scale(1.4)}
+.node-port.input{left:-7px;top:50%;transform:translateY(-50%)}
+.node-port.input:hover{transform:translateY(-50%) scale(1.4);border-color:var(--green);background:var(--green-bg)}
+.node-port.output{right:-7px;top:50%;transform:translateY(-50%)}
+.node-port.output:hover{transform:translateY(-50%) scale(1.4)}
+.node-port.output-yes{right:-7px;top:35%;transform:translateY(-50%)}
+.node-port.output-yes:hover{transform:translateY(-50%) scale(1.4)}
+.node-port.output-no{right:-7px;top:65%;transform:translateY(-50%)}
+.node-port.output-no:hover{transform:translateY(-50%) scale(1.4)}
+.node-port-label{position:absolute;font-size:8px;color:var(--text-muted);font-weight:600;white-space:nowrap}
+.node-port-label.yes{right:16px;top:50%;transform:translateY(-50%);color:var(--green)}
+.node-port-label.no{right:16px;top:50%;transform:translateY(-50%);color:var(--red)}
+
+/* CONNECTIONS SVG */
+.connections-layer{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:5;overflow:visible}
+.conn-path{fill:none;stroke:var(--border);stroke-width:2;transition:stroke var(--transition)}
+.conn-path:hover{stroke:var(--primary)}
+.conn-arrow{fill:var(--border);transition:fill var(--transition)}
+
+/* CONFIG PANEL */
+.config-panel{position:absolute;top:0;right:-320px;width:320px;height:100%;background:var(--white);border-left:0.5px solid var(--border);z-index:30;transition:right 0.3s ease;overflow-y:auto;box-shadow:-4px 0 20px rgba(0,0,0,0.04)}
+.config-panel.open{right:0}
+.config-header{display:flex;align-items:center;gap:10px;padding:16px 18px;border-bottom:0.5px solid var(--border)}
+.config-header h3{flex:1;font-size:14px;font-weight:600;color:var(--text-primary)}
+.config-close{width:28px;height:28px;border-radius:var(--radius-sm);border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-tertiary)}
+.config-close:hover{background:var(--surface)}
+.config-body{padding:16px 18px}
+.config-section{margin-bottom:16px}
+.config-label{font-size:11px;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px}
+.config-field{margin-bottom:12px}
+.config-field label{display:block;font-size:12px;font-weight:500;color:var(--text-secondary);margin-bottom:4px}
+input.fi,select.fi,textarea.fi{width:100%;padding:8px 12px;border:0.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px;font-family:var(--font);color:var(--text-primary);background:var(--white)}
+input.fi:focus,select.fi:focus,textarea.fi:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-bg)}
+textarea.fi{min-height:60px;resize:vertical}
+select.fi{cursor:pointer}
+</style>
+<link rel="stylesheet" href="orbicorp-dark.css">
+<style>
+.in-iframe .topnav{display:none!important}
+.in-iframe .sidebar{display:none!important}
+.in-iframe .layout{margin-top:0!important;height:100vh!important}
+.in-iframe .settings-nav{top:0!important;height:100vh!important}
+.in-iframe .chat-panel{top:0!important;height:100vh!important}
+</style>
+</head>
+<body>
+<script>
+(function(){
+  // If in iframe, hide own nav/sidebar and sync theme from parent
+  if(window.self!==window.top){
+    document.body.classList.add("in-iframe");
+    try{
+      var pt=window.parent.document.documentElement.getAttribute("data-theme");
+      if(pt)document.documentElement.setAttribute("data-theme",pt);
+    }catch(e){}
+    // Listen for theme changes from parent
+    window.addEventListener("message",function(e){
+      if(e.data&&e.data.type==="theme")document.documentElement.setAttribute("data-theme",e.data.value);
+      if(e.data&&e.data.type==="lang"){window._orbicorpLang=e.data.value;if(typeof applyPageLang==="function")applyPageLang(e.data.value);}
+    });
+  }
+})();
+</script>
+<nav class="topnav">
+  <a class="topnav-brand" href="#"><div class="topnav-logo">O</div><span class="topnav-name">Orbicorp</span></a>
+  <div class="topnav-tabs"><a class="topnav-tab">Overview</a><a class="topnav-tab">Agents</a><a class="topnav-tab">Company Profile</a><a class="topnav-tab">Chat</a><a class="topnav-tab">Skills</a><a class="topnav-tab">Analytics</a></div>
+  <div class="topnav-right">
+    <div class="topnav-avatar">AY</div>
+  </div>
+</nav>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-toggle" onclick="document.getElementById('sidebar').classList.toggle('collapsed')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </div>
+    <div class="nav-section">
+      <div class="sidebar-label">Ana Menü</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>Dashboard</span></div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42"/></svg><span>Agent'lar</span></div>
+      <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Workflow Builder</span></div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg><span>Skill Market</span></div>
+    </div>
+    <div class="nav-section">
+      <div class="sidebar-label">Operasyon</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Chat</span></div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Görev Takip</span></div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 20V10M12 20V4M6 20v-6"/></svg><span>Analitik</span></div>
+    </div>
+    <div class="nav-section">
+      <div class="sidebar-label">Sistem</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33"/></svg><span>Ayarlar</span></div>
+    </div>
+  </aside>
+  <!-- PALETTE -->
+  <aside class="palette">
+    <div class="palette-section">
+      <h3 style="display:flex;align-items:center;justify-content:space-between">Workflow'larım <button class="wf-add-btn" onclick="newWorkflow()" title="Yeni Workflow">+</button></h3>
+      <div id="wfList"></div>
+    </div>
+    <div class="palette-divider"></div>
+    <div class="palette-section">
+      <h3>Bloklar</h3>
+      <div class="palette-item" draggable="true" ondragstart="dragBlock(event,'trigger')">
+        <div class="palette-icon" style="background:var(--amber-bg);color:var(--amber)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+        Tetikleyici
+      </div>
+      <div class="palette-item" draggable="true" ondragstart="dragBlock(event,'agent')">
+        <div class="palette-icon" style="background:var(--primary-bg);color:var(--primary)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42"/></svg></div>
+        Agent Adımı
+      </div>
+      <div class="palette-item" draggable="true" ondragstart="dragBlock(event,'condition')">
+        <div class="palette-icon" style="background:var(--blue-bg);color:var(--blue)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+        Koşul / Karar
+      </div>
+      <div class="palette-item" draggable="true" ondragstart="dragBlock(event,'approval')">
+        <div class="palette-icon" style="background:var(--amber-bg);color:var(--amber-text)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg></div>
+        İnsan Onayı
+      </div>
+      <div class="palette-item" draggable="true" ondragstart="dragBlock(event,'integration')">
+        <div class="palette-icon" style="background:var(--green-bg);color:var(--green)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div>
+        Entegrasyon
+      </div>
+      <div class="palette-item" draggable="true" ondragstart="dragBlock(event,'notification')">
+        <div class="palette-icon" style="background:var(--red-bg);color:var(--red)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+        Bildirim
+      </div>
+      <div class="palette-item" draggable="true" ondragstart="dragBlock(event,'transform')">
+        <div class="palette-icon" style="background:#F1EFE8;color:#5F5E5A"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div>
+        Veri Dönüştürme
+      </div>
+    </div>
+    <div class="palette-divider"></div>
+    <div class="palette-section">
+      <h3>Şablonlar</h3>
+      <div class="template-card" onclick="loadTemplate('invoice')"><h4>Fatura İşleme</h4><p>E-posta → Parse → Kaydet → Bildir</p></div>
+      <div class="template-card" onclick="loadTemplate('onboarding')"><h4>Çalışan Onboarding</h4><p>Trigger → Doküman → IT → Tanıştırma</p></div>
+      <div class="template-card" onclick="loadTemplate('support')"><h4>Destek Eskalasyon</h4><p>Ticket → Analiz → Karar → Yanıt/İnsan</p></div>
+    </div>
+  </aside>
+
+  <!-- CANVAS COLUMN -->
+  <div style="flex:1;display:flex;flex-direction:column;min-width:0">
+    <div class="canvas-toolbar">
+      <span class="wf-name" contenteditable="true" id="wfName" oninput="updateWorkflowName(this.textContent)">Fatura İşleme Otomasyonu</span>
+      <span class="badge badge-green">Aktif</span>
+      <div class="canvas-toolbar-right">
+        <button class="btn btn-secondary btn-sm" onclick="runWorkflow(activeWfId)" title="Workflow'u çalıştır"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>Çalıştır</button>
+        <button class="btn btn-secondary btn-sm" onclick="toggleWorkflowStatus(activeWfId)" title="Aktif/Duraklat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg></button>
+        <button class="btn btn-primary btn-sm" onclick="saveWorkflow()" title="Kaydet (Ctrl+S)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>Kaydet</button>
+      </div>
+    </div>
+
+    <!-- CANVAS -->
+    <div class="canvas-area" id="canvasArea" ondragover="allowDrop(event)" ondrop="dropBlock(event)">
+    <svg class="connections-layer" id="connLayer"></svg>
+    <div class="canvas" id="canvas"></div>
+    <div class="canvas-controls">
+      <button onclick="zoom(0.1)" title="Yakınlaştır">+</button>
+      <button onclick="zoom(-0.1)" title="Uzaklaştır">−</button>
+      <button onclick="zoomReset()" title="Sığdır">⊡</button>
+    </div>
+    <!-- CONFIG PANEL -->
+    <div class="config-panel" id="configPanel">
+      <div class="config-header">
+        <div class="palette-icon" id="cfgIcon" style="width:24px;height:24px"></div>
+        <h3 id="cfgTitle">Blok Ayarları</h3>
+        <button class="config-close" onclick="closeConfig()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+      </div>
+      <div class="config-body" id="cfgBody"></div>
+    </div>
+  </div>
+  </div><!-- end canvas column -->
+</div>
+
+<script src="orbicorp-api.js"></script>
+<script>
+// ═══ STATE ═══
+let workflows = [];
+let activeWfId = null;
+let nodes = [];
+let connections = [];
+let nextId = 1;
+let selectedNode = null;
+let dragOffset = {x:0, y:0};
+let draggingNode = null;
+let scale = 1;
+let isLoading = false;
+let hasUnsavedChanges = false;
+
+// Dynamic data for config panel
+let availableAgents = [];
+let availableUsers = [];
+
+// ═══ LOAD DYNAMIC DATA ═══
+async function loadDynamicData() {
+  try {
+    // Load agents
+    const agentsResult = await window.orbicorpAPI.getAgents();
+    if (agentsResult.success && agentsResult.data) {
+      availableAgents = agentsResult.data.map(a => ({
+        id: a.id,
+        name: a.name
+      }));
+    }
+    
+    // Load users
+    const usersResult = await window.orbicorpAPI.getUsers();
+    if (usersResult.success && usersResult.data) {
+      availableUsers = usersResult.data.map(u => ({
+        id: u.id,
+        name: u.name || `${u.firstName || ''} ${u.lastName || ''}`.trim() || u.email
+      }));
+    }
+  } catch (e) {
+    console.error('Failed to load dynamic data:', e);
+  }
+}
+
+// ═══ API FUNCTIONS ═══
+async function loadWorkflows() {
+  try {
+    isLoading = true;
+    const result = await window.orbicorpAPI.getWorkflows();
+    if (result.success) {
+      workflows = result.data.map(w => ({
+        id: w.id,
+        name: w.name,
+        description: w.description,
+        icon: w.icon || '⚡',
+        status: w.status.toLowerCase(),
+        steps: w.stepCount || 0,
+        lastRun: formatLastRun(w.lastRunAt),
+        definition: w.definition || { nodes: [], connections: [] },
+        runCount: w.runCount || 0,
+      }));
+      
+      if (workflows.length > 0 && !activeWfId) {
+        activeWfId = workflows[0].id;
+      }
+      renderWfList();
+      if (activeWfId) {
+        selectWorkflow(activeWfId);
+      }
+    }
+  } catch (error) {
+    console.error('Load workflows error:', error);
+    showToast('Workflow\'lar yüklenemedi', 'error');
+  } finally {
+    isLoading = false;
+  }
+}
+
+function formatLastRun(dateStr) {
+  if (!dateStr) return 'Henüz çalışmadı';
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diff = now - date;
+  const minutes = Math.floor(diff / 60000);
+  const hours = Math.floor(diff / 3600000);
+  const days = Math.floor(diff / 86400000);
+  
+  if (minutes < 1) return 'Az önce';
+  if (minutes < 60) return `${minutes} dk önce`;
+  if (hours < 24) return `${hours} saat önce`;
+  return `${days} gün önce`;
+}
+
+async function saveWorkflow() {
+  if (!activeWfId) return;
+  
+  const w = workflows.find(x => x.id === activeWfId);
+  if (!w) return;
+  
+  try {
+    const definition = { nodes, connections };
+    const isNew = activeWfId.startsWith('new_');
+    
+    let result;
+    if (isNew) {
+      result = await window.orbicorpAPI.createWorkflow({
+        name: w.name,
+        description: w.description,
+        icon: w.icon,
+        status: 'DRAFT',
+        definition,
+      });
+      
+      if (result.success) {
+        // Update local ID with server ID
+        const oldId = activeWfId;
+        activeWfId = result.data.id;
+        const idx = workflows.findIndex(x => x.id === oldId);
+        if (idx !== -1) {
+          workflows[idx].id = result.data.id;
+        }
+      }
+    } else {
+      result = await window.orbicorpAPI.updateWorkflow(activeWfId, {
+        name: w.name,
+        definition,
+      });
+    }
+    
+    if (result.success) {
+      hasUnsavedChanges = false;
+      showToast('Workflow kaydedildi', 'success');
+    } else {
+      throw new Error(result.message);
+    }
+  } catch (error) {
+    console.error('Save workflow error:', error);
+    showToast('Kaydetme hatası: ' + error.message, 'error');
+  }
+}
+
+async function deleteWorkflow(id) {
+  if (!confirm('Bu workflow\'u silmek istediğinizden emin misiniz?')) return;
+  
+  try {
+    // Skip API call for unsaved new workflows
+    if (!id.startsWith('new_')) {
+      const result = await window.orbicorpAPI.deleteWorkflow(id);
+      if (!result.success) throw new Error(result.message);
+    }
+    
+    workflows = workflows.filter(w => w.id !== id);
+    if (activeWfId === id) {
+      activeWfId = workflows.length > 0 ? workflows[0].id : null;
+      if (activeWfId) selectWorkflow(activeWfId);
+      else { nodes = []; connections = []; renderAll(); }
+    }
+    renderWfList();
+    showToast('Workflow silindi', 'success');
+  } catch (error) {
+    console.error('Delete workflow error:', error);
+    showToast('Silme hatası', 'error');
+  }
+}
+
+async function toggleWorkflowStatus(id) {
+  const w = workflows.find(x => x.id === id);
+  if (!w || id.startsWith('new_')) return;
+  
+  try {
+    const newStatus = w.status === 'active' ? 'pause' : 'activate';
+    const result = await window.orbicorpAPI[newStatus + 'Workflow'](id);
+    
+    if (result.success) {
+      w.status = result.data.status.toLowerCase();
+      renderWfList();
+      if (activeWfId === id) {
+        document.querySelector('.canvas-toolbar .badge').className = 'badge ' + (w.status === 'active' ? 'badge-green' : 'badge-amber');
+        document.querySelector('.canvas-toolbar .badge').textContent = w.status === 'active' ? 'Aktif' : 'Duraklatıldı';
+      }
+      showToast(w.status === 'active' ? 'Workflow aktifleştirildi' : 'Workflow duraklatıldı', 'success');
+    }
+  } catch (error) {
+    console.error('Toggle status error:', error);
+    showToast('Durum değiştirilemedi', 'error');
+  }
+}
+
+async function runWorkflow(id) {
+  if (id.startsWith('new_')) {
+    showToast('Önce workflow\'u kaydedin', 'error');
+    return;
+  }
+  
+  try {
+    const result = await window.orbicorpAPI.runWorkflow(id);
+    if (result.success) {
+      showToast('Workflow başlatıldı! Task ID: ' + result.data.id.substring(0, 8), 'success');
+      // Update lastRun
+      const w = workflows.find(x => x.id === id);
+      if (w) w.lastRun = 'Az önce';
+      renderWfList();
+    }
+  } catch (error) {
+    console.error('Run workflow error:', error);
+    showToast('Çalıştırma hatası', 'error');
+  }
+}
+
+function showToast(message, type = 'info') {
+  const toast = document.createElement('div');
+  toast.className = 'toast toast-' + type;
+  toast.textContent = message;
+  toast.style.cssText = 'position:fixed;bottom:20px;right:20px;padding:12px 20px;border-radius:8px;font-size:13px;z-index:9999;animation:fadeIn 0.3s;';
+  toast.style.background = type === 'error' ? 'var(--red)' : type === 'success' ? 'var(--green)' : 'var(--primary)';
+  toast.style.color = 'white';
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+
+// ═══ WORKFLOW LIST ═══
+function renderWfList() {
+  const container = document.getElementById('wfList');
+  if (workflows.length === 0) {
+    container.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:13px">Henüz workflow yok.<br>Yeni oluşturmak için + butonuna tıklayın.</div>';
+    return;
+  }
+  
+  container.innerHTML = workflows.map(w => `
+    <div class="wf-list-item ${w.id===activeWfId?'active':''}" onclick="selectWorkflow('${w.id}')">
+      <div class="wf-list-icon" style="background:${w.status==='active'?'var(--green-bg)':'var(--surface)'};color:${w.status==='active'?'var(--green)':'var(--text-muted)'};font-size:12px">${w.icon}</div>
+      <div class="wf-list-info">
+        <div class="wf-list-name">${w.name}</div>
+        <div class="wf-list-meta"><span class="wf-list-status" style="background:${w.status==='active'?'var(--green)':'var(--text-muted)'}"></span>${w.steps} adım &bull; ${w.lastRun}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function selectWorkflow(id) {
+  activeWfId = id;
+  renderWfList();
+  const w = workflows.find(x => x.id === id);
+  if (w) {
+    document.getElementById('wfName').textContent = w.name;
+    const statusBadge = document.querySelector('.canvas-toolbar .badge');
+    if (w.status === 'active') {
+      statusBadge.className = 'badge badge-green';
+      statusBadge.textContent = 'Aktif';
+    } else if (w.status === 'draft') {
+      statusBadge.className = 'badge badge-amber';
+      statusBadge.textContent = 'Taslak';
+    } else {
+      statusBadge.className = 'badge badge-amber';
+      statusBadge.textContent = 'Duraklatıldı';
+    }
+    
+    // Load workflow definition
+    if (w.definition && w.definition.nodes && w.definition.nodes.length > 0) {
+      nodes = w.definition.nodes.map(n => ({...n}));
+      connections = w.definition.connections ? w.definition.connections.map(c => ({...c})) : [];
+      nextId = Math.max(...nodes.map(n => n.id), 0) + 1;
+    } else {
+      // Empty workflow - start with trigger
+      nodes = [{id: 1, type: 'trigger', x: 80, y: 180, label: 'Tetikleyici', sub: 'Yapılandır'}];
+      connections = [];
+      nextId = 2;
+    }
+    renderAll();
+  }
+  hasUnsavedChanges = false;
+}
+
+function newWorkflow() {
+  const name = 'Yeni Workflow ' + (workflows.length + 1);
+  const id = 'new_' + Date.now();
+  workflows.push({id, name, status: 'draft', steps: 0, lastRun: 'Henüz çalışmadı', icon: '✨', definition: {nodes: [], connections: []}});
+  activeWfId = id;
+  nodes = [{id: 1, type: 'trigger', x: 80, y: 180, label: 'Tetikleyici', sub: 'Yapılandır'}];
+  connections = [];
+  nextId = 2;
+  document.getElementById('wfName').textContent = name;
+  document.querySelector('.canvas-toolbar .badge').className = 'badge badge-amber';
+  document.querySelector('.canvas-toolbar .badge').textContent = 'Taslak';
+  renderWfList();
+  renderAll();
+  hasUnsavedChanges = true;
+}
+
+function updateWorkflowName(newName) {
+  const w = workflows.find(x => x.id === activeWfId);
+  if (w && newName.trim()) {
+    w.name = newName.trim();
+    hasUnsavedChanges = true;
+    renderWfList();
+  }
+}
+
+const blockDefs = {
+  trigger:{label:'Tetikleyici',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',bg:'var(--amber-bg)',color:'var(--amber)',borderColor:'#D97706',hasInput:false,hasOutput:true,config:[{type:'select',label:'Tetikleyici Türü',name:'triggerType',opts:['E-posta geldiğinde','Zamanlama (Cron)','Webhook','Manuel']},{type:'text',label:'Filtre / Kural',name:'filter',placeholder:'Konu: "fatura" içeriyorsa'}]},
+  agent:{label:'Agent Adımı',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42"/></svg>',bg:'var(--primary-bg)',color:'var(--primary)',borderColor:'#635BFF',hasInput:true,hasOutput:true,config:[{type:'select',label:'Agent',name:'agentId',dynamic:'agents'},{type:'textarea',label:'Görev Talimatı',name:'instruction',placeholder:'Bu adımda agent ne yapacak?'}]},
+  condition:{label:'Koşul',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',bg:'var(--blue-bg)',color:'var(--blue)',borderColor:'#0570DE',hasInput:true,hasOutput:false,hasBranch:true,config:[{type:'text',label:'Koşul İfadesi',name:'expr',placeholder:'Eğer tutar > $1000'},{type:'text',label:'Evet Dalı',name:'yesBranch',placeholder:'Sonraki adım'},{type:'text',label:'Hayır Dalı',name:'noBranch',placeholder:'Alternatif adım'}]},
+  approval:{label:'İnsan Onayı',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>',bg:'var(--amber-bg)',color:'var(--amber-text)',borderColor:'#D97706',hasInput:true,hasOutput:true,config:[{type:'select',label:'Onaylayıcı',name:'approverId',dynamic:'users'},{type:'text',label:'Onay Mesajı',name:'msg',placeholder:'Lütfen bu işlemi onaylayın'},{type:'select',label:'Zaman Aşımı',name:'timeout',opts:['1 saat','4 saat','24 saat','72 saat']}]},
+  integration:{label:'Entegrasyon',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>',bg:'var(--green-bg)',color:'var(--green)',borderColor:'#0EA371',hasInput:true,hasOutput:true,config:[{type:'select',label:'Servis',name:'service',opts:['Salesforce','SAP ERP','Jira','Google Sheets','REST API']},{type:'select',label:'İşlem',name:'action',opts:['Veri çek','Veri yaz','Güncelle','Sil']},{type:'text',label:'Endpoint / Tablo',name:'endpoint',placeholder:'API URL veya tablo adı'}]},
+  notification:{label:'Bildirim',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>',bg:'var(--red-bg)',color:'var(--red)',borderColor:'#DF1B41',hasInput:true,hasOutput:true,config:[{type:'select',label:'Kanal',name:'channel',opts:['E-posta','Slack','SMS','Teams','WhatsApp']},{type:'select',label:'Alıcı',name:'recipientId',dynamic:'users'},{type:'textarea',label:'Mesaj Şablonu',name:'template',placeholder:'{{agent_name}} görevi tamamladı...'}]},
+  transform:{label:'Veri Dönüştürme',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>',bg:'#F1EFE8',color:'#5F5E5A',borderColor:'#8792A2',hasInput:true,hasOutput:true,config:[{type:'select',label:'İşlem',name:'op',opts:['JSON parse','CSV parse','Filtre','Birleştir','Format dönüştür']},{type:'textarea',label:'Dönüşüm Kuralı',name:'rule',placeholder:'{ "field": "amount", "type": "number" }'}]}
+};
+
+// Pre-loaded invoice template
+function loadTemplate(name) {
+  nodes = []; connections = []; nextId = 1;
+  if (name === 'invoice') {
+    document.getElementById('wfName').textContent = 'Fatura İşleme Otomasyonu';
+    nodes = [
+      {id:nextId++,type:'trigger',x:60,y:180,label:'E-posta Geldiğinde',sub:'Konu: "fatura"'},
+      {id:nextId++,type:'agent',x:300,y:180,label:'Fatura Parse Et',sub:'Support Agent'},
+      {id:nextId++,type:'condition',x:540,y:180,label:'Tutar > $1,000?',sub:'Koşul kontrol'},
+      {id:nextId++,type:'approval',x:780,y:100,label:'Yönetici Onayı',sub:'CFO onay bekle'},
+      {id:nextId++,type:'integration',x:780,y:260,label:'ERP\'ye Kaydet',sub:'SAP fatura tablosu'},
+      {id:nextId++,type:'integration',x:1020,y:100,label:'ERP\'ye Kaydet',sub:'Onay sonrası kayıt'},
+      {id:nextId++,type:'notification',x:1020,y:260,label:'Slack Bildirim',sub:'#finans kanalı'}
+    ];
+    connections = [{from:1,to:2},{from:2,to:3},{from:3,to:4,label:'Evet'},{from:3,to:5,label:'Hayır'},{from:4,to:6},{from:5,to:7}];
+  } else if (name === 'onboarding') {
+    document.getElementById('wfName').textContent = 'Çalışan Onboarding Süreci';
+    nodes = [
+      {id:nextId++,type:'trigger',x:60,y:180,label:'Yeni Çalışan Kaydı',sub:'HR sisteminden'},
+      {id:nextId++,type:'agent',x:300,y:180,label:'Hoş Geldin Mesajı',sub:'Onboarding Bot'},
+      {id:nextId++,type:'agent',x:540,y:180,label:'Doküman Topla',sub:'HR Assistant'},
+      {id:nextId++,type:'integration',x:780,y:180,label:'IT Hesap Oluştur',sub:'Email, Slack, Jira'},
+      {id:nextId++,type:'notification',x:1020,y:180,label:'Ekibe Bildirim',sub:'Yeni üye katıldı'}
+    ];
+    connections = [{from:1,to:2},{from:2,to:3},{from:3,to:4},{from:4,to:5}];
+  } else if (name === 'support') {
+    document.getElementById('wfName').textContent = 'Destek Eskalasyon Akışı';
+    nodes = [
+      {id:nextId++,type:'trigger',x:60,y:180,label:'Yeni Ticket',sub:'Webhook'},
+      {id:nextId++,type:'agent',x:300,y:180,label:'Ticket Analizi',sub:'Support Agent'},
+      {id:nextId++,type:'condition',x:540,y:180,label:'Çözüldü mü?',sub:'Duygu analizi'},
+      {id:nextId++,type:'notification',x:780,y:100,label:'Müşteriye Yanıt',sub:'E-posta'},
+      {id:nextId++,type:'approval',x:780,y:260,label:'İnsan Devralsın',sub:'Eskalasyon'},
+    ];
+    connections = [{from:1,to:2},{from:2,to:3},{from:3,to:4,label:'Evet'},{from:3,to:5,label:'Hayır'}];
+  }
+  renderAll();
+}
+
+function renderAll() {
+  renderNodes();
+  renderConnections();
+}
+
+function renderNodes() {
+  const c = document.getElementById('canvas');
+  c.innerHTML = '';
+  nodes.forEach(n => {
+    const def = blockDefs[n.type];
+    const el = document.createElement('div');
+    el.className = 'node' + (selectedNode === n.id ? ' selected' : '');
+    el.style.cssText = `left:${n.x}px;top:${n.y}px;border-color:${selectedNode===n.id?'var(--primary)':def.borderColor+'44'}`;
+    el.setAttribute('data-id', n.id);
+    
+    let portsHtml = '';
+    if (def.hasInput) {
+      portsHtml += `<div class="node-port input" onmousedown="startConnection(event,${n.id},'input')"></div>`;
+    }
+    if (def.hasOutput) {
+      portsHtml += `<div class="node-port output" onmousedown="startConnection(event,${n.id},'output')"></div>`;
+    }
+    if (def.hasBranch) {
+      portsHtml += `<div class="node-port output-yes" onmousedown="startConnection(event,${n.id},'output-yes','Evet')"><span class="node-port-label yes" style="right:16px;top:-2px">Evet</span></div>`;
+      portsHtml += `<div class="node-port output-no" onmousedown="startConnection(event,${n.id},'output-no','Hayır')"><span class="node-port-label no" style="right:16px;top:-2px">Hayır</span></div>`;
+    }
+    
+    el.innerHTML = `
+      <div class="node-header">
+        <div class="node-icon" style="background:${def.bg};color:${def.color}">${def.icon}</div>
+        <div class="node-title">${n.label || def.label}</div>
+      </div>
+      ${n.sub ? `<div class="node-subtitle">${n.sub}</div>` : ''}
+      ${portsHtml}
+    `;
+    el.onmousedown = (e) => startDrag(e, n);
+    el.onclick = (e) => { e.stopPropagation(); selectNode(n.id); };
+    c.appendChild(el);
+  });
+}
+
+function renderConnections() {
+  const svg = document.getElementById('connLayer');
+  const canvas = document.getElementById('canvas');
+  let paths = '';
+  
+  connections.forEach((conn, idx) => {
+    const fromNode = nodes.find(n => n.id === conn.from);
+    const toNode = nodes.find(n => n.id === conn.to);
+    if (!fromNode || !toNode) return;
+    
+    const fromDef = blockDefs[fromNode.type];
+    const fromEl = canvas.querySelector(`[data-id="${fromNode.id}"]`);
+    const toEl = canvas.querySelector(`[data-id="${toNode.id}"]`);
+    if (!fromEl || !toEl) return;
+
+    let fromX = fromNode.x + fromEl.offsetWidth;
+    let fromY = fromNode.y + fromEl.offsetHeight / 2;
+    if (fromDef && fromDef.hasBranch) {
+      if (conn.label === 'Evet') fromY = fromNode.y + fromEl.offsetHeight * 0.35;
+      else if (conn.label === 'Hayır') fromY = fromNode.y + fromEl.offsetHeight * 0.65;
+    }
+    const toX = toNode.x;
+    const toY = toNode.y + toEl.offsetHeight / 2;
+    const midX = fromX + (toX - fromX) / 2;
+
+    paths += `<path class="conn-path" d="M${fromX} ${fromY} H${midX} V${toY} H${toX}"/>`;
+    paths += `<polygon class="conn-arrow" points="${toX},${toY} ${toX-6},${toY-3} ${toX-6},${toY+3}"/>`;
+  });
+  
+  svg.innerHTML = paths;
+}
+
+function selectNode(id) {
+  selectedNode = id;
+  renderNodes();
+  renderConnections();
+  openConfig(id);
+}
+
+function openConfig(id) {
+  const n = nodes.find(x => x.id === id);
+  if (!n) return;
+  const def = blockDefs[n.type];
+  document.getElementById('cfgIcon').style.cssText = `background:${def.bg};color:${def.color};width:24px;height:24px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center`;
+  document.getElementById('cfgIcon').innerHTML = def.icon;
+  document.getElementById('cfgTitle').textContent = n.label || def.label;
+  let html = `<div class="config-section"><div class="config-label">Genel</div>
+    <div class="config-field"><label>Blok Adı</label><input class="fi" value="${n.label||def.label}" onchange="updateNode(${n.id},'label',this.value)"></div>
+    <div class="config-field"><label>Açıklama</label><input class="fi" value="${n.sub||''}" onchange="updateNode(${n.id},'sub',this.value)"></div>
+  </div>`;
+  if (def.config) {
+    html += `<div class="config-section"><div class="config-label">Yapılandırma</div>`;
+    def.config.forEach(f => {
+      if (f.type === 'select') {
+        let options = '';
+        const currentValue = n.config?.[f.name] || '';
+        
+        if (f.dynamic) {
+          // Dynamic options from loaded data
+          const dynamicList = getDynamicList(f.dynamic);
+          options = `<option value="">Seçiniz...</option>`;
+          options += dynamicList.map(item => 
+            `<option value="${item.id}"${currentValue === item.id ? ' selected' : ''}>${item.name}</option>`
+          ).join('');
+        } else {
+          // Static options
+          options = `<option value="">Seçiniz...</option>`;
+          options += f.opts.map(o => 
+            `<option value="${o}"${currentValue === o ? ' selected' : ''}>${o}</option>`
+          ).join('');
+        }
+        
+        html += `<div class="config-field"><label>${f.label}</label><select class="fi" onchange="updateNodeConfig(${n.id},'${f.name}',this.value)">${options}</select></div>`;
+      }
+      else if (f.type === 'textarea') {
+        const currentValue = n.config?.[f.name] || '';
+        html += `<div class="config-field"><label>${f.label}</label><textarea class="fi" placeholder="${f.placeholder||''}" onchange="updateNodeConfig(${n.id},'${f.name}',this.value)">${currentValue}</textarea></div>`;
+      }
+      else {
+        const currentValue = n.config?.[f.name] || '';
+        html += `<div class="config-field"><label>${f.label}</label><input class="fi" placeholder="${f.placeholder||''}" value="${currentValue}" onchange="updateNodeConfig(${n.id},'${f.name}',this.value)"></div>`;
+      }
+    });
+    html += `</div>`;
+  }
+  html += `<div style="margin-top:16px"><button class="btn btn-sm btn-secondary" style="color:var(--red)" onclick="deleteNode(${n.id})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Sil</button></div>`;
+  document.getElementById('cfgBody').innerHTML = html;
+  document.getElementById('configPanel').classList.add('open');
+}
+
+function getDynamicList(type) {
+  switch(type) {
+    case 'agents': return availableAgents;
+    case 'users': return availableUsers;
+    default: return [];
+  }
+}
+
+function updateNodeConfig(id, key, val) {
+  const n = nodes.find(x => x.id === id);
+  if (n) {
+    if (!n.config) n.config = {};
+    n.config[key] = val;
+    hasUnsavedChanges = true;
+  }
+}
+
+function closeConfig() { document.getElementById('configPanel').classList.remove('open'); selectedNode = null; renderNodes(); }
+function updateNode(id, key, val) { const n = nodes.find(x=>x.id===id); if(n){n[key]=val; renderAll();} }
+function deleteNode(id) { nodes = nodes.filter(n=>n.id!==id); connections = connections.filter(c=>c.from!==id&&c.to!==id); closeConfig(); renderAll(); }
+
+// Drag nodes
+function startDrag(e, node) {
+  if (e.target.classList.contains('node-port')) return;
+  e.preventDefault();
+  draggingNode = node;
+  
+  const canvasArea = document.getElementById('canvasArea');
+  const rect = canvasArea.getBoundingClientRect();
+  
+  // Calculate offset considering scale
+  dragOffset.x = (e.clientX - rect.left) / scale - node.x;
+  dragOffset.y = (e.clientY - rect.top) / scale - node.y;
+  
+  document.addEventListener('mousemove', onDrag);
+  document.addEventListener('mouseup', stopDrag);
+}
+
+function onDrag(e) {
+  if (!draggingNode) return;
+  
+  const canvasArea = document.getElementById('canvasArea');
+  const rect = canvasArea.getBoundingClientRect();
+  
+  // Calculate new position considering scale
+  const newX = (e.clientX - rect.left) / scale - dragOffset.x;
+  const newY = (e.clientY - rect.top) / scale - dragOffset.y;
+  
+  draggingNode.x = Math.max(0, newX);
+  draggingNode.y = Math.max(0, newY);
+  
+  renderAll();
+  hasUnsavedChanges = true;
+}
+
+function stopDrag() {
+  draggingNode = null;
+  document.removeEventListener('mousemove', onDrag);
+  document.removeEventListener('mouseup', stopDrag);
+}
+
+// ═══ CONNECTION DRAWING ═══
+let isDrawingConnection = false;
+let connectionStartNode = null;
+let connectionStartPort = null;
+let connectionBranchLabel = null;
+
+function startConnection(e, nodeId, portType, branchLabel) {
+  e.stopPropagation();
+  e.preventDefault();
+  
+  // Only allow starting connection from output ports
+  if (portType === 'input') {
+    return;
+  }
+  
+  connectionStartNode = nodeId;
+  connectionStartPort = portType;
+  connectionBranchLabel = branchLabel || null;
+  isDrawingConnection = true;
+  
+  // Add visual feedback
+  document.body.style.cursor = 'crosshair';
+}
+
+function handleCanvasMouseUp(e) {
+  if (!isDrawingConnection) return;
+  
+  const canvasArea = document.getElementById('canvasArea');
+  const rect = canvasArea.getBoundingClientRect();
+  const mouseX = (e.clientX - rect.left) / scale;
+  const mouseY = (e.clientY - rect.top) / scale;
+  
+  // Find target node (check if clicking on input port area)
+  let targetNode = null;
+  
+  for (const n of nodes) {
+    if (n.id === connectionStartNode) continue; // Can't connect to self
+    
+    const def = blockDefs[n.type];
+    if (!def.hasInput) continue;
+    
+    const canvas = document.getElementById('canvas');
+    const nodeEl = canvas.querySelector(`[data-id="${n.id}"]`);
+    if (!nodeEl) continue;
+    
+    // Check if mouse is near left edge of node (input port area)
+    const nodeLeft = n.x;
+    const nodeTop = n.y;
+    const nodeBottom = n.y + nodeEl.offsetHeight;
+    
+    // Generous hit area: 50px from left edge, full height of node
+    if (mouseX >= nodeLeft - 50 && mouseX <= nodeLeft + 20 &&
+        mouseY >= nodeTop - 10 && mouseY <= nodeBottom + 10) {
+      targetNode = n;
+      break;
+    }
+  }
+  
+  if (targetNode) {
+    // Check if connection already exists
+    const exists = connections.some(c => 
+      c.from === connectionStartNode && c.to === targetNode.id
+    );
+    
+    if (!exists) {
+      const newConn = { 
+        from: connectionStartNode, 
+        to: targetNode.id 
+      };
+      if (connectionBranchLabel) {
+        newConn.label = connectionBranchLabel;
+      }
+      connections.push(newConn);
+      hasUnsavedChanges = true;
+    }
+  }
+  
+  // Reset
+  isDrawingConnection = false;
+  connectionStartNode = null;
+  connectionStartPort = null;
+  connectionBranchLabel = null;
+  document.body.style.cursor = '';
+  
+  renderAll();
+}
+
+// Add canvas mouseup listener
+document.addEventListener('DOMContentLoaded', () => {
+  const canvasArea = document.getElementById('canvasArea');
+  if (canvasArea) {
+    canvasArea.addEventListener('mouseup', handleCanvasMouseUp);
+  }
+});
+
+// Delete connection by clicking it
+function deleteConnection(fromId, toId) {
+  connections = connections.filter(c => !(c.from === fromId && c.to === toId));
+  renderAll();
+}
+
+// Drag from palette
+function dragBlock(e, type) { 
+  e.dataTransfer.setData('blockType', type); 
+  e.dataTransfer.effectAllowed = 'copy';
+}
+
+function allowDrop(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'copy';
+}
+
+function dropBlock(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  
+  const type = e.dataTransfer.getData('blockType');
+  if (!type || !blockDefs[type]) return;
+  
+  const canvasArea = document.getElementById('canvasArea');
+  const rect = canvasArea.getBoundingClientRect();
+  
+  // Calculate position considering scale
+  const x = (e.clientX - rect.left) / scale;
+  const y = (e.clientY - rect.top) / scale;
+  
+  const def = blockDefs[type];
+  nodes.push({id: nextId++, type, x, y, label: def.label, sub: ''});
+  renderAll();
+  hasUnsavedChanges = true;
+}
+
+// Zoom
+function zoom(delta) { scale = Math.min(1.5, Math.max(0.5, scale + delta)); document.getElementById('canvas').style.transform = `scale(${scale})`; }
+function zoomReset() { scale = 1; document.getElementById('canvas').style.transform = 'scale(1)'; }
+
+// Click canvas to deselect
+document.getElementById('canvasArea').addEventListener('click', (e) => { if (e.target.id === 'canvasArea' || e.target.classList.contains('canvas-area')) { closeConfig(); } });
+
+// Mark changes when nodes/connections change
+function markUnsaved() {
+  hasUnsavedChanges = true;
+}
+
+// Auto-save indicator in toolbar
+function updateToolbar() {
+  const w = workflows.find(x => x.id === activeWfId);
+  if (w) {
+    w.steps = nodes.length;
+  }
+}
+
+// Demo data for offline/fallback
+const demoWorkflows = [
+  {id:'demo-invoice', name:'Fatura İşleme Otomasyonu', status:'active', steps:6, lastRun:'2 saat önce', icon:'⚡', definition:{
+    nodes: [
+      {id:1,type:'trigger',x:60,y:180,label:'E-posta Geldiğinde',sub:'Konu: "fatura"'},
+      {id:2,type:'agent',x:300,y:180,label:'Fatura Parse Et',sub:'Support Agent'},
+      {id:3,type:'condition',x:540,y:180,label:'Tutar > $1,000?',sub:'Koşul kontrol'},
+      {id:4,type:'approval',x:780,y:100,label:'Yönetici Onayı',sub:'CFO onay bekle'},
+      {id:5,type:'integration',x:780,y:260,label:'ERP\'ye Kaydet',sub:'SAP fatura tablosu'},
+      {id:6,type:'notification',x:1020,y:180,label:'Slack Bildirim',sub:'#finans kanalı'}
+    ],
+    connections: [{from:1,to:2},{from:2,to:3},{from:3,to:4,label:'Evet'},{from:3,to:5,label:'Hayır'},{from:4,to:5},{from:5,to:6}]
+  }},
+  {id:'demo-onboarding', name:'Çalışan Onboarding', status:'active', steps:4, lastRun:'30 dk önce', icon:'👤', definition:{
+    nodes: [
+      {id:1,type:'trigger',x:60,y:180,label:'Yeni Çalışan',sub:'HR sisteminden'},
+      {id:2,type:'agent',x:300,y:180,label:'Hoş Geldin Mesajı',sub:'Onboarding Bot'},
+      {id:3,type:'integration',x:540,y:180,label:'IT Hesap Oluştur',sub:'Email, Slack'},
+      {id:4,type:'notification',x:780,y:180,label:'Ekibe Bildirim',sub:'Yeni üye'}
+    ],
+    connections: [{from:1,to:2},{from:2,to:3},{from:3,to:4}]
+  }}
+];
+
+// Init - Load from API or use demo data
+document.addEventListener('DOMContentLoaded', async () => {
+  // Check if in iframe
+  if (window.self !== window.top) {
+    document.body.classList.add('in-iframe');
+  }
+  
+  // Load dynamic data for config panels (agents, models, users)
+  await loadDynamicData();
+  
+  // Try to load workflows from API
+  try {
+    await loadWorkflows();
+  } catch (e) {
+    console.log('API failed, using demo data:', e);
+  }
+  
+  // If no workflows loaded, use demo data
+  if (workflows.length === 0) {
+    workflows = demoWorkflows;
+    activeWfId = workflows[0].id;
+  }
+  
+  renderWfList();
+  if (activeWfId) {
+    selectWorkflow(activeWfId);
+  }
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+  if (e.key === 's' && (e.ctrlKey || e.metaKey)) {
+    e.preventDefault();
+    saveWorkflow();
+  }
+  if (e.key === 'Delete' && selectedNode) {
+    deleteNode(selectedNode);
+  }
+});
+</script>
+</body>
+</html>

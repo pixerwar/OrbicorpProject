@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orbicorp — Bilgi Tabanı</title>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="orbicorp-dark.css">
+<style>
+/* ═══ IFRAME MODE ═══ */
+body.in-iframe .topnav{display:none !important}
+body.in-iframe .sidebar{display:none !important}
+body.in-iframe .layout{margin-top:0}
+body.in-iframe .main{max-width:100%;padding:24px 28px}
+
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--primary:#635BFF;--primary-light:#7A73FF;--primary-bg:#F0EEFF;--primary-bg-subtle:#F8F7FF;--navy:#0A2540;--surface:#F6F9FC;--white:#FFFFFF;--border:#E3E8EE;--border-light:#EBEEF2;--text-primary:#0A2540;--text-secondary:#425466;--text-tertiary:#8792A2;--text-muted:#A3ACB9;--green:#0EA371;--green-bg:#EEFBF4;--green-text:#0C7D58;--amber:#D97706;--amber-bg:#FEF7E6;--amber-text:#92510A;--red:#DF1B41;--red-bg:#FDE8EC;--red-text:#A11534;--blue:#0570DE;--blue-bg:#E8F2FD;--blue-text:#0455A9;--radius-sm:6px;--radius-md:8px;--radius-lg:12px;--radius-xl:16px;--font:'Google Sans',-apple-system,BlinkMacSystemFont,sans-serif;--font-mono:'Google Sans Mono','SF Mono',monospace;--transition:0.2s cubic-bezier(0.4,0,0.2,1)}
+
+/* DARK MODE */
+[data-theme="dark"]{--primary:#7C75FF;--primary-light:#9590FF;--primary-bg:#2A2654;--primary-bg-subtle:#1E1B3A;--navy:#E8EAED;--surface:#0D0D12;--white:#18181B;--border:#2E2E35;--border-light:#252529;--text-primary:#F4F4F5;--text-secondary:#A1A1AA;--text-tertiary:#71717A;--text-muted:#52525B;--green:#34D399;--green-bg:#064E3B;--green-text:#6EE7B7;--amber:#FBBF24;--amber-bg:#78350F;--amber-text:#FCD34D;--red:#F87171;--red-bg:#7F1D1D;--red-text:#FCA5A5;--blue:#60A5FA;--blue-bg:#1E3A5F;--blue-text:#93C5FD}
+[data-theme="dark"] body{background:#09090B}
+[data-theme="dark"] .upload-zone{border-color:var(--border);background:var(--surface)}
+[data-theme="dark"] .upload-zone:hover{border-color:var(--primary);background:var(--primary-bg-subtle)}
+[data-theme="dark"] .modal-content{background:var(--white);border:1px solid var(--border)}
+[data-theme="dark"] .chunks-table tr:hover{background:var(--surface)}
+[data-theme="dark"] .search-input{background:var(--white);border-color:var(--border)}
+
+body{font-family:var(--font);background:var(--surface);color:var(--text-primary);-webkit-font-smoothing:antialiased}
+
+/* TOP NAV */
+.topnav{height:56px;background:var(--white);border-bottom:0.5px solid var(--border);display:flex;align-items:center;padding:0 24px;position:sticky;top:0;z-index:100}
+.topnav-brand{display:flex;align-items:center;gap:10px;margin-right:32px;text-decoration:none}
+.topnav-logo{width:32px;height:32px;background:linear-gradient(135deg,var(--primary),var(--navy));border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:14px}
+.topnav-name{font-size:16px;font-weight:700;color:var(--navy);letter-spacing:-0.3px}
+.topnav-tabs{display:flex;gap:4px;flex:1}
+.topnav-tab{padding:8px 14px;font-size:14px;color:var(--text-secondary);border-radius:var(--radius-sm);cursor:pointer;transition:all var(--transition);text-decoration:none}
+.topnav-tab:hover{background:var(--surface);color:var(--text-primary)}
+.topnav-tab.active{background:var(--primary-bg);color:var(--primary);font-weight:500}
+.topnav-right{display:flex;align-items:center;gap:12px;margin-left:auto}
+.topnav-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-light));color:white;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;cursor:pointer}
+
+/* LAYOUT */
+.layout{display:flex;min-height:100vh}
+
+/* SIDEBAR */
+.sidebar{width:260px;background:var(--white);border-right:0.5px solid var(--border);padding:20px 12px;flex-shrink:0;overflow-y:auto;position:sticky;top:0;height:100vh}
+.sidebar h2{font-size:15px;font-weight:600;color:var(--navy);padding:0 12px;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.sidebar h2 svg{width:18px;height:18px;color:var(--primary)}
+.nav-group{margin-bottom:20px}
+.nav-group-label{font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;padding:0 12px;margin-bottom:6px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--radius-sm);font-size:13px;color:var(--text-secondary);cursor:pointer;transition:all var(--transition)}
+.nav-item:hover{background:var(--surface);color:var(--text-primary)}
+.nav-item.active{background:var(--primary-bg);color:var(--primary);font-weight:500}
+.nav-item svg{width:16px;height:16px;flex-shrink:0}
+.nav-item .count{margin-left:auto;font-size:11px;background:var(--surface);color:var(--text-tertiary);padding:2px 8px;border-radius:999px}
+.nav-item.active .count{background:var(--primary-bg-subtle);color:var(--primary)}
+
+/* Stats mini cards */
+.stats-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px;margin-top:12px;background:var(--surface);border-radius:var(--radius-md)}
+.stat-mini{text-align:center;padding:8px}
+.stat-mini-value{font-size:18px;font-weight:600;color:var(--navy)}
+.stat-mini-label{font-size:10px;color:var(--text-muted);margin-top:2px}
+
+/* MAIN CONTENT */
+.main{flex:1;padding:24px 32px;overflow-y:auto;min-width:0}
+
+/* Page header */
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.page-title{font-size:20px;font-weight:600;color:var(--navy);letter-spacing:-0.3px}
+.page-subtitle{font-size:13px;color:var(--text-tertiary);margin-top:2px}
+.header-actions{display:flex;gap:10px}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;cursor:pointer;transition:all var(--transition);border:none;font-family:var(--font)}
+.btn-primary{background:var(--primary);color:white}
+.btn-primary:hover{background:var(--primary-light)}
+.btn-secondary{background:var(--white);color:var(--text-secondary);border:0.5px solid var(--border)}
+.btn-secondary:hover{background:var(--surface);border-color:var(--text-muted)}
+.btn-danger{background:var(--red-bg);color:var(--red-text);border:0.5px solid var(--red-bg)}
+.btn-danger:hover{background:var(--red);color:white}
+.btn svg{width:14px;height:14px}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-sm svg{width:12px;height:12px}
+
+/* Cards */
+.card{background:var(--white);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:20px 24px;margin-bottom:16px}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.card-title{font-size:14px;font-weight:600;color:var(--text-primary);display:flex;align-items:center;gap:8px}
+.card-title svg{width:16px;height:16px;color:var(--primary)}
+
+/* Badge */
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:3px 10px;border-radius:999px;font-weight:500}
+.badge-green{background:var(--green-bg);color:var(--green-text)}
+.badge-amber{background:var(--amber-bg);color:var(--amber-text)}
+.badge-red{background:var(--red-bg);color:var(--red-text)}
+.badge-blue{background:var(--blue-bg);color:var(--blue-text)}
+.badge-gray{background:#F1EFE8;color:#5F5E5A}
+
+/* Upload Zone */
+.upload-zone{border:2px dashed var(--border);border-radius:var(--radius-lg);padding:40px;text-align:center;transition:all var(--transition);cursor:pointer;background:var(--white)}
+.upload-zone:hover,.upload-zone.dragover{border-color:var(--primary);background:var(--primary-bg-subtle)}
+.upload-zone-icon{width:56px;height:56px;border-radius:50%;background:var(--primary-bg);color:var(--primary);display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
+.upload-zone-icon svg{width:24px;height:24px}
+.upload-zone-title{font-size:15px;font-weight:500;color:var(--text-primary);margin-bottom:4px}
+.upload-zone-subtitle{font-size:13px;color:var(--text-tertiary)}
+.upload-zone-formats{font-size:11px;color:var(--text-muted);margin-top:12px}
+.upload-zone-formats span{background:var(--surface);padding:2px 8px;border-radius:4px;margin:0 3px}
+
+/* File list */
+.file-list{margin-top:16px}
+.file-item{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--surface);border-radius:var(--radius-md);margin-bottom:8px;transition:all var(--transition)}
+.file-item:hover{background:var(--primary-bg-subtle)}
+.file-icon{width:40px;height:40px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0}
+.file-icon.pdf{background:var(--red-bg);color:var(--red-text)}
+.file-icon.doc{background:var(--blue-bg);color:var(--blue-text)}
+.file-icon.md{background:var(--green-bg);color:var(--green-text)}
+.file-icon.html{background:var(--amber-bg);color:var(--amber-text)}
+.file-icon.json{background:var(--primary-bg);color:var(--primary)}
+.file-info{flex:1;min-width:0}
+.file-name{font-size:13px;font-weight:500;color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.file-meta{font-size:11px;color:var(--text-muted);margin-top:2px;display:flex;gap:12px}
+.file-status{display:flex;align-items:center;gap:8px}
+.file-actions{display:flex;gap:6px}
+
+/* Progress bar */
+.progress-bar{width:100px;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.progress-bar-fill{height:100%;background:var(--primary);border-radius:2px;transition:width 0.3s}
+
+/* Chunks table */
+.chunks-table{width:100%;border-collapse:collapse}
+.chunks-table th{text-align:left;padding:10px 12px;font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;border-bottom:0.5px solid var(--border)}
+.chunks-table td{padding:12px;border-bottom:0.5px solid var(--border-light);font-size:13px;color:var(--text-secondary);vertical-align:top}
+.chunks-table tr:hover{background:var(--surface)}
+.chunk-content{max-width:400px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.5}
+.chunk-id{font-family:var(--font-mono);font-size:11px;color:var(--text-muted)}
+.chunk-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.chunk-tag{font-size:10px;padding:2px 6px;background:var(--primary-bg);color:var(--primary);border-radius:4px}
+.quality-bar{width:60px;height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.quality-bar-fill{height:100%;border-radius:3px}
+.quality-bar-fill.high{background:var(--green)}
+.quality-bar-fill.medium{background:var(--amber)}
+.quality-bar-fill.low{background:var(--red)}
+
+/* Search box */
+.search-box{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--white);border:0.5px solid var(--border);border-radius:var(--radius-md);margin-bottom:16px}
+.search-box svg{width:16px;height:16px;color:var(--text-muted);flex-shrink:0}
+.search-box input{flex:1;border:none;outline:none;font-size:13px;font-family:var(--font);color:var(--text-primary);background:transparent}
+.search-box input::placeholder{color:var(--text-muted)}
+
+/* Tabs */
+.tabs{display:flex;gap:4px;margin-bottom:20px;border-bottom:0.5px solid var(--border);padding-bottom:0}
+.tab{padding:10px 16px;font-size:13px;color:var(--text-secondary);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-0.5px;transition:all var(--transition)}
+.tab:hover{color:var(--text-primary)}
+.tab.active{color:var(--primary);border-bottom-color:var(--primary);font-weight:500}
+
+/* Empty state */
+.empty-state{text-align:center;padding:60px 20px}
+.empty-state-icon{width:64px;height:64px;border-radius:50%;background:var(--surface);color:var(--text-muted);display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
+.empty-state-icon svg{width:28px;height:28px}
+.empty-state-title{font-size:15px;font-weight:500;color:var(--text-primary);margin-bottom:4px}
+.empty-state-text{font-size:13px;color:var(--text-tertiary)}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(10,37,64,0.4);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;visibility:hidden;transition:all 0.3s}
+.modal-overlay.open{opacity:1;visibility:visible}
+.modal{background:var(--white);border-radius:var(--radius-xl);width:100%;max-width:560px;max-height:90vh;overflow:hidden;transform:translateY(20px);transition:transform 0.3s}
+.modal-overlay.open .modal{transform:translateY(0)}
+.modal-header{padding:20px 24px;border-bottom:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-size:16px;font-weight:600;color:var(--navy)}
+.modal-close{width:32px;height:32px;border-radius:var(--radius-sm);border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-muted);transition:all var(--transition)}
+.modal-close:hover{background:var(--surface);color:var(--text-primary)}
+.modal-body{padding:24px;overflow-y:auto;max-height:calc(90vh - 140px)}
+.modal-footer{padding:16px 24px;border-top:0.5px solid var(--border);display:flex;justify-content:flex-end;gap:10px}
+
+/* Processing animation */
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+.processing{animation:pulse 1.5s ease-in-out infinite}
+
+/* Toast notification */
+.toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;background:var(--navy);color:white;border-radius:var(--radius-md);font-size:13px;display:flex;align-items:center;gap:10px;box-shadow:0 4px 12px rgba(0,0,0,0.15);transform:translateY(100px);opacity:0;transition:all 0.3s;z-index:1001}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{background:var(--green)}
+.toast.error{background:var(--red)}
+.toast svg{width:16px;height:16px}
+</style>
+</head>
+<body>
+<script>
+(function(){
+  // If in iframe, hide own nav/sidebar and sync theme from parent
+  if(window.self!==window.top){
+    document.body.classList.add("in-iframe");
+    try{
+      var pt=window.parent.document.documentElement.getAttribute("data-theme");
+      if(pt)document.documentElement.setAttribute("data-theme",pt);
+    }catch(e){}
+    // Listen for theme changes from parent
+    window.addEventListener("message",function(e){
+      if(e.data&&e.data.type==="theme")document.documentElement.setAttribute("data-theme",e.data.value);
+      if(e.data&&e.data.type==="lang")window._orbicorpLang=e.data.value;
+    });
+  }
+})();
+</script>
+
+<div class="layout" style="height:100vh">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <h2>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      <span data-i18n="knowledge.title">Bilgi Tabanı</span>
+    </h2>
+    
+    <div class="nav-group">
+      <div class="nav-group-label">Kaynaklar</div>
+      <div class="nav-item active" onclick="switchSection('all')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+        <span data-i18n="knowledge.allFiles">Tüm Dosyalar</span>
+        <span class="count" id="countAll">13</span>
+      </div>
+      <div class="nav-item" onclick="switchSection('docs')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span data-i18n="knowledge.documents">Dokümanlar</span>
+        <span class="count" id="countDocs">2</span>
+      </div>
+      <div class="nav-item" onclick="switchSection('html')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        <span data-i18n="knowledge.htmlPages">HTML Sayfaları</span>
+        <span class="count" id="countHtml">10</span>
+      </div>
+      <div class="nav-item" onclick="switchSection('api')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        <span data-i18n="knowledge.apiDocs">API Docs</span>
+        <span class="count" id="countApi">1</span>
+      </div>
+    </div>
+    
+    <div class="nav-group">
+      <div class="nav-group-label">Yönetim</div>
+      <div class="nav-item" onclick="switchSection('chunks')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <span data-i18n="knowledge.chunks">Chunk'lar</span>
+        <span class="count" id="countChunks">336</span>
+      </div>
+      <div class="nav-item" onclick="switchSection('index')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <span data-i18n="knowledge.searchIndex">Arama İndeksi</span>
+      </div>
+      <div class="nav-item" onclick="switchSection('settings')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span data-i18n="knowledge.settings">Ayarlar</span>
+      </div>
+    </div>
+    
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-mini">
+        <div class="stat-mini-value" id="statChunks">336</div>
+        <div class="stat-mini-label" data-i18n="knowledge.stats.chunks">Chunk</div>
+      </div>
+      <div class="stat-mini">
+        <div class="stat-mini-value" id="statKeywords">3.5K</div>
+        <div class="stat-mini-label" data-i18n="knowledge.stats.keywords">Anahtar Kelime</div>
+      </div>
+      <div class="stat-mini">
+        <div class="stat-mini-value" id="statSize">590</div>
+        <div class="stat-mini-label" data-i18n="knowledge.stats.size">KB Boyut</div>
+      </div>
+      <div class="stat-mini">
+        <div class="stat-mini-value" id="statQueries">47</div>
+        <div class="stat-mini-label" data-i18n="knowledge.stats.queries">Sorgu/Gün</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <!-- Section: All Files (default) -->
+    <div class="section" id="sec-all">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Bilgi Tabanı</div>
+          <div class="page-subtitle">RAG sistemi için kaynak dosyaları yönetin</div>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-secondary" onclick="reindexAll()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            Yeniden İndeksle
+          </button>
+          <button class="btn btn-primary" onclick="openUploadModal()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Dosya Yükle
+          </button>
+        </div>
+      </div>
+
+      <!-- Upload Zone -->
+      <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+        <div class="upload-zone-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        </div>
+        <div class="upload-zone-title">Dosyaları sürükleyin veya tıklayın</div>
+        <div class="upload-zone-subtitle">Bilgi tabanına eklenecek dokümanları yükleyin</div>
+        <div class="upload-zone-formats">
+          Desteklenen: <span>.md</span><span>.txt</span><span>.html</span><span>.pdf</span><span>.docx</span><span>.json</span>
+        </div>
+      </div>
+      <input type="file" id="fileInput" multiple hidden accept=".md,.txt,.html,.pdf,.docx,.json" onchange="handleFileUpload(this.files)">
+
+      <!-- File List -->
+      <div class="card" style="margin-top:20px">
+        <div class="card-header">
+          <div class="card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+            Yüklü Dosyalar
+          </div>
+          <span class="badge badge-green" id="fileCountBadge">13 dosya</span>
+        </div>
+        <div class="file-list" id="fileList"></div>
+      </div>
+    </div>
+
+    <!-- Section: Chunks -->
+    <div class="section" id="sec-chunks" style="display:none">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Chunk Yönetimi</div>
+          <div class="page-subtitle">İndekslenmiş metin parçalarını görüntüleyin ve yönetin</div>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-secondary" onclick="exportChunks()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            JSON Dışa Aktar
+          </button>
+        </div>
+      </div>
+
+      <!-- Search -->
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" placeholder="Chunk içeriğinde ara..." id="chunkSearch" oninput="filterChunks()">
+      </div>
+
+      <!-- Chunks Table -->
+      <div class="card" style="padding:0;overflow:hidden">
+        <table class="chunks-table">
+          <thead>
+            <tr>
+              <th style="width:80px">ID</th>
+              <th>İçerik</th>
+              <th style="width:140px">Kaynak</th>
+              <th style="width:100px">Kalite</th>
+              <th style="width:80px"></th>
+            </tr>
+          </thead>
+          <tbody id="chunksTableBody"></tbody>
+        </table>
+      </div>
+      
+      <!-- Pagination -->
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px">
+        <div style="font-size:12px;color:var(--text-muted)" id="chunksPagination">1-20 / 336 chunk</div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-sm btn-secondary" onclick="prevChunkPage()">← Önceki</button>
+          <button class="btn btn-sm btn-secondary" onclick="nextChunkPage()">Sonraki →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section: Search Index -->
+    <div class="section" id="sec-index" style="display:none">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Arama İndeksi</div>
+          <div class="page-subtitle">TF-IDF ve BM25 tabanlı vektör deposu durumu</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px">
+        <div class="card" style="text-align:center">
+          <div style="font-size:32px;font-weight:600;color:var(--primary)">3,570</div>
+          <div style="font-size:13px;color:var(--text-tertiary);margin-top:4px">Benzersiz Terim</div>
+        </div>
+        <div class="card" style="text-align:center">
+          <div style="font-size:32px;font-weight:600;color:var(--green)">336</div>
+          <div style="font-size:13px;color:var(--text-tertiary);margin-top:4px">İndeksli Chunk</div>
+        </div>
+        <div class="card" style="text-align:center">
+          <div style="font-size:32px;font-weight:600;color:var(--blue)">1.4ms</div>
+          <div style="font-size:13px;color:var(--text-tertiary);margin-top:4px">Ort. Arama Süresi</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title" style="margin-bottom:16px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Arama Testi
+        </div>
+        <div class="search-box" style="margin-bottom:16px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" placeholder="Test sorgusu yazın..." id="testSearchInput" onkeydown="if(event.key==='Enter')runTestSearch()">
+          <button class="btn btn-sm btn-primary" onclick="runTestSearch()">Ara</button>
+        </div>
+        <div id="testSearchResults"></div>
+      </div>
+    </div>
+
+    <!-- Section: Settings -->
+    <div class="section" id="sec-settings" style="display:none">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Bilgi Tabanı Ayarları</div>
+          <div class="page-subtitle">Chunk boyutu, overlap ve işleme seçenekleri</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title" style="margin-bottom:16px">Chunking Ayarları</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div>
+            <label style="font-size:13px;font-weight:500;color:var(--text-primary);display:block;margin-bottom:6px">Chunk Boyutu (karakter)</label>
+            <input type="number" class="fi" value="1500" style="width:100%;padding:10px 14px;border:0.5px solid var(--border);border-radius:6px;font-size:13px">
+            <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Önerilen: 1000-2000</div>
+          </div>
+          <div>
+            <label style="font-size:13px;font-weight:500;color:var(--text-primary);display:block;margin-bottom:6px">Overlap (karakter)</label>
+            <input type="number" class="fi" value="200" style="width:100%;padding:10px 14px;border:0.5px solid var(--border);border-radius:6px;font-size:13px">
+            <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Önerilen: 100-300</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title" style="margin-bottom:16px">İşleme Seçenekleri</div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
+            <input type="checkbox" checked style="width:16px;height:16px">
+            <span style="font-size:13px;color:var(--text-primary)">HTML etiketlerini temizle</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
+            <input type="checkbox" checked style="width:16px;height:16px">
+            <span style="font-size:13px;color:var(--text-primary)">CSS/JS kodlarını filtrele</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
+            <input type="checkbox" checked style="width:16px;height:16px">
+            <span style="font-size:13px;color:var(--text-primary)">Düşük kaliteli chunk'ları çıkar</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
+            <input type="checkbox" style="width:16px;height:16px">
+            <span style="font-size:13px;color:var(--text-primary)">Semantik etiketleri otomatik oluştur</span>
+          </label>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px">
+        <button class="btn btn-secondary">İptal</button>
+        <button class="btn btn-primary" onclick="saveSettings()">Kaydet</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Upload Modal -->
+<div class="modal-overlay" id="uploadModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Dosya Yükle</div>
+      <button class="modal-close" onclick="closeUploadModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div id="uploadModalContent">
+        <div class="upload-zone" onclick="document.getElementById('modalFileInput').click()">
+          <div class="upload-zone-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          </div>
+          <div class="upload-zone-title">Dosyaları seçin</div>
+          <div class="upload-zone-subtitle">veya sürükleyip bırakın</div>
+        </div>
+        <input type="file" id="modalFileInput" multiple hidden accept=".md,.txt,.html,.pdf,.docx,.json" onchange="handleModalUpload(this.files)">
+        <div class="file-list" id="modalFileList" style="margin-top:16px"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeUploadModal()">İptal</button>
+      <button class="btn btn-primary" id="processBtn" onclick="processUploadedFiles()" disabled>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+        İşle ve İndeksle
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+  <span id="toastText">İşlem başarılı</span>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════════════════
+
+const knowledgeFiles = [
+  { id: 1, name: 'ORBICORP_CONTEXT.md', type: 'md', size: '12.4 KB', chunks: 19, status: 'indexed', date: '2026-03-27' },
+  { id: 2, name: 'Orbicorp_Documentation.docx', type: 'doc', size: '28.6 KB', chunks: 27, status: 'indexed', date: '2026-03-27' },
+  { id: 3, name: 'README.md', type: 'md', size: '4.2 KB', chunks: 16, status: 'indexed', date: '2026-03-27' },
+  { id: 4, name: 'index.html', type: 'html', size: '18.3 KB', chunks: 18, status: 'indexed', date: '2026-03-27' },
+  { id: 5, name: 'orbicorp-dashboard.html', type: 'html', size: '45.2 KB', chunks: 52, status: 'indexed', date: '2026-03-27' },
+  { id: 6, name: 'orbicorp-agents.html', type: 'html', size: '48.7 KB', chunks: 53, status: 'indexed', date: '2026-03-27' },
+  { id: 7, name: 'orbicorp-company.html', type: 'html', size: '32.1 KB', chunks: 29, status: 'indexed', date: '2026-03-27' },
+  { id: 8, name: 'orbicorp-chat.html', type: 'html', size: '24.8 KB', chunks: 24, status: 'indexed', date: '2026-03-27' },
+  { id: 9, name: 'orbicorp-settings.html', type: 'html', size: '52.4 KB', chunks: 43, status: 'indexed', date: '2026-03-27' },
+  { id: 10, name: 'orbicorp-market.html', type: 'html', size: '36.9 KB', chunks: 28, status: 'indexed', date: '2026-03-27' },
+  { id: 11, name: 'orbicorp-analytics.html', type: 'html', size: '21.5 KB', chunks: 18, status: 'indexed', date: '2026-03-27' },
+  { id: 12, name: 'orbicorp-tasks.html', type: 'html', size: '15.2 KB', chunks: 15, status: 'indexed', date: '2026-03-27' },
+  { id: 13, name: 'orbicorp-workflow.html', type: 'html', size: '28.3 KB', chunks: 25, status: 'indexed', date: '2026-03-27' }
+];
+
+const sampleChunks = [
+  { id: 'chunk_001', content: 'Dashboard modülü 4 KPI kartı içerir: Aktif Agent sayısı, Günlük etkileşim, Başarı oranı ve Aylık maliyet. Agent gallery 3 agent kartı gösterir.', source: 'orbicorp-dashboard.html', section: 'Overview', tags: ['dashboard', 'kpi', 'agent'], quality: 85 },
+  { id: 'chunk_002', content: 'Yeni agent oluşturmak için Agents sayfasında "Yeni Agent" butonuna tıklayın. 4 adımlı wizard açılır: Temel Bilgiler, Model & Skill seçimi, Kanal ataması, Önizleme.', source: 'orbicorp-agents.html', section: 'Agent Wizard', tags: ['agent', 'wizard', 'create'], quality: 92 },
+  { id: 'chunk_003', content: 'Workflow Builder 7 blok türü sunar: Tetikleyici, Agent Adımı, Koşul/Karar, İnsan Onayı, Entegrasyon, Bildirim ve Veri Dönüştürme.', source: 'orbicorp-workflow.html', section: 'Block Types', tags: ['workflow', 'automation'], quality: 88 },
+  { id: 'chunk_004', content: 'OrbiCorp 22 entegrasyon destekler. Slack, Teams, Salesforce, HubSpot, Jira, SAP, WhatsApp, Zoom, Zendesk, Stripe, Notion ve diğerleri.', source: 'orbicorp-settings.html', section: 'Integrations', tags: ['integration', 'slack', 'salesforce'], quality: 84 },
+  { id: 'chunk_005', content: 'API anahtarları Settings > API Anahtarları bölümünden yönetilir. Anthropic Claude, OpenAI GPT, Google Gemini desteklenir.', source: 'orbicorp-settings.html', section: 'API Keys', tags: ['api', 'settings', 'llm'], quality: 90 },
+  { id: 'chunk_006', content: 'NovaTech Solutions A.Ş. İstanbul merkezli B2B SaaS şirketidir. 145 çalışan, 5 departman: Satış, Pazarlama, İK, Destek, Finans.', source: 'ORBICORP_CONTEXT.md', section: 'Company Info', tags: ['company', 'novatech'], quality: 86 },
+  { id: 'chunk_007', content: 'Skill Market 14 ürün ve 7 kategori içerir: Agent Skills, Personas, Language Packs, Automation Connectors, Security, Analytics.', source: 'orbicorp-market.html', section: 'Categories', tags: ['skill', 'market'], quality: 82 },
+  { id: 'chunk_008', content: 'Dark mode Claude Desktop tonları kullanır: #2B2A27 arka plan, #323130 kartlar, #7B73FF primary renk.', source: 'ORBICORP_CONTEXT.md', section: 'Theme', tags: ['theme', 'dark', 'ui'], quality: 78 }
+];
+
+let currentSection = 'all';
+let chunkPage = 1;
+const chunksPerPage = 20;
+let uploadQueue = [];
+
+// ═══════════════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════════════
+
+function switchSection(section) {
+  currentSection = section;
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  event.target.closest('.nav-item').classList.add('active');
+  
+  document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
+  
+  if (section === 'chunks') {
+    document.getElementById('sec-chunks').style.display = 'block';
+    renderChunks();
+  } else if (section === 'index') {
+    document.getElementById('sec-index').style.display = 'block';
+  } else if (section === 'settings') {
+    document.getElementById('sec-settings').style.display = 'block';
+  } else {
+    document.getElementById('sec-all').style.display = 'block';
+    renderFileList();
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// FILE LIST
+// ═══════════════════════════════════════════════════════════════
+
+function renderFileList() {
+  const container = document.getElementById('fileList');
+  container.innerHTML = knowledgeFiles.map(f => `
+    <div class="file-item">
+      <div class="file-icon ${f.type}">${getFileIcon(f.type)}</div>
+      <div class="file-info">
+        <div class="file-name">${f.name}</div>
+        <div class="file-meta">
+          <span>${f.size}</span>
+          <span>${f.chunks} chunk</span>
+          <span>${f.date}</span>
+        </div>
+      </div>
+      <div class="file-status">
+        <span class="badge badge-green">İndekslendi</span>
+      </div>
+      <div class="file-actions">
+        <button class="btn btn-sm btn-secondary" onclick="reindexFile(${f.id})">Yeniden İndeksle</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteFile(${f.id})">Sil</button>
+      </div>
+    </div>
+  `).join('');
+  
+  document.getElementById('fileCountBadge').textContent = knowledgeFiles.length + ' dosya';
+}
+
+function getFileIcon(type) {
+  const icons = {
+    'pdf': 'PDF',
+    'doc': 'DOC',
+    'md': 'MD',
+    'html': '< >',
+    'json': '{ }'
+  };
+  return icons[type] || '📄';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CHUNKS TABLE
+// ═══════════════════════════════════════════════════════════════
+
+function renderChunks() {
+  const tbody = document.getElementById('chunksTableBody');
+  const search = document.getElementById('chunkSearch').value.toLowerCase();
+  
+  let filtered = sampleChunks;
+  if (search) {
+    filtered = sampleChunks.filter(c => 
+      c.content.toLowerCase().includes(search) || 
+      c.source.toLowerCase().includes(search) ||
+      c.tags.some(t => t.includes(search))
+    );
+  }
+  
+  const start = (chunkPage - 1) * chunksPerPage;
+  const paged = filtered.slice(start, start + chunksPerPage);
+  
+  tbody.innerHTML = paged.map(c => `
+    <tr>
+      <td><span class="chunk-id">${c.id}</span></td>
+      <td>
+        <div class="chunk-content">${c.content}</div>
+        <div class="chunk-tags">${c.tags.map(t => `<span class="chunk-tag">${t}</span>`).join('')}</div>
+      </td>
+      <td>
+        <div style="font-size:12px;font-weight:500;color:var(--text-primary)">${c.source}</div>
+        <div style="font-size:11px;color:var(--text-muted)">${c.section}</div>
+      </td>
+      <td>
+        <div class="quality-bar">
+          <div class="quality-bar-fill ${c.quality >= 85 ? 'high' : c.quality >= 70 ? 'medium' : 'low'}" style="width:${c.quality}%"></div>
+        </div>
+        <div style="font-size:10px;color:var(--text-muted);margin-top:2px">${c.quality}%</div>
+      </td>
+      <td>
+        <button class="btn btn-sm btn-secondary" onclick="viewChunk('${c.id}')">Görüntüle</button>
+      </td>
+    </tr>
+  `).join('');
+  
+  document.getElementById('chunksPagination').textContent = 
+    `${start + 1}-${Math.min(start + chunksPerPage, filtered.length)} / ${filtered.length} chunk`;
+}
+
+function filterChunks() {
+  chunkPage = 1;
+  renderChunks();
+}
+
+function prevChunkPage() {
+  if (chunkPage > 1) { chunkPage--; renderChunks(); }
+}
+
+function nextChunkPage() {
+  chunkPage++;
+  renderChunks();
+}
+
+function viewChunk(id) {
+  const chunk = sampleChunks.find(c => c.id === id);
+  if (chunk) {
+    alert(`Chunk: ${chunk.id}\n\nİçerik:\n${chunk.content}\n\nKaynak: ${chunk.source}\nBölüm: ${chunk.section}\nKalite: ${chunk.quality}%\nEtiketler: ${chunk.tags.join(', ')}`);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SEARCH TEST
+// ═══════════════════════════════════════════════════════════════
+
+function runTestSearch() {
+  const query = document.getElementById('testSearchInput').value.trim();
+  if (!query) return;
+  
+  const results = document.getElementById('testSearchResults');
+  results.innerHTML = '<div class="processing" style="padding:20px;text-align:center;color:var(--text-muted)">Aranıyor...</div>';
+  
+  setTimeout(() => {
+    const queryTerms = query.toLowerCase().split(/\s+/);
+    const scored = sampleChunks.map(c => {
+      let score = 0;
+      queryTerms.forEach(term => {
+        if (c.content.toLowerCase().includes(term)) score += 2;
+        if (c.tags.some(t => t.includes(term))) score += 3;
+      });
+      return { ...c, score };
+    }).filter(c => c.score > 0).sort((a, b) => b.score - a.score).slice(0, 5);
+    
+    if (scored.length === 0) {
+      results.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-muted)">Sonuç bulunamadı</div>';
+      return;
+    }
+    
+    results.innerHTML = scored.map((c, i) => `
+      <div style="padding:12px;background:var(--surface);border-radius:8px;margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+          <span style="font-size:12px;font-weight:500;color:var(--primary)">#${i + 1} - ${c.source}</span>
+          <span style="font-size:11px;color:var(--green);font-weight:500">Skor: ${c.score.toFixed(1)}</span>
+        </div>
+        <div style="font-size:13px;color:var(--text-secondary);line-height:1.5">${c.content}</div>
+        <div style="margin-top:6px">${c.tags.map(t => `<span class="chunk-tag">${t}</span>`).join('')}</div>
+      </div>
+    `).join('');
+  }, 500);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// FILE UPLOAD
+// ═══════════════════════════════════════════════════════════════
+
+function openUploadModal() {
+  uploadQueue = [];
+  document.getElementById('modalFileList').innerHTML = '';
+  document.getElementById('processBtn').disabled = true;
+  document.getElementById('uploadModal').classList.add('open');
+}
+
+function closeUploadModal() {
+  document.getElementById('uploadModal').classList.remove('open');
+}
+
+function handleFileUpload(files) {
+  Array.from(files).forEach(f => {
+    uploadQueue.push(f);
+  });
+  renderUploadQueue();
+}
+
+function handleModalUpload(files) {
+  Array.from(files).forEach(f => {
+    uploadQueue.push(f);
+  });
+  renderModalQueue();
+}
+
+function renderModalQueue() {
+  const list = document.getElementById('modalFileList');
+  list.innerHTML = uploadQueue.map((f, i) => `
+    <div class="file-item">
+      <div class="file-icon ${getFileType(f.name)}">${getFileIcon(getFileType(f.name))}</div>
+      <div class="file-info">
+        <div class="file-name">${f.name}</div>
+        <div class="file-meta"><span>${formatSize(f.size)}</span></div>
+      </div>
+      <button class="btn btn-sm btn-danger" onclick="removeFromQueue(${i})">×</button>
+    </div>
+  `).join('');
+  
+  document.getElementById('processBtn').disabled = uploadQueue.length === 0;
+}
+
+function removeFromQueue(index) {
+  uploadQueue.splice(index, 1);
+  renderModalQueue();
+}
+
+function getFileType(name) {
+  const ext = name.split('.').pop().toLowerCase();
+  if (['doc', 'docx'].includes(ext)) return 'doc';
+  if (ext === 'pdf') return 'pdf';
+  if (ext === 'md') return 'md';
+  if (ext === 'html') return 'html';
+  if (ext === 'json') return 'json';
+  return 'doc';
+}
+
+function formatSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / 1048576).toFixed(1) + ' MB';
+}
+
+function processUploadedFiles() {
+  const btn = document.getElementById('processBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="processing">İşleniyor...</span>';
+  
+  setTimeout(() => {
+    uploadQueue.forEach(f => {
+      knowledgeFiles.push({
+        id: knowledgeFiles.length + 1,
+        name: f.name,
+        type: getFileType(f.name),
+        size: formatSize(f.size),
+        chunks: Math.floor(Math.random() * 20) + 5,
+        status: 'indexed',
+        date: new Date().toISOString().split('T')[0]
+      });
+    });
+    
+    closeUploadModal();
+    renderFileList();
+    updateCounts();
+    showToast('success', `${uploadQueue.length} dosya başarıyla işlendi ve indekslendi`);
+    uploadQueue = [];
+  }, 2000);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ACTIONS
+// ═══════════════════════════════════════════════════════════════
+
+function reindexFile(id) {
+  showToast('success', 'Dosya yeniden indeksleniyor...');
+}
+
+function deleteFile(id) {
+  if (confirm('Bu dosyayı silmek istediğinizden emin misiniz?')) {
+    const index = knowledgeFiles.findIndex(f => f.id === id);
+    if (index > -1) {
+      knowledgeFiles.splice(index, 1);
+      renderFileList();
+      updateCounts();
+      showToast('success', 'Dosya silindi');
+    }
+  }
+}
+
+function reindexAll() {
+  showToast('success', 'Tüm dosyalar yeniden indeksleniyor...');
+}
+
+function exportChunks() {
+  showToast('success', 'Chunk\'lar JSON olarak dışa aktarıldı');
+}
+
+function saveSettings() {
+  showToast('success', 'Ayarlar kaydedildi');
+}
+
+function updateCounts() {
+  document.getElementById('countAll').textContent = knowledgeFiles.length;
+  document.getElementById('countDocs').textContent = knowledgeFiles.filter(f => ['doc', 'md'].includes(f.type)).length;
+  document.getElementById('countHtml').textContent = knowledgeFiles.filter(f => f.type === 'html').length;
+  
+  const totalChunks = knowledgeFiles.reduce((sum, f) => sum + f.chunks, 0);
+  document.getElementById('countChunks').textContent = totalChunks;
+  document.getElementById('statChunks').textContent = totalChunks;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════════════════
+
+function showToast(type, message) {
+  const toast = document.getElementById('toast');
+  const text = document.getElementById('toastText');
+  
+  toast.className = 'toast ' + type;
+  text.textContent = message;
+  toast.classList.add('show');
+  
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DRAG & DROP
+// ═══════════════════════════════════════════════════════════════
+
+const uploadZone = document.getElementById('uploadZone');
+
+uploadZone.addEventListener('dragover', e => {
+  e.preventDefault();
+  uploadZone.classList.add('dragover');
+});
+
+uploadZone.addEventListener('dragleave', e => {
+  e.preventDefault();
+  uploadZone.classList.remove('dragover');
+});
+
+uploadZone.addEventListener('drop', e => {
+  e.preventDefault();
+  uploadZone.classList.remove('dragover');
+  if (e.dataTransfer.files.length) {
+    handleFileUpload(e.dataTransfer.files);
+    openUploadModal();
+    renderModalQueue();
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════
+// THEME
+// ═══════════════════════════════════════════════════════════════
+
+function initTheme() {
+  const savedTheme = localStorage.getItem('orbicorp_theme') || 'light';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+
+initTheme();
+renderFileList();
+
+// i18n init
+document.addEventListener('DOMContentLoaded', async () => {
+  if (typeof i18n !== 'undefined') {
+    await i18n.init({ langPath: 'lang/' });
+  }
+});
+</script>
+<script src="lang/i18n.js" defer></script>
+</body>
+</html>

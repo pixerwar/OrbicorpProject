@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orbicorp — AI Agent Management Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--primary:#635BFF;--primary-light:#7A73FF;--primary-bg:#F0EEFF;--primary-bg-subtle:#F8F7FF;--navy:#0A2540;--surface:#F6F9FC;--white:#FFFFFF;--border:#E3E8EE;--border-light:#EBEEF2;--text-primary:#0A2540;--text-secondary:#425466;--text-tertiary:#8792A2;--text-muted:#A3ACB9;--green:#0EA371;--green-bg:#EEFBF4;--green-text:#0C7D58;--amber:#D97706;--amber-bg:#FEF7E6;--amber-text:#92510A;--red:#DF1B41;--red-bg:#FDE8EC;--red-text:#A11534;--blue:#0570DE;--blue-bg:#E8F2FD;--blue-text:#0455A9;--radius-sm:6px;--radius-md:8px;--radius-lg:12px;--font:'Google Sans',-apple-system,BlinkMacSystemFont,sans-serif;--transition:0.2s cubic-bezier(0.4,0,0.2,1)}
+
+/* ═══ DARK MODE VARIABLES ═══ */
+html[data-theme="dark"]{--primary:#7A73FF;--primary-light:#918AFF;--primary-bg:#2D2B5A;--primary-bg-subtle:#1E1D3A;--navy:#E8E6F2;--navy-light:#B8B5D0;--surface:#0F0E1A;--surface-warm:#141320;--white:#1A1927;--border:#2E2D42;--border-light:#252438;--text-primary:#F0EEF9;--text-secondary:#B8B5D0;--text-tertiary:#8280A0;--text-muted:#5E5C78;--green:#34D399;--green-bg:#0D3A2D;--green-text:#6EE7B7;--amber:#FBBF24;--amber-bg:#3D2E0A;--amber-text:#FCD34D;--red:#F87171;--red-bg:#3D1519;--red-text:#FCA5A5;--blue:#60A5FA;--blue-bg:#0C2D4D;--blue-text:#93C5FD}
+
+body{font-family:var(--font);background:var(--surface);color:var(--text-primary);-webkit-font-smoothing:antialiased;overflow:hidden;height:100vh;margin:0}
+
+.topnav{height:56px;background:var(--white);border-bottom:0.5px solid var(--border);display:flex;align-items:center;padding:0 24px;position:fixed;top:0;left:0;right:0;z-index:200}
+.topnav-brand{display:flex;align-items:center;gap:10px;margin-right:32px;text-decoration:none;cursor:pointer}
+.topnav-logo{width:32px;height:32px;background:linear-gradient(135deg,#635BFF,#0A2540);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:14px}
+.topnav-name{font-size:16px;font-weight:700;color:var(--text-primary);letter-spacing:-0.3px}
+.topnav-tabs{display:flex;gap:4px;flex:1}
+.topnav-tab{padding:8px 14px;font-size:14px;color:var(--text-secondary);border-radius:var(--radius-sm);cursor:pointer;transition:all var(--transition);text-decoration:none;white-space:nowrap}
+.topnav-tab:hover{background:var(--surface);color:var(--text-primary)}
+.topnav-tab.active{background:var(--primary-bg);color:var(--primary);font-weight:500}
+.topnav-right{display:flex;align-items:center;gap:8px;margin-left:auto}
+.topnav-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#635BFF,#7A73FF);color:white;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;cursor:pointer}
+
+/* Avatar Dropdown */
+.avatar-wrapper{position:relative}
+.avatar-dropdown{position:absolute;top:calc(100% + 8px);right:0;width:220px;background:var(--white);border:1px solid var(--border);border-radius:var(--radius-md);box-shadow:0 10px 40px rgba(0,0,0,0.15);opacity:0;visibility:hidden;transform:translateY(-10px);transition:all 0.2s ease;z-index:300}
+.avatar-dropdown.show{opacity:1;visibility:visible;transform:translateY(0)}
+.avatar-dropdown-header{padding:14px 16px;border-bottom:1px solid var(--border)}
+.avatar-dropdown-name{font-size:14px;font-weight:600;color:var(--text-primary)}
+.avatar-dropdown-email{font-size:12px;color:var(--text-tertiary);margin-top:2px}
+.avatar-dropdown-divider{height:1px;background:var(--border);margin:4px 0}
+.avatar-dropdown-item{display:flex;align-items:center;gap:10px;padding:10px 16px;font-size:13px;color:var(--text-secondary);cursor:pointer;transition:all 0.15s}
+.avatar-dropdown-item:hover{background:var(--surface);color:var(--text-primary)}
+.avatar-dropdown-item svg{width:16px;height:16px}
+.avatar-dropdown-item.logout{color:var(--red)}
+.avatar-dropdown-item.logout:hover{background:var(--red-bg)}
+
+.layout{display:flex;height:calc(100vh - 56px);margin-top:56px}
+.sidebar{width:220px;background:var(--white);border-right:0.5px solid var(--border);padding:16px 12px;flex-shrink:0;overflow-y:auto;transition:width 0.3s}
+.sidebar.collapsed{width:56px;padding:16px 8px}
+.sidebar-toggle{display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:var(--radius-sm);border:0.5px solid var(--border);background:var(--white);cursor:pointer;margin-bottom:16px;margin-left:auto;transition:all var(--transition)}
+.sidebar-toggle:hover{background:var(--surface)}
+.sidebar-toggle svg{width:14px;height:14px;color:var(--text-tertiary);transition:transform 0.3s}
+.sidebar.collapsed .sidebar-toggle{margin:0 auto 16px}
+.sidebar.collapsed .sidebar-toggle svg{transform:rotate(180deg)}
+.sidebar-section{margin-bottom:20px}
+.sidebar-label{font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;padding:0 10px;margin-bottom:6px;white-space:nowrap}
+.sidebar.collapsed .sidebar-label{opacity:0;height:0;margin:0;overflow:hidden}
+.nav-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--radius-sm);font-size:13px;color:var(--text-secondary);cursor:pointer;transition:all var(--transition);white-space:nowrap}
+.nav-item:hover{background:var(--surface);color:var(--text-primary)}
+.nav-item.active{background:var(--primary-bg);color:var(--primary);font-weight:500}
+.nav-item svg{width:16px;height:16px;flex-shrink:0}
+.nav-item .label{transition:opacity 0.2s}
+.sidebar.collapsed .nav-item .label{opacity:0;width:0;overflow:hidden}
+.sidebar.collapsed .nav-item{justify-content:center;padding:10px}
+.nav-badge{margin-left:auto;font-size:10px;background:var(--amber-bg);color:var(--amber-text);padding:1px 7px;border-radius:999px;font-weight:600}
+.sidebar.collapsed .nav-badge{display:none}
+
+.content-frame{flex:1;border:none;width:100%;height:100%;background:var(--surface)}
+
+.theme-toggle,.lang-toggle{width:36px;height:36px;border-radius:var(--radius-sm);border:0.5px solid var(--border);background:var(--white);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all var(--transition);color:var(--text-tertiary)}
+.theme-toggle:hover,.lang-toggle:hover{background:var(--surface);color:var(--text-primary);border-color:var(--primary)}
+.theme-toggle svg{width:18px;height:18px}
+.icon-moon{display:none}
+[data-theme="dark"] .icon-sun{display:none}
+[data-theme="dark"] .icon-moon{display:block}
+.lang-flag{font-size:12px;font-weight:700;font-family:var(--font);letter-spacing:0.5px}
+
+/* NOTIFICATION BELL */
+.notif-wrapper{position:relative}
+.notif-bell{width:36px;height:36px;border-radius:var(--radius-sm);border:0.5px solid var(--border);background:var(--white);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all var(--transition);color:var(--text-tertiary);position:relative}
+.notif-bell:hover{background:var(--surface);color:var(--text-primary);border-color:var(--primary)}
+.notif-bell svg{width:18px;height:18px}
+.notif-badge{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;padding:0 5px;background:var(--red);color:white;font-size:10px;font-weight:700;border-radius:999px;display:flex;align-items:center;justify-content:center}
+.notif-dropdown{position:absolute;top:calc(100% + 8px);right:0;width:360px;max-height:480px;background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:0 10px 40px rgba(0,0,0,0.15);opacity:0;visibility:hidden;transform:translateY(-10px);transition:all 0.2s ease;z-index:300;display:flex;flex-direction:column}
+.notif-dropdown.show{opacity:1;visibility:visible;transform:translateY(0)}
+.notif-header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.notif-header-title{font-size:14px;font-weight:600;color:var(--text-primary)}
+.notif-header-btn{font-size:11px;color:var(--primary);cursor:pointer;background:none;border:none;font-family:var(--font)}
+.notif-header-btn:hover{text-decoration:underline}
+.notif-list{flex:1;overflow-y:auto;max-height:380px}
+.notif-item{padding:14px 16px;border-bottom:1px solid var(--border-light);cursor:pointer;transition:background 0.15s}
+.notif-item:hover{background:var(--surface)}
+.notif-item:last-child{border-bottom:none}
+.notif-item-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px}
+.notif-item-icon{width:32px;height:32px;border-radius:50%;background:var(--amber-bg);color:var(--amber);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.notif-item-icon svg{width:16px;height:16px}
+.notif-item-content{flex:1;min-width:0}
+.notif-item-title{font-size:13px;font-weight:500;color:var(--text-primary);margin-bottom:2px}
+.notif-item-desc{font-size:12px;color:var(--text-tertiary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.notif-item-time{font-size:10px;color:var(--text-muted);margin-left:auto;flex-shrink:0}
+.notif-item-actions{display:flex;gap:8px;margin-top:10px}
+.notif-item-btn{padding:6px 14px;font-size:12px;border-radius:var(--radius-sm);cursor:pointer;font-weight:500;font-family:var(--font);border:none;transition:all 0.15s}
+.notif-item-btn.approve{background:var(--green);color:white}
+.notif-item-btn.approve:hover{background:#0c8c5e}
+.notif-item-btn.reject{background:var(--surface);color:var(--text-secondary);border:0.5px solid var(--border)}
+.notif-item-btn.reject:hover{background:var(--red-bg);color:var(--red-text);border-color:var(--red-bg)}
+.notif-empty{padding:40px 20px;text-align:center;color:var(--text-muted)}
+.notif-empty svg{margin-bottom:10px}
+.notif-empty p{font-size:13px}
+
+/* PAYMENT MODAL */
+.pay-overlay{display:none;position:fixed;inset:0;background:rgba(10,37,64,0.5);z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.pay-overlay.open{display:flex}
+.pay-modal{display:flex;width:780px;max-width:95vw;max-height:90vh;border-radius:16px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,0.25);animation:payIn 0.3s ease}
+@keyframes payIn{from{opacity:0;transform:translateY(20px) scale(0.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+.pay-left{width:320px;background:linear-gradient(135deg,#635BFF 0%,#0A2540 100%);color:white;padding:28px 24px;display:flex;flex-direction:column;position:relative;overflow:hidden;flex-shrink:0}
+.pay-left::before{content:'';position:absolute;top:-40%;right:-20%;width:250px;height:250px;background:radial-gradient(circle,rgba(255,255,255,0.06) 0%,transparent 70%)}
+.pay-left-head{position:relative;z-index:1;margin-bottom:20px}
+.pay-product-name{font-size:18px;font-weight:600;margin-bottom:4px}
+.pay-product-desc{font-size:12px;color:rgba(255,255,255,0.6);line-height:1.5}
+.pay-price-area{margin-bottom:20px}
+.pay-period-toggle{display:flex;gap:4px;background:rgba(255,255,255,0.1);border-radius:8px;padding:3px;margin-bottom:14px}
+.pay-period{flex:1;padding:7px 12px;border:none;background:none;color:rgba(255,255,255,0.6);font-size:12px;font-family:var(--font);cursor:pointer;border-radius:6px;transition:all 0.2s;font-weight:500}
+.pay-period.active{background:rgba(255,255,255,0.2);color:white}
+.pay-price{font-size:36px;font-weight:700;display:inline}
+.pay-price-sub{font-size:14px;color:rgba(255,255,255,0.5);display:inline}
+.pay-features{margin-bottom:auto;flex:1}
+.pay-feature{display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(255,255,255,0.8);padding:4px 0}
+.pay-feature svg{width:14px;height:14px;color:#6EE7B7;flex-shrink:0}
+.pay-coupon{display:flex;gap:6px;margin-bottom:14px;margin-top:16px}
+.pay-coupon input{flex:1;padding:8px 12px;border:0.5px solid rgba(255,255,255,0.2);border-radius:6px;background:rgba(255,255,255,0.08);color:white;font-size:12px;font-family:var(--font);outline:none}
+.pay-coupon input::placeholder{color:rgba(255,255,255,0.3)}
+.pay-coupon input:focus{border-color:rgba(255,255,255,0.5)}
+.pay-coupon button{padding:8px 14px;border:none;background:rgba(255,255,255,0.15);color:white;border-radius:6px;font-size:12px;font-family:var(--font);cursor:pointer;font-weight:500;transition:background 0.2s}
+.pay-coupon button:hover{background:rgba(255,255,255,0.25)}
+.pay-summary{border-top:0.5px solid rgba(255,255,255,0.15);padding-top:12px}
+.pay-summary-row{display:flex;justify-content:space-between;font-size:13px;color:rgba(255,255,255,0.7);padding:4px 0}
+
+.pay-right{flex:1;background:var(--white);padding:24px;display:flex;flex-direction:column;overflow-y:auto}
+.pay-right-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.pay-close{width:30px;height:30px;border-radius:6px;border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-tertiary);transition:all 0.2s}
+.pay-close:hover{background:var(--surface);color:var(--text-primary)}
+.pay-cards{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.pay-card-option{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;transition:all 0.2s}
+.pay-card-option:hover{border-color:var(--primary)}
+.pay-card-option.selected{border-color:var(--primary);background:var(--primary-bg-subtle)}
+.pay-card-option input{display:none}
+.pay-card-visual{width:42px;height:28px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:white;flex-shrink:0}
+.pay-card-visual.visa{background:linear-gradient(135deg,#1A1F71,#2E3192)}
+.pay-card-visual.mc{background:linear-gradient(135deg,#EB001B,#F79E1B)}
+.pay-card-visual.amex{background:linear-gradient(135deg,#006FCF,#0097D5)}
+.pay-card-visual.virtual{background:linear-gradient(135deg,#635BFF,#0A2540)}
+.pay-card-visual::after{font-size:8px;letter-spacing:0.5px}
+.pay-card-visual.visa::after{content:'VISA'}
+.pay-card-visual.mc::after{content:'MC'}
+.pay-card-visual.amex::after{content:'AMEX'}
+.pay-card-visual.virtual::after{content:'SANAL'}
+.pay-card-info{flex:1}
+.pay-card-label{font-size:13px;font-weight:500;color:var(--text-primary)}
+.pay-card-exp{font-size:11px;color:var(--text-muted)}
+.pay-new-card{margin-bottom:16px;padding-top:4px;border-top:0.5px solid var(--border-light)}
+.pay-field{margin-bottom:10px}
+.pay-field label{display:block;font-size:11px;font-weight:500;color:var(--text-tertiary);margin-bottom:4px}
+.pay-field input{width:100%;padding:9px 12px;border:0.5px solid var(--border);border-radius:6px;font-size:13px;font-family:var(--font);color:var(--text-primary);outline:none;transition:border-color 0.2s}
+.pay-field input:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-bg)}
+.pay-billing{margin-bottom:18px;padding-top:4px;border-top:0.5px solid var(--border-light)}
+.pay-billing-info{padding:10px 12px;background:var(--surface);border-radius:8px;margin-top:6px}
+.pay-submit{width:100%;padding:14px;border:none;background:var(--primary);color:white;border-radius:10px;font-size:14px;font-weight:600;font-family:var(--font);cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.pay-submit:hover{background:var(--primary-light)}
+.pay-submit svg{width:18px;height:18px}
+.pay-submit.success{background:var(--green);pointer-events:none}
+@media(max-width:700px){.pay-modal{flex-direction:column}.pay-left{width:100%}}
+</style>
+<link rel="stylesheet" href="orbicorp-dark.css">
+</head>
+<body>
+
+<!-- TOPNAV -->
+<nav class="topnav">
+  <a class="topnav-brand" onclick="navigate('dashboard')">
+    <div class="topnav-logo">O</div>
+    <span class="topnav-name">Orbicorp</span>
+  </a>
+  <div class="topnav-tabs" id="topTabs">
+    <a class="topnav-tab active" data-page="dashboard" onclick="navigate('dashboard')">Overview</a>
+    <a class="topnav-tab" data-page="agents" onclick="navigate('agents')">Agents</a>
+    <a class="topnav-tab" data-page="company" onclick="navigate('company')">Company Profile</a>
+    <a class="topnav-tab" data-page="chat" onclick="navigate('chat')">Chat</a>
+    <a class="topnav-tab" data-page="market" onclick="navigate('market')">Skills</a>
+    <a class="topnav-tab" data-page="analytics" onclick="navigate('analytics')">Analytics</a>
+  </div>
+  <div class="topnav-right">
+    <!-- Notification Bell -->
+    <div class="notif-wrapper">
+      <button class="notif-bell" id="notifBell" onclick="toggleNotifications()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="notif-badge" id="notifBadge" style="display:none">0</span>
+      </button>
+      <div class="notif-dropdown" id="notifDropdown">
+        <div class="notif-header">
+          <span class="notif-header-title">Onay Bekleyenler</span>
+          <button class="notif-header-btn" onclick="markAllNotificationsRead()">Tümünü Okundu İşaretle</button>
+        </div>
+        <div class="notif-list" id="notifList">
+          <div class="notif-empty">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--border)" stroke-width="1.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <p>Bekleyen onay yok</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Tema değiştir">
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
+    <button class="lang-toggle" id="langToggle" onclick="toggleLang()">
+      <span class="lang-flag" id="langFlag">TR</span>
+    </button>
+    <div class="avatar-wrapper">
+      <div class="topnav-avatar" onclick="toggleAvatarMenu()">AY</div>
+      <div class="avatar-dropdown" id="avatarDropdown">
+        <div class="avatar-dropdown-header">
+          <div class="avatar-dropdown-name" id="avatarName">Kullanıcı</div>
+          <div class="avatar-dropdown-email" id="avatarEmail">-</div>
+        </div>
+        <div class="avatar-dropdown-divider"></div>
+        <div class="avatar-dropdown-item" onclick="navigateTo('orbicorp-settings.html')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span data-i18n="menu.settings">Ayarlar</span>
+        </div>
+        <div class="avatar-dropdown-item logout" onclick="logout()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          <span data-i18n="menu.logout">Çıkış Yap</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-toggle" onclick="document.getElementById('sidebar').classList.toggle('collapsed')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Ana Menü</div>
+      <div class="nav-item active" data-page="dashboard" onclick="navigate('dashboard')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        <span class="label">Dashboard</span>
+      </div>
+      <div class="nav-item" data-page="agents" onclick="navigate('agents')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2"/></svg>
+        <span class="label">Agent'lar</span>
+      </div>
+      <div class="nav-item" data-page="company" onclick="navigate('company')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 21h18M3 10h18M3 7l9-4 9 4M4 10v11M20 10v11"/></svg>
+        <span class="label">Kurum Profili</span>
+      </div>
+      <div class="nav-item" data-page="market" onclick="navigate('market')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+        <span class="label">Skill Market</span>
+      </div>
+      <div class="nav-item" data-page="knowledge" onclick="navigate('knowledge')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        <span class="label">Bilgi Tabanı</span>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Operasyon</div>
+      <div class="nav-item" data-page="chat" onclick="navigate('chat')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span class="label">Chat</span>
+      </div>
+      <div class="nav-item" data-page="workflow" onclick="navigate('workflow')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <span class="label">Workflow Builder</span>
+      </div>
+      <div class="nav-item" data-page="tasks" onclick="navigate('tasks')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <span class="label">Görev Takip</span>
+        <span class="nav-badge">3</span>
+      </div>
+      <div class="nav-item" data-page="analytics" onclick="navigate('analytics')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+        <span class="label">Analitik</span>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Sistem</div>
+      <div class="nav-item" data-page="users" onclick="navigate('users')" id="navUsers" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span class="label">Kullanıcılar</span>
+      </div>
+      <div class="nav-item" data-page="settings" onclick="navigate('settings')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span class="label">Ayarlar</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- CONTENT -->
+  <iframe class="content-frame" id="contentFrame" src="orbicorp-dashboard.html"></iframe>
+</div>
+
+<!-- GLOBAL PAYMENT MODAL -->
+<div class="pay-overlay" id="payOverlay" onclick="if(event.target===this)closePayment()">
+  <div class="pay-modal">
+    <div class="pay-left">
+      <div class="pay-left-head">
+        <div style="font-size:11px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">Ödeme Özeti</div>
+        <div class="pay-product-name" id="payProductName">Ürün Adı</div>
+        <div class="pay-product-desc" id="payProductDesc">Ürün açıklaması</div>
+      </div>
+      <div class="pay-price-area">
+        <div class="pay-period-toggle" id="payPeriodToggle">
+          <button class="pay-period active" onclick="setPeriod(this,'monthly')">Aylık</button>
+          <button class="pay-period" onclick="setPeriod(this,'yearly')">Yıllık <span style='font-size:9px;background:rgba(255,255,255,0.15);padding:1px 6px;border-radius:99px;margin-left:4px'>-20%</span></button>
+        </div>
+        <div class="pay-price" id="payPrice">$29</div>
+        <div class="pay-price-sub" id="payPriceSub">/ay</div>
+      </div>
+      <div class="pay-features" id="payFeatures"></div>
+      <div class="pay-coupon">
+        <input placeholder="Kupon kodu" id="payCoupon">
+        <button onclick="applyCoupon()">Uygula</button>
+      </div>
+      <div class="pay-summary">
+        <div class="pay-summary-row"><span>Ara Toplam</span><span id="paySubtotal">$29.00</span></div>
+        <div class="pay-summary-row" id="payDiscountRow" style="display:none"><span>İndirim</span><span id="payDiscount" style="color:#6EE7B7">-$0.00</span></div>
+        <div class="pay-summary-row" style="border-top:1px solid rgba(255,255,255,0.1);padding-top:10px;margin-top:6px"><span style="font-weight:600">Toplam</span><span style="font-weight:700;font-size:16px" id="payTotal">$29.00</span></div>
+      </div>
+    </div>
+    <div class="pay-right">
+      <div class="pay-right-head">
+        <div style="font-size:15px;font-weight:600;color:var(--text-primary)">Ödeme Yöntemi</div>
+        <button class="pay-close" onclick="closePayment()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+      </div>
+      <div class="pay-cards" id="payCards">
+        <label class="pay-card-option selected" onclick="selectCard(this)">
+          <input type="radio" name="paycard" checked>
+          <div class="pay-card-visual visa"></div>
+          <div class="pay-card-info"><div class="pay-card-label">Visa •••• 4242</div><div class="pay-card-exp">12/27</div></div>
+        </label>
+        <label class="pay-card-option" onclick="selectCard(this)">
+          <input type="radio" name="paycard">
+          <div class="pay-card-visual mc"></div>
+          <div class="pay-card-info"><div class="pay-card-label">Mastercard •••• 8831</div><div class="pay-card-exp">06/28</div></div>
+        </label>
+        <label class="pay-card-option" onclick="selectCard(this)">
+          <input type="radio" name="paycard">
+          <div class="pay-card-visual amex"></div>
+          <div class="pay-card-info"><div class="pay-card-label">Amex •••• 1005</div><div class="pay-card-exp">03/26</div></div>
+        </label>
+        <label class="pay-card-option" onclick="selectCard(this)">
+          <input type="radio" name="paycard">
+          <div class="pay-card-visual virtual"></div>
+          <div class="pay-card-info"><div class="pay-card-label">Sanal Kart •••• 7841</div><div class="pay-card-exp">Sales Copilot</div></div>
+        </label>
+      </div>
+      <div class="pay-new-card" id="payNewCard">
+        <div style="font-size:12px;font-weight:500;color:var(--text-tertiary);margin-bottom:10px;cursor:pointer" onclick="toggleNewCard()">+ Yeni kart ekle</div>
+        <div id="newCardForm" style="display:none">
+          <div class="pay-field"><label>Kart Numarası</label><input placeholder="1234 5678 9012 3456"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div class="pay-field"><label>Son Kullanma</label><input placeholder="AA/YY"></div>
+            <div class="pay-field"><label>CVV</label><input placeholder="123"></div>
+          </div>
+          <div class="pay-field"><label>Kart Üzerindeki İsim</label><input placeholder="AD SOYAD"></div>
+        </div>
+      </div>
+      <div class="pay-billing">
+        <div style="font-size:12px;font-weight:500;color:var(--text-tertiary);margin-bottom:10px">Fatura Bilgileri</div>
+        <div class="pay-billing-info">
+          <div style="font-size:13px;font-weight:500;color:var(--text-primary)">NovaTech Solutions A.Ş.</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:2px">Maslak Mah. Ahi Evran Cad. No:6, Sarıyer/İstanbul</div>
+          <div style="font-size:11px;color:var(--text-muted)">VKN: 1234567890</div>
+        </div>
+      </div>
+      <button class="pay-submit" id="paySubmitBtn" onclick="submitPayment()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        <span id="paySubmitText">$29.00 Öde</span>
+      </button>
+      <div style="text-align:center;margin-top:10px;font-size:10px;color:var(--text-muted);display:flex;align-items:center;justify-content:center;gap:4px">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        256-bit SSL ile güvenli ödeme
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══ I18N ═══
+const i18n = {
+  tr: {
+    tabs: {dashboard:'Overview',agents:'Agents',company:'Kurum Profili',chat:'Chat',market:'Skills',knowledge:'Bilgi Tabanı',analytics:'Analitik'},
+    sidebar: {dashboard:'Dashboard',agents:"Agent'lar",company:'Kurum Profili',market:'Skill Market',knowledge:'Bilgi Tabanı',chat:'Chat',workflow:'Workflow Builder',tasks:'Görev Takip',analytics:'Analitik',users:'Kullanıcılar',settings:'Ayarlar'},
+    sidebarLabels: {main:'Ana Menü',ops:'Operasyon',sys:'Sistem'},
+    titles: {dashboard:'Overview',agents:'Agents',company:'Kurum Profili',chat:'Chat',market:'Skills',knowledge:'Bilgi Tabanı',analytics:'Analitik',users:'Kullanıcılar',settings:'Ayarlar',workflow:'Workflow Builder',tasks:'Görev Takip'}
+  },
+  en: {
+    tabs: {dashboard:'Overview',agents:'Agents',company:'Company Profile',chat:'Chat',market:'Skills',knowledge:'Knowledge Base',analytics:'Analytics'},
+    sidebar: {dashboard:'Dashboard',agents:'Agents',company:'Company Profile',market:'Skill Market',knowledge:'Knowledge Base',chat:'Chat',workflow:'Workflow Builder',tasks:'Task Tracker',analytics:'Analytics',users:'Users',settings:'Settings'},
+    sidebarLabels: {main:'Main Menu',ops:'Operations',sys:'System'},
+    titles: {dashboard:'Overview',agents:'Agents',company:'Company Profile',chat:'Chat',market:'Skills',knowledge:'Knowledge Base',analytics:'Analytics',users:'Users',settings:'Settings',workflow:'Workflow Builder',tasks:'Task Tracker'}
+  }
+};
+
+const pageMap = {
+  dashboard: {file:'orbicorp-dashboard.html', tab:'dashboard'},
+  agents:    {file:'orbicorp-agents.html',    tab:'agents'},
+  company:   {file:'orbicorp-company.html',   tab:'company'},
+  chat:      {file:'orbicorp-chat.html',      tab:'chat'},
+  market:    {file:'orbicorp-market.html',     tab:'market'},
+  knowledge: {file:'orbicorp-knowledge.html',  tab:'knowledge'},
+  analytics: {file:'orbicorp-analytics.html',  tab:'analytics'},
+  settings:  {file:'orbicorp-settings.html',   tab:'settings'},
+  workflow:  {file:'orbicorp-workflow.html',    tab:'workflow'},
+  tasks:     {file:'orbicorp-tasks.html',      tab:'tasks'},
+  users:     {file:'orbicorp-users.html',      tab:'users'},
+};
+
+let currentPage = 'dashboard';
+let currentTheme = 'light';
+let currentLang = 'tr';
+
+// ═══ NAVIGATION ═══
+function navigate(page) {
+  if (!pageMap[page]) return;
+  currentPage = page;
+  const info = pageMap[page];
+  document.getElementById('contentFrame').src = info.file;
+  document.querySelectorAll('.topnav-tab').forEach(t => t.classList.toggle('active', t.dataset.page === info.tab));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.page === page));
+  document.title = 'Orbicorp — ' + (i18n[currentLang].titles[page] || page);
+  // Propagate theme to new iframe after load
+  document.getElementById('contentFrame').onload = () => propagateTheme();
+}
+
+// Listen for navigation requests from iframe pages
+window.addEventListener('message', function(e) {
+  if (e.data && e.data.type === 'navigate') {
+    const page = e.data.page;
+    if (page && pageMap[page]) {
+      navigate(page);
+      // If there's additional data like agentId, we could pass it to the new page
+      if (e.data.agentId) {
+        // Store for the loaded page to use
+        sessionStorage.setItem('navigateAgentId', e.data.agentId);
+      }
+      if (e.data.action) {
+        sessionStorage.setItem('navigateAction', e.data.action);
+      }
+      if (e.data.tab) {
+        sessionStorage.setItem('navigateTab', e.data.tab);
+      }
+    }
+  }
+});
+
+// ═══ THEME ═══
+function toggleTheme() {
+  currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+  applyTheme();
+}
+
+function applyTheme() {
+  document.documentElement.setAttribute('data-theme', currentTheme);
+  propagateTheme();
+}
+
+function propagateTheme() {
+  try {
+    const iframe = document.getElementById('contentFrame');
+    // Direct access (same-origin)
+    if (iframe.contentDocument) {
+      iframe.contentDocument.documentElement.setAttribute('data-theme', currentTheme);
+    }
+    // Also postMessage (more reliable)
+    if (iframe.contentWindow) {
+      iframe.contentWindow.postMessage({type:'theme', value:currentTheme}, '*');
+    }
+  } catch(e) {}
+}
+
+// ═══ LANGUAGE ═══
+function toggleLang() {
+  currentLang = currentLang === 'tr' ? 'en' : 'tr';
+  applyLang();
+}
+
+function applyLang() {
+  const lang = i18n[currentLang];
+  document.getElementById('langFlag').textContent = currentLang.toUpperCase();
+
+  // Update top tabs
+  document.querySelectorAll('.topnav-tab').forEach(tab => {
+    const page = tab.dataset.page;
+    if (page && lang.tabs[page]) tab.textContent = lang.tabs[page];
+  });
+
+  // Update sidebar items
+  document.querySelectorAll('.nav-item').forEach(item => {
+    const page = item.dataset.page;
+    const label = item.querySelector('.label');
+    if (page && label && lang.sidebar[page]) label.textContent = lang.sidebar[page];
+  });
+
+  // Update sidebar labels
+  const labels = document.querySelectorAll('.sidebar-label');
+  const labelKeys = ['main','ops','sys'];
+  labels.forEach((el, i) => {
+    if (labelKeys[i] && lang.sidebarLabels[labelKeys[i]]) el.textContent = lang.sidebarLabels[labelKeys[i]];
+  });
+
+  document.title = 'Orbicorp — ' + (lang.titles[currentPage] || currentPage);
+  
+  // Propagate language to iframe
+  propagateLang();
+}
+
+function propagateLang() {
+  try {
+    const iframe = document.getElementById('contentFrame');
+    if (iframe.contentWindow) {
+      iframe.contentWindow.postMessage({type:'lang', value:currentLang}, '*');
+    }
+  } catch(e) {}
+}
+
+// ═══ INIT ═══
+applyTheme();
+applyLang();
+// Propagate theme and lang when iframe loads
+document.getElementById('contentFrame').addEventListener('load', function() {
+  propagateTheme();
+  propagateLang();
+  // Retry after short delay to ensure iframe is fully ready
+  setTimeout(propagateTheme, 100);
+  setTimeout(propagateLang, 100);
+  setTimeout(propagateTheme, 500);
+  setTimeout(propagateLang, 500);
+});
+// ═══ PAYMENT MODAL ═══
+let paymentData = {price:0, period:'monthly'};
+
+// Listen for payment requests from iframe
+window.addEventListener('message', function(e) {
+  if (e.data && e.data.type === 'openPayment') {
+    openPayment(e.data.opts);
+  }
+});
+
+function openPayment(opts) {
+  opts = opts || {};
+  paymentData.price = opts.price || 29;
+  paymentData.period = 'monthly';
+  document.getElementById('payProductName').textContent = opts.name || 'Ürün';
+  document.getElementById('payProductDesc').textContent = opts.desc || '';
+  document.getElementById('payPrice').textContent = '$' + paymentData.price;
+  document.getElementById('payPriceSub').textContent = '/ay';
+  document.getElementById('paySubtotal').textContent = '$' + paymentData.price.toFixed(2);
+  document.getElementById('payTotal').textContent = '$' + paymentData.price.toFixed(2);
+  document.getElementById('paySubmitText').textContent = '$' + paymentData.price.toFixed(2) + ' Öde';
+  document.getElementById('payDiscountRow').style.display = 'none';
+  document.getElementById('payCoupon').value = '';
+  document.getElementById('paySubmitBtn').className = 'pay-submit';
+  document.getElementById('paySubmitBtn').disabled = false;
+  const ft = document.getElementById('payFeatures');
+  ft.innerHTML = (opts.features || []).map(f => '<div class="pay-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>' + f + '</div>').join('');
+  const toggle = document.getElementById('payPeriodToggle');
+  toggle.style.display = opts.hideperiod ? 'none' : 'flex';
+  toggle.querySelectorAll('.pay-period').forEach((b,i) => b.classList.toggle('active', i===0));
+  document.getElementById('payOverlay').classList.add('open');
+}
+
+function closePayment() { document.getElementById('payOverlay').classList.remove('open'); }
+
+function selectCard(el) {
+  document.querySelectorAll('.pay-card-option').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  el.querySelector('input').checked = true;
+}
+
+function setPeriod(btn, period) {
+  document.querySelectorAll('.pay-period').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  paymentData.period = period;
+  const p = period === 'yearly' ? paymentData.price * 12 * 0.8 : paymentData.price;
+  const label = period === 'yearly' ? '/yıl' : '/ay';
+  document.getElementById('payPrice').textContent = '$' + (period === 'yearly' ? p.toFixed(0) : p);
+  document.getElementById('payPriceSub').textContent = label;
+  document.getElementById('paySubtotal').textContent = '$' + p.toFixed(2);
+  document.getElementById('payTotal').textContent = '$' + p.toFixed(2);
+  document.getElementById('paySubmitText').textContent = '$' + p.toFixed(2) + ' Öde';
+}
+
+function applyCoupon() {
+  const code = document.getElementById('payCoupon').value.trim().toUpperCase();
+  if (code === 'ORBICORP20' || code === 'WELCOME') {
+    const total = parseFloat(document.getElementById('paySubtotal').textContent.replace('$',''));
+    const discount = total * 0.2;
+    document.getElementById('payDiscountRow').style.display = 'flex';
+    document.getElementById('payDiscount').textContent = '-$' + discount.toFixed(2);
+    document.getElementById('payTotal').textContent = '$' + (total - discount).toFixed(2);
+    document.getElementById('paySubmitText').textContent = '$' + (total - discount).toFixed(2) + ' Öde';
+    document.getElementById('payCoupon').style.borderColor = '#6EE7B7';
+  } else {
+    document.getElementById('payCoupon').style.borderColor = '#F87171';
+  }
+}
+
+function toggleNewCard() {
+  const f = document.getElementById('newCardForm');
+  f.style.display = f.style.display === 'none' ? 'block' : 'none';
+}
+
+function submitPayment() {
+  const btn = document.getElementById('paySubmitBtn');
+  btn.innerHTML = '<span style="width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:spin 0.6s linear infinite;display:inline-block"></span> İşleniyor...';
+  btn.disabled = true;
+  setTimeout(() => {
+    btn.className = 'pay-submit success';
+    btn.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Ödeme Başarılı!';
+    setTimeout(closePayment, 1500);
+  }, 2000);
+}
+
+// Listen for payment requests from iframe pages
+window.addEventListener('message', function(e) {
+  if (e.data && e.data.type === 'openPayment') openPayment(e.data.opts);
+});
+
+// =====================
+// Auth Control
+// =====================
+(function checkAuth() {
+  // Load API client
+  const script = document.createElement('script');
+  script.src = 'orbicorp-api.js';
+  script.onload = function() {
+    // Check if user is authenticated
+    if (!window.orbicorpAPI.isAuthenticated()) {
+      // Save current page for redirect after login
+      sessionStorage.setItem('orbicorp_last_page', window.location.href);
+      // Redirect to login
+      window.location.href = 'orbicorp-login.html';
+      return;
+    }
+    
+    // User is authenticated, load user info
+    loadUserInfo();
+  };
+  document.head.appendChild(script);
+})();
+
+async function loadUserInfo() {
+  try {
+    const result = await window.orbicorpAPI.getMe();
+    if (result.success && result.data) {
+      const user = result.data;
+      // Update avatar with initials
+      const initials = ((user.firstName?.[0] || '') + (user.lastName?.[0] || '')).toUpperCase() || 'U';
+      const avatarEl = document.querySelector('.topnav-avatar');
+      if (avatarEl) {
+        avatarEl.textContent = initials;
+      }
+      // Update dropdown info
+      const nameEl = document.getElementById('avatarName');
+      const emailEl = document.getElementById('avatarEmail');
+      if (nameEl) nameEl.textContent = `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Kullanıcı';
+      if (emailEl) emailEl.textContent = user.email || '';
+      
+      // Show Users menu only for Admin and Operator roles
+      const navUsers = document.getElementById('navUsers');
+      if (navUsers && (user.role === 'ADMIN' || user.role === 'OPERATOR')) {
+        navUsers.style.display = 'flex';
+      }
+    }
+  } catch (error) {
+    console.error('Failed to load user info:', error);
+    // If token is invalid, redirect to login
+    if (error.status === 401) {
+      window.orbicorpAPI.clearTokens();
+      window.location.href = 'orbicorp-login.html';
+    }
+  }
+}
+
+// Toggle avatar dropdown
+function toggleAvatarMenu() {
+  const dropdown = document.getElementById('avatarDropdown');
+  dropdown.classList.toggle('show');
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(e) {
+  const wrapper = document.querySelector('.avatar-wrapper');
+  const dropdown = document.getElementById('avatarDropdown');
+  if (wrapper && dropdown && !wrapper.contains(e.target)) {
+    dropdown.classList.remove('show');
+  }
+});
+
+// Logout function
+function logout() {
+  if (window.orbicorpAPI) {
+    window.orbicorpAPI.logout().finally(() => {
+      window.location.href = 'orbicorp-login.html';
+    });
+  } else {
+    localStorage.removeItem('orbicorp_access_token');
+    localStorage.removeItem('orbicorp_refresh_token');
+    window.location.href = 'orbicorp-login.html';
+  }
+}
+
+// =====================
+// NOTIFICATIONS
+// =====================
+let notificationsOpen = false;
+let pendingApprovals = [];
+let notifPollInterval = null;
+
+function toggleNotifications() {
+  const dropdown = document.getElementById('notifDropdown');
+  notificationsOpen = !notificationsOpen;
+  
+  if (notificationsOpen) {
+    dropdown.classList.add('show');
+    loadPendingApprovals();
+  } else {
+    dropdown.classList.remove('show');
+  }
+}
+
+// Close notification dropdown when clicking outside
+document.addEventListener('click', function(e) {
+  const wrapper = document.querySelector('.notif-wrapper');
+  const dropdown = document.getElementById('notifDropdown');
+  if (wrapper && dropdown && !wrapper.contains(e.target)) {
+    dropdown.classList.remove('show');
+    notificationsOpen = false;
+  }
+});
+
+async function loadPendingApprovals() {
+  if (!window.orbicorpAPI) return;
+  
+  try {
+    const result = await window.orbicorpAPI.getPendingApprovals();
+    pendingApprovals = Array.isArray(result) ? result : [];
+    renderNotifications();
+    updateNotifBadge();
+  } catch (error) {
+    console.error('Failed to load pending approvals:', error);
+    pendingApprovals = [];
+    renderNotifications();
+  }
+}
+
+async function loadNotificationCount() {
+  if (!window.orbicorpAPI) return;
+  
+  try {
+    const result = await window.orbicorpAPI.getNotificationCount();
+    const count = result.count || 0;
+    updateNotifBadge(count);
+  } catch (error) {
+    console.error('Failed to load notification count:', error);
+  }
+}
+
+function updateNotifBadge(count) {
+  const badge = document.getElementById('notifBadge');
+  const c = count !== undefined ? count : pendingApprovals.length;
+  
+  if (c > 0) {
+    badge.textContent = c > 99 ? '99+' : c;
+    badge.style.display = 'flex';
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+function renderNotifications() {
+  const list = document.getElementById('notifList');
+  
+  if (pendingApprovals.length === 0) {
+    list.innerHTML = `
+      <div class="notif-empty">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--border)" stroke-width="1.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <p>Bekleyen onay yok</p>
+      </div>
+    `;
+    return;
+  }
+  
+  list.innerHTML = pendingApprovals.map(n => {
+    const data = n.data || {};
+    const timeAgo = formatNotifTime(n.createdAt);
+    
+    return `
+      <div class="notif-item" data-id="${n.id}">
+        <div class="notif-item-head">
+          <div class="notif-item-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+          </div>
+          <div class="notif-item-content">
+            <div class="notif-item-title">${escapeHtml(n.title)}</div>
+            <div class="notif-item-desc">${escapeHtml(n.message)}</div>
+          </div>
+          <span class="notif-item-time">${timeAgo}</span>
+        </div>
+        <div class="notif-item-actions">
+          <button class="notif-item-btn approve" onclick="respondToApproval('${n.id}', 'APPROVED', event)">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:4px;vertical-align:-2px"><path d="M20 6L9 17l-5-5"/></svg>
+            Onayla
+          </button>
+          <button class="notif-item-btn reject" onclick="respondToApproval('${n.id}', 'REJECTED', event)">Reddet</button>
+          ${n.taskId ? `<button class="notif-item-btn reject" onclick="viewApprovalDetails('${n.id}', event)" style="margin-left:auto">Detay</button>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text || '';
+  return div.innerHTML;
+}
+
+function formatNotifTime(dateStr) {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diff = Math.floor((now - date) / 1000);
+  
+  if (diff < 60) return 'Az önce';
+  if (diff < 3600) return `${Math.floor(diff / 60)} dk önce`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)} saat önce`;
+  if (diff < 604800) return `${Math.floor(diff / 86400)} gün önce`;
+  return date.toLocaleDateString('tr-TR');
+}
+
+async function respondToApproval(notifId, response, event) {
+  event.stopPropagation();
+  
+  const btn = event.target.closest('button');
+  const originalText = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<span style="width:12px;height:12px;border:2px solid rgba(255,255,255,0.3);border-top-color:currentColor;border-radius:50%;animation:spin 0.6s linear infinite;display:inline-block"></span>';
+  
+  try {
+    const result = await window.orbicorpAPI.respondToNotification(notifId, response);
+    
+    if (result.success) {
+      // Remove from local array
+      pendingApprovals = pendingApprovals.filter(n => n.id !== notifId);
+      renderNotifications();
+      updateNotifBadge();
+      
+      // Show success feedback
+      showNotifToast(response === 'APPROVED' ? 'Onaylandı' : 'Reddedildi', response === 'APPROVED' ? 'success' : 'info');
+    } else {
+      throw new Error(result.error || 'İşlem başarısız');
+    }
+  } catch (error) {
+    console.error('Failed to respond:', error);
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+    showNotifToast(error.message || 'Bir hata oluştu', 'error');
+  }
+}
+
+async function markAllNotificationsRead() {
+  if (!window.orbicorpAPI) return;
+  
+  try {
+    await window.orbicorpAPI.markAllNotificationsRead();
+    // Note: This doesn't affect approvals, just marks them as read
+  } catch (error) {
+    console.error('Failed to mark all as read:', error);
+  }
+}
+
+function viewApprovalDetails(notifId, event) {
+  event.stopPropagation();
+  
+  const notif = pendingApprovals.find(n => n.id === notifId);
+  if (!notif) return;
+  
+  // Navigate to tasks page with the task ID
+  if (notif.taskId) {
+    toggleNotifications(); // Close dropdown
+    navigate('tasks');
+    // Send message to iframe to highlight/open the task
+    setTimeout(() => {
+      const frame = document.getElementById('contentFrame');
+      if (frame && frame.contentWindow) {
+        frame.contentWindow.postMessage({ type: 'openTask', taskId: notif.taskId }, '*');
+      }
+    }, 500);
+  }
+}
+
+function showNotifToast(message, type = 'info') {
+  // Create toast element
+  const toast = document.createElement('div');
+  toast.style.cssText = `
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    z-index: 9999;
+    animation: toastIn 0.3s ease;
+    ${type === 'success' ? 'background: var(--green-bg); color: var(--green-text);' : ''}
+    ${type === 'error' ? 'background: var(--red-bg); color: var(--red-text);' : ''}
+    ${type === 'info' ? 'background: var(--surface); color: var(--text-primary); border: 1px solid var(--border);' : ''}
+  `;
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  
+  setTimeout(() => {
+    toast.style.animation = 'toastOut 0.3s ease forwards';
+    setTimeout(() => toast.remove(), 300);
+  }, 2500);
+}
+
+// Poll for new notifications every 30 seconds
+function startNotificationPolling() {
+  loadNotificationCount();
+  notifPollInterval = setInterval(loadNotificationCount, 30000);
+}
+
+// Start polling when page loads
+document.addEventListener('DOMContentLoaded', function() {
+  // Wait for API to be loaded
+  setTimeout(startNotificationPolling, 1000);
+});
+
+// Add toast animations
+const toastStyles = document.createElement('style');
+toastStyles.textContent = `
+  @keyframes toastIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes toastOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-20px); } }
+`;
+document.head.appendChild(toastStyles);
+</script>
+</body>
+</html>

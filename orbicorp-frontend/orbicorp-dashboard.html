@@ -1,0 +1,2134 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orbicorp — AI Agent Management Platform</title>
+<script src="orbicorp-api.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Display:wght@400;500;700&family=Google+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --primary: #635BFF;
+  --primary-light: #7A73FF;
+  --primary-lighter: #918AFF;
+  --primary-bg: #F0EEFF;
+  --primary-bg-subtle: #F8F7FF;
+  --navy: #0A2540;
+  --navy-light: #1A3A5C;
+  --navy-muted: #425466;
+  --surface: #F6F9FC;
+  --surface-warm: #FAFBFD;
+  --white: #FFFFFF;
+  --border: #E3E8EE;
+  --border-light: #EBEEF2;
+  --text-primary: #0A2540;
+  --text-secondary: #425466;
+  --text-tertiary: #8792A2;
+  --text-muted: #A3ACB9;
+  --green: #0EA371;
+  --green-bg: #EEFBF4;
+  --green-text: #0C7D58;
+  --amber: #D97706;
+  --amber-bg: #FEF7E6;
+  --amber-text: #92510A;
+  --red: #DF1B41;
+  --red-bg: #FDE8EC;
+  --red-text: #A11534;
+  --blue: #0570DE;
+  --blue-bg: #E8F2FD;
+  --blue-text: #0455A9;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 2px 8px rgba(0,0,0,0.06);
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.04), 0 0 0 0.5px var(--border);
+  --font: 'Google Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'Google Sans Mono', 'SF Mono', monospace;
+  --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body {
+  font-family: var(--font);
+  background: var(--surface);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+/* ═══ TOP NAV ═══ */
+.topnav {
+  height: 56px;
+  background: var(--white);
+  border-bottom: 0.5px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.topnav-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-right: 32px;
+  text-decoration: none;
+}
+.topnav-logo {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, var(--primary), var(--navy));
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 14px;
+}
+.topnav-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--navy);
+  letter-spacing: -0.3px;
+}
+.topnav-tabs {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+}
+.topnav-tab {
+  padding: 8px 14px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition);
+  text-decoration: none;
+  font-weight: 400;
+}
+.topnav-tab:hover { background: var(--surface); color: var(--text-primary); }
+.topnav-tab.active { background: var(--primary-bg); color: var(--primary); font-weight: 500; }
+.topnav-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+.topnav-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all var(--transition);
+  min-width: 200px;
+}
+.topnav-search:hover { border-color: var(--primary); }
+.topnav-search kbd {
+  margin-left: auto;
+  font-size: 11px;
+  background: var(--white);
+  border: 0.5px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-family: var(--font);
+  color: var(--text-tertiary);
+}
+.topnav-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background var(--transition);
+  position: relative;
+}
+.topnav-icon:hover { background: var(--surface); }
+.topnav-icon svg { width: 18px; height: 18px; color: var(--text-secondary); }
+.notif-dot {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: 8px;
+  height: 8px;
+  background: var(--red);
+  border-radius: 50%;
+  border: 2px solid var(--white);
+}
+.topnav-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* ═══ LAYOUT ═══ */
+.layout {
+  display: flex;
+  min-height: calc(100vh - 56px);
+}
+
+/* ═══ SIDEBAR ═══ */
+.sidebar {
+  width: 240px;
+  background: var(--white);
+  border-right: 0.5px solid var(--border);
+  padding: 16px 12px;
+  transition: width 0.3s ease, opacity 0.3s ease;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.sidebar.collapsed {
+  width: 56px;
+  padding: 16px 8px;
+}
+.sidebar-section {
+  margin-bottom: 24px;
+}
+.sidebar-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0 10px;
+  margin-bottom: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.sidebar.collapsed .sidebar-label { opacity: 0; height: 0; margin: 0; }
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+  text-decoration: none;
+}
+.sidebar-item:hover { background: var(--surface); color: var(--text-primary); }
+.sidebar-item.active {
+  background: var(--primary-bg);
+  color: var(--primary);
+  font-weight: 500;
+}
+.sidebar-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+.sidebar-item.active svg { color: var(--primary); }
+.sidebar.collapsed .sidebar-item span { opacity: 0; width: 0; }
+.sidebar.collapsed .sidebar-item { justify-content: center; padding: 10px; }
+.sidebar-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  border: 0.5px solid var(--border);
+  background: var(--white);
+  cursor: pointer;
+  margin-bottom: 16px;
+  transition: all var(--transition);
+  margin-left: auto;
+}
+.sidebar-toggle:hover { background: var(--surface); }
+.sidebar-toggle svg { width: 14px; height: 14px; color: var(--text-tertiary); transition: transform 0.3s ease; }
+.sidebar.collapsed .sidebar-toggle { margin: 0 auto 16px; }
+.sidebar.collapsed .sidebar-toggle svg { transform: rotate(180deg); }
+.sidebar-badge {
+  margin-left: auto;
+  font-size: 11px;
+  background: var(--primary-bg);
+  color: var(--primary);
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-weight: 500;
+}
+.sidebar.collapsed .sidebar-badge { display: none; }
+
+/* ═══ MAIN ═══ */
+.main {
+  flex: 1;
+  padding: 28px 32px;
+  min-width: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+/* ═══ HERO ═══ */
+.hero {
+  background: linear-gradient(135deg, #635BFF 0%, #0A2540 100%);
+  border-radius: var(--radius-xl);
+  padding: 32px 36px;
+  color: white;
+  margin-bottom: 28px;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -60%;
+  right: -10%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero::after {
+  content: '';
+  position: absolute;
+  bottom: -40%;
+  left: 20%;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(99,91,255,0.3) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 1;
+}
+.hero-greeting {
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: -0.3px;
+  margin-bottom: 6px;
+}
+.hero-subtitle {
+  font-size: 14px;
+  color: rgba(255,255,255,0.7);
+  max-width: 500px;
+  line-height: 1.5;
+}
+.hero-actions {
+  display: flex;
+  gap: 8px;
+}
+.hero-btn {
+  padding: 9px 18px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition);
+  border: none;
+  font-family: var(--font);
+}
+.hero-btn-primary {
+  background: white;
+  color: var(--primary);
+}
+.hero-btn-primary:hover { background: rgba(255,255,255,0.9); transform: translateY(-1px); }
+.hero-btn-secondary {
+  background: rgba(255,255,255,0.12);
+  color: white;
+  border: 0.5px solid rgba(255,255,255,0.2);
+}
+.hero-btn-secondary:hover { background: rgba(255,255,255,0.18); }
+.hero-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  position: relative;
+  z-index: 1;
+}
+.hero-stat {
+  background: rgba(255,255,255,0.08);
+  border: 0.5px solid rgba(255,255,255,0.12);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  backdrop-filter: blur(8px);
+}
+.hero-stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  margin-bottom: 2px;
+}
+.hero-stat-label {
+  font-size: 12px;
+  color: rgba(255,255,255,0.6);
+}
+.hero-stat-change {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  margin-top: 6px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 500;
+}
+.hero-stat-change.up { background: rgba(14,163,113,0.2); color: #6EE7B7; }
+.hero-stat-change.down { background: rgba(223,27,65,0.2); color: #FCA5A5; }
+
+/* ═══ SECTION HEADERS ═══ */
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.section-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-primary);
+  letter-spacing: -0.2px;
+}
+.section-link {
+  font-size: 13px;
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity var(--transition);
+}
+.section-link:hover { opacity: 0.8; }
+
+/* ═══ AGENT CARDS ═══ */
+.agents-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 28px;
+}
+.agent-card {
+  background: var(--white);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  transition: all var(--transition);
+  cursor: pointer;
+}
+.agent-card:hover {
+  border-color: var(--primary);
+  box-shadow: 0 4px 16px rgba(99,91,255,0.08);
+  transform: translateY(-1px);
+}
+.agent-card-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.agent-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.agent-avatar.purple { background: linear-gradient(135deg, #7C3AED, #4F46E5); color: white; }
+.agent-avatar.green { background: linear-gradient(135deg, #10B981, #059669); color: white; }
+.agent-avatar.blue { background: linear-gradient(135deg, #3B82F6, #1D4ED8); color: white; }
+.agent-avatar.amber { background: linear-gradient(135deg, #F59E0B, #D97706); color: white; }
+.agent-avatar.teal { background: linear-gradient(135deg, #14B8A6, #0D9488); color: white; }
+.agent-avatar.pink { background: linear-gradient(135deg, #EC4899, #DB2777); color: white; }
+.agent-info { flex: 1; min-width: 0; }
+.agent-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+.agent-role {
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-weight: 500;
+}
+.badge-green { background: var(--green-bg); color: var(--green-text); }
+.badge-amber { background: var(--amber-bg); color: var(--amber-text); }
+.badge-red { background: var(--red-bg); color: var(--red-text); }
+.badge-blue { background: var(--blue-bg); color: var(--blue-text); }
+.badge-secondary { background: var(--surface); color: var(--text-tertiary); }
+.badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.agent-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.agent-metric {
+  text-align: center;
+  padding: 8px 4px;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+}
+.agent-metric-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 1px;
+}
+.agent-metric-label {
+  font-size: 10px;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Agent card stats - Tasarım 1 */
+.agent-card-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding-top: 14px;
+  border-top: 0.5px solid var(--border-light);
+  margin-bottom: 14px;
+}
+.agent-stat {
+  text-align: center;
+}
+.agent-stat-value {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+.agent-stat-label {
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+/* Agent card footer - Tasarım 1 */
+.agent-card-footer {
+  display: flex;
+  gap: 8px;
+}
+.agent-card-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--primary);
+  background: var(--primary-bg);
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition);
+  font-family: var(--font);
+}
+.agent-card-btn:hover {
+  background: var(--primary);
+  color: white;
+}
+.agent-card-btn.secondary {
+  background: var(--surface);
+  color: var(--text-secondary);
+}
+.agent-card-btn.secondary:hover {
+  background: var(--border-light);
+  color: var(--text-primary);
+}
+
+/* Agent card add */
+.agent-card-add {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 180px;
+  border: 1.5px dashed var(--border);
+  background: var(--surface);
+  color: var(--text-tertiary);
+}
+.agent-card-add:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-bg);
+}
+
+/* ═══ BOTTOM GRID ═══ */
+.bottom-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+/* ═══ CHART CARD ═══ */
+.chart-card {
+  background: var(--white);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px 24px;
+}
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.chart-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+.chart-tabs {
+  display: flex;
+  gap: 2px;
+  background: var(--surface);
+  padding: 3px;
+  border-radius: var(--radius-sm);
+}
+.chart-tab {
+  padding: 5px 12px;
+  font-size: 12px;
+  color: var(--text-tertiary);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all var(--transition);
+  border: none;
+  background: none;
+  font-family: var(--font);
+}
+.chart-tab.active { background: var(--white); color: var(--text-primary); font-weight: 500; box-shadow: var(--shadow-sm); }
+.chart-area {
+  height: 200px;
+  position: relative;
+}
+.chart-svg { width: 100%; height: 100%; }
+
+/* ═══ ACTIVITY FEED ═══ */
+.activity-list {
+  display: flex;
+  flex-direction: column;
+}
+.activity-item {
+  display: flex;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 0.5px solid var(--border-light);
+}
+.activity-item:last-child { border-bottom: none; }
+.activity-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 14px;
+}
+.activity-icon.purple { background: var(--primary-bg); color: var(--primary); }
+.activity-icon.green { background: var(--green-bg); color: var(--green); }
+.activity-icon.amber { background: var(--amber-bg); color: var(--amber); }
+.activity-icon.blue { background: var(--blue-bg); color: var(--blue); }
+.activity-content { flex: 1; min-width: 0; }
+.activity-text {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+.activity-text strong {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+.activity-time {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 3px;
+}
+
+/* ═══ COST BREAKDOWN ═══ */
+.cost-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 28px;
+}
+.cost-card {
+  background: var(--white);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px 24px;
+}
+.cost-total {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.5px;
+  margin-bottom: 2px;
+}
+.cost-label {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  margin-bottom: 16px;
+}
+.cost-bar-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.cost-bar-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.cost-bar-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  min-width: 100px;
+}
+.cost-bar-track {
+  flex: 1;
+  height: 8px;
+  background: var(--surface);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.cost-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 1s ease;
+}
+.cost-bar-value {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-primary);
+  min-width: 50px;
+  text-align: right;
+}
+
+/* ═══ QUICK ACTIONS ═══ */
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+.quick-action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 12px;
+  background: var(--white);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition);
+  text-decoration: none;
+}
+.quick-action:hover { border-color: var(--primary); background: var(--primary-bg-subtle); transform: translateY(-1px); }
+.quick-action-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.quick-action-icon svg { width: 18px; height: 18px; }
+.quick-action-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+/* ═══ LANG SWITCH ═══ */
+.lang-switch {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  border: 0.5px solid var(--border);
+}
+.lang-btn {
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  border-radius: 4px;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: var(--text-tertiary);
+  font-family: var(--font);
+  transition: all var(--transition);
+}
+.lang-btn.active { background: var(--white); color: var(--text-primary); box-shadow: var(--shadow-sm); }
+
+/* ═══ CHAT PANEL (fixed right) ═══ */
+.chat-fab { display: none; }
+
+.chat-panel {
+  width: 380px; background: var(--white); border-left: 0.5px solid var(--border);
+  display: flex; flex-direction: column; flex-shrink: 0;
+  height: calc(100vh - 56px); position: sticky; top: 56px;
+}
+
+.chat-header {
+  padding: 14px 18px; border-bottom: 0.5px solid var(--border);
+  display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+}
+.chat-header-avatar {
+  width: 36px; height: 36px; border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--primary), var(--navy));
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-weight: 700; font-size: 13px; flex-shrink: 0;
+}
+.chat-header-info { flex: 1; min-width: 0; }
+.chat-header-info h3 { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+.chat-header-info p { font-size: 11px; color: var(--text-tertiary); }
+.chat-header-actions { display: flex; gap: 4px; }
+.chat-header-btn {
+  width: 30px; height: 30px; border-radius: var(--radius-sm); border: none;
+  background: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  color: var(--text-tertiary); transition: all var(--transition);
+}
+.chat-header-btn:hover { background: var(--surface); color: var(--text-primary); }
+.chat-header-btn svg { width: 16px; height: 16px; }
+
+.chat-agent-switcher {
+  padding: 8px 12px;
+  border-bottom: 0.5px solid var(--border);
+  position: relative;
+}
+.chat-agent-dropdown {
+  position: relative;
+}
+.chat-agent-dropdown-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 12px;
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--white);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all var(--transition);
+  font-family: var(--font);
+}
+.chat-agent-dropdown-btn:hover {
+  border-color: var(--primary);
+  background: var(--primary-bg-subtle);
+}
+.chat-agent-dropdown-btn svg {
+  margin-left: auto;
+  color: var(--text-muted);
+  transition: transform 0.2s;
+}
+.chat-agent-dropdown.open .chat-agent-dropdown-btn svg {
+  transform: rotate(180deg);
+}
+.chat-agent-dropdown-btn .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.chat-agent-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--white);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  z-index: 100;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+  transition: all 0.2s;
+}
+.chat-agent-dropdown.open .chat-agent-dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+.chat-agent-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: background var(--transition);
+}
+.chat-agent-option:first-child {
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+.chat-agent-option:last-child {
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+}
+.chat-agent-option:hover {
+  background: var(--surface);
+}
+.chat-agent-option.active {
+  background: var(--primary-bg-subtle);
+}
+.chat-agent-option .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.chat-agent-option .option-info {
+  flex: 1;
+  min-width: 0;
+}
+.chat-agent-option .option-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+.chat-agent-option .option-desc {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 1px;
+}
+.chat-agent-tab {
+  padding: 5px 12px; border-radius: 999px; font-size: 11px; font-weight: 500;
+  border: 0.5px solid var(--border); background: var(--white); color: var(--text-tertiary);
+  cursor: pointer; transition: all var(--transition); white-space: nowrap;
+  font-family: var(--font);
+}
+.chat-agent-tab:hover { border-color: var(--primary); color: var(--primary); }
+.chat-agent-tab.active { background: var(--primary-bg); border-color: var(--primary); color: var(--primary); }
+.chat-agent-tab .dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; margin-right: 4px; }
+
+.chat-messages { flex: 1; overflow-y: auto; padding: 16px 18px; display: flex; flex-direction: column; gap: 12px; }
+.chat-msg { display: flex; gap: 8px; max-width: 92%; animation: msgIn 0.3s ease; }
+@keyframes msgIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.chat-msg.user { align-self: flex-end; flex-direction: row-reverse; }
+.chat-msg-avatar {
+  width: 28px; height: 28px; border-radius: 50%; display: flex;
+  align-items: center; justify-content: center; flex-shrink: 0; font-size: 10px; font-weight: 600;
+}
+.chat-msg-avatar.ai { background: linear-gradient(135deg, var(--primary), var(--navy)); color: white; }
+.chat-msg-avatar.human { background: var(--surface); color: var(--text-tertiary); }
+.chat-msg-bubble {
+  padding: 10px 14px; border-radius: 14px; font-size: 13px; line-height: 1.5;
+  color: var(--text-primary);
+}
+.chat-msg.user .chat-msg-bubble { background: var(--primary); color: white; border-bottom-right-radius: 4px; }
+.chat-msg.ai .chat-msg-bubble { background: var(--surface); border-bottom-left-radius: 4px; }
+.chat-msg-time { font-size: 10px; color: var(--text-muted); margin-top: 3px; padding: 0 4px; }
+.chat-msg.user .chat-msg-time { text-align: right; }
+
+.chat-action-card {
+  background: var(--white); border: 0.5px solid var(--border); border-radius: var(--radius-md);
+  padding: 12px; margin-top: 8px;
+}
+.chat-action-title { font-size: 12px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+.chat-action-title svg { width: 14px; height: 14px; color: var(--primary); }
+.chat-action-body { font-size: 12px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 10px; }
+.chat-action-body code { background: var(--surface); padding: 1px 6px; border-radius: 3px; font-family: var(--font-mono); font-size: 11px; }
+.chat-action-btns { display: flex; gap: 6px; }
+.chat-action-btn {
+  padding: 6px 14px; border-radius: var(--radius-sm); font-size: 12px; font-weight: 500;
+  cursor: pointer; transition: all var(--transition); font-family: var(--font); border: 0.5px solid var(--border);
+}
+.chat-action-btn.approve { background: var(--green-bg); color: var(--green-text); border-color: var(--green-bg); }
+.chat-action-btn.approve:hover { background: var(--green); color: white; }
+.chat-action-btn.edit { background: var(--white); color: var(--text-secondary); }
+.chat-action-btn.edit:hover { background: var(--surface); }
+.chat-action-btn.reject { background: var(--white); color: var(--red-text); }
+.chat-action-btn.reject:hover { background: var(--red-bg); }
+
+.chat-input-area {
+  padding: 12px 14px; border-top: 0.5px solid var(--border); display: flex;
+  align-items: flex-end; gap: 8px; flex-shrink: 0;
+}
+.chat-input-wrapper {
+  flex: 1; display: flex; align-items: flex-end; gap: 6px; padding: 8px 14px;
+  background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-md);
+  transition: border-color var(--transition); min-height: 40px;
+}
+.chat-input-wrapper:focus-within { border-color: var(--primary); }
+.chat-textarea {
+  flex: 1; border: none; outline: none; font-size: 13px; color: var(--text-primary);
+  background: none; resize: none; font-family: var(--font); max-height: 80px;
+  line-height: 1.4; padding: 0;
+}
+.chat-textarea::placeholder { color: var(--text-muted); }
+.chat-attach-btn {
+  width: 28px; height: 28px; border-radius: var(--radius-sm); border: none;
+  background: none; cursor: pointer; color: var(--text-muted); display: flex;
+  align-items: center; justify-content: center; transition: all var(--transition); flex-shrink: 0;
+}
+.chat-attach-btn:hover { color: var(--primary); background: var(--primary-bg); }
+.chat-attach-btn svg { width: 16px; height: 16px; }
+.chat-send-btn {
+  width: 36px; height: 36px; border-radius: var(--radius-md); border: none;
+  background: var(--primary); color: white; cursor: pointer; display: flex;
+  align-items: center; justify-content: center; transition: all var(--transition); flex-shrink: 0;
+}
+.chat-send-btn:hover { background: var(--primary-light); }
+.chat-send-btn:disabled { background: var(--border); cursor: default; }
+.chat-send-btn svg { width: 16px; height: 16px; }
+
+.typing-indicator { display: flex; gap: 4px; padding: 8px 12px; }
+.typing-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-muted); animation: typingBounce 1.2s infinite; }
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes typingBounce { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-6px); } }
+
+/* ═══ ANIMATIONS ═══ */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-8px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.animate-fade { animation: fadeUp 0.5s ease forwards; opacity: 0; }
+.animate-slide { animation: slideIn 0.4s ease forwards; opacity: 0; }
+.delay-1 { animation-delay: 0.1s; }
+.delay-2 { animation-delay: 0.2s; }
+.delay-3 { animation-delay: 0.3s; }
+.delay-4 { animation-delay: 0.4s; }
+.delay-5 { animation-delay: 0.5s; }
+.delay-6 { animation-delay: 0.6s; }
+
+/* ═══ RESPONSIVE ═══ */
+@media (max-width: 1024px) {
+  .hero-stats { grid-template-columns: repeat(2, 1fr); }
+  .agents-grid { grid-template-columns: repeat(2, 1fr); }
+  .bottom-grid { grid-template-columns: 1fr; }
+  .cost-grid { grid-template-columns: 1fr; }
+  .quick-actions { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .main { padding: 20px 16px; }
+  .hero { padding: 24px; }
+  .hero-stats { grid-template-columns: 1fr 1fr; }
+  .agents-grid { grid-template-columns: 1fr; }
+}
+</style>
+<link rel="stylesheet" href="orbicorp-dark.css">
+<style>
+.in-iframe .topnav{display:none!important}
+.in-iframe .sidebar{display:none!important}
+.in-iframe .layout{margin-top:0!important;height:100vh!important}
+.in-iframe .settings-nav{top:0!important;height:100vh!important}
+.in-iframe .chat-panel{top:0!important;height:100vh!important}
+</style>
+</head>
+<body>
+<script>
+(function(){
+  // If in iframe, hide own nav/sidebar and sync theme from parent
+  if(window.self!==window.top){
+    document.body.classList.add("in-iframe");
+    try{
+      var pt=window.parent.document.documentElement.getAttribute("data-theme");
+      if(pt)document.documentElement.setAttribute("data-theme",pt);
+    }catch(e){}
+    // Listen for theme changes from parent
+    window.addEventListener("message",function(e){
+      if(e.data&&e.data.type==="theme")document.documentElement.setAttribute("data-theme",e.data.value);
+      if(e.data&&e.data.type==="lang")window._orbicorpLang=e.data.value;
+    });
+  }
+})();
+</script>
+
+<!-- ═══ TOP NAV ═══ -->
+<nav class="topnav">
+  <a class="topnav-brand" href="#">
+    <div class="topnav-logo">O</div>
+    <span class="topnav-name">Orbicorp</span>
+  </a>
+
+  <div class="topnav-tabs">
+    <a class="topnav-tab active" data-page="overview">Overview</a>
+    <a class="topnav-tab" data-page="agents">Agents</a>
+    <a class="topnav-tab" data-page="company">Company Profile</a>
+    <a class="topnav-tab" data-page="skills">Skills</a>
+    <a class="topnav-tab" data-page="analytics">Analytics</a>
+    <a class="topnav-tab" data-page="integrations">Integrations</a>
+  </div>
+
+  <div class="topnav-right">
+    <div class="lang-switch">
+      <button class="lang-btn active" onclick="setLang('tr')">TR</button>
+      <button class="lang-btn" onclick="setLang('en')">EN</button>
+    </div>
+    <div class="topnav-search">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <span data-i18n="search">Ara...</span>
+      <kbd>⌘K</kbd>
+    </div>
+    <div class="topnav-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <div class="notif-dot"></div>
+    </div>
+    <div class="topnav-avatar">AY</div>
+  </div>
+</nav>
+
+<!-- ═══ LAYOUT ═══ -->
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-toggle" onclick="toggleSidebar()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label" data-i18n="sb_main">Ana Menü</div>
+      <a class="sidebar-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        <span data-i18n="sb_dashboard">Dashboard</span>
+      </a>
+      <a class="sidebar-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        <span data-i18n="sb_agents">Agent'lar</span>
+        <span class="sidebar-badge">12</span>
+      </a>
+      <a class="sidebar-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 21h18M3 10h18M3 7l9-4 9 4M4 10v11M20 10v11"/></svg>
+        <span data-i18n="sb_company">Kurum Profili</span>
+      </a>
+      <a class="sidebar-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+        <span data-i18n="sb_skills">Skill Market</span>
+      </a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label" data-i18n="sb_analytics_label">Analitik</div>
+      <a class="sidebar-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+        <span data-i18n="sb_performance">Performans</span>
+      </a>
+      <a class="sidebar-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        <span data-i18n="sb_costs">Maliyet</span>
+      </a>
+      <a class="sidebar-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <span data-i18n="sb_security">Güvenlik</span>
+      </a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label" data-i18n="sb_settings_label">Sistem</div>
+      <a class="sidebar-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+        <span data-i18n="sb_users">Kullanıcılar</span>
+      </a>
+      <a class="sidebar-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span data-i18n="sb_settings">Ayarlar</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+    <!-- HERO -->
+    <div class="hero animate-fade">
+      <div class="hero-top">
+        <div>
+          <div class="hero-greeting" data-i18n="hero_greeting">Günaydın, Ahmet</div>
+          <div class="hero-subtitle" data-i18n="hero_subtitle">12 aktif agent'ınız bugün toplam 847 etkileşim gerçekleştirdi. Tüm sistemler sorunsuz çalışıyor.</div>
+        </div>
+        <div class="hero-actions">
+          <button class="hero-btn hero-btn-primary" data-i18n="hero_new_agent">+ Yeni Agent</button>
+          <button class="hero-btn hero-btn-secondary" data-i18n="hero_report">Rapor İndir</button>
+        </div>
+      </div>
+      <div class="hero-stats" id="heroStats">
+        <div class="hero-stat animate-fade delay-1">
+          <div class="hero-stat-value" id="statActiveAgents">—</div>
+          <div class="hero-stat-label" data-i18n="stat_active">Aktif Agent</div>
+          <div class="hero-stat-change up" id="statActiveAgentsChange">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 15l-6-6-6 6"/></svg>
+            <span>—</span>
+          </div>
+        </div>
+        <div class="hero-stat animate-fade delay-2">
+          <div class="hero-stat-value" id="statMessages">—</div>
+          <div class="hero-stat-label" data-i18n="stat_conversations">Aylık Mesaj</div>
+          <div class="hero-stat-change up" id="statMessagesChange">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 15l-6-6-6 6"/></svg>
+            <span>—</span>
+          </div>
+        </div>
+        <div class="hero-stat animate-fade delay-3">
+          <div class="hero-stat-value" id="statSuccessRate">—</div>
+          <div class="hero-stat-label" data-i18n="stat_success">Başarı Oranı</div>
+          <div class="hero-stat-change up" id="statSuccessRateChange">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 15l-6-6-6 6"/></svg>
+            <span>—</span>
+          </div>
+        </div>
+        <div class="hero-stat animate-fade delay-4">
+          <div class="hero-stat-value" id="statCost">—</div>
+          <div class="hero-stat-label" data-i18n="stat_cost">Aylık Maliyet</div>
+          <div class="hero-stat-change down" id="statCostChange">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 9l6 6 6-6"/></svg>
+            <span>—</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AGENT GALLERY -->
+    <div class="section-header animate-fade delay-3">
+      <div class="section-title" data-i18n="agents_title">Agent Galerisi</div>
+      <a class="section-link" onclick="window.parent.postMessage({type:'navigate',page:'agents'},'*')" style="cursor:pointer" data-i18n="agents_all">Tümünü gör &rarr;</a>
+    </div>
+    <div class="agents-grid" id="agentsGrid">
+      <!-- Loading placeholder - will be replaced by API data -->
+      <div class="agent-card animate-fade delay-3" style="opacity:0.5">
+        <div class="agent-card-top">
+          <div class="agent-avatar purple" style="background:var(--border-light)"></div>
+          <div class="agent-info">
+            <div class="agent-name" style="background:var(--border-light);height:14px;width:100px;border-radius:4px"></div>
+            <div class="agent-role" style="background:var(--border-light);height:12px;width:60px;border-radius:4px;margin-top:6px"></div>
+          </div>
+        </div>
+      </div>
+      <div class="agent-card animate-fade delay-4" style="opacity:0.5">
+        <div class="agent-card-top">
+          <div class="agent-avatar green" style="background:var(--border-light)"></div>
+          <div class="agent-info">
+            <div class="agent-name" style="background:var(--border-light);height:14px;width:80px;border-radius:4px"></div>
+            <div class="agent-role" style="background:var(--border-light);height:12px;width:70px;border-radius:4px;margin-top:6px"></div>
+          </div>
+        </div>
+      </div>
+      <div class="agent-card animate-fade delay-5" style="opacity:0.5">
+        <div class="agent-card-top">
+          <div class="agent-avatar blue" style="background:var(--border-light)"></div>
+          <div class="agent-info">
+            <div class="agent-name" style="background:var(--border-light);height:14px;width:90px;border-radius:4px"></div>
+            <div class="agent-role" style="background:var(--border-light);height:12px;width:50px;border-radius:4px;margin-top:6px"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTTOM: CHART + ACTIVITY -->
+    <div class="bottom-grid">
+      <!-- USAGE CHART -->
+      <div class="chart-card animate-fade delay-4">
+        <div class="chart-header">
+          <div class="chart-title" data-i18n="chart_usage">Etkileşim Trendi</div>
+          <div class="chart-tabs">
+            <button class="chart-tab" data-i18n="chart_7d">7G</button>
+            <button class="chart-tab active" data-i18n="chart_30d">30G</button>
+            <button class="chart-tab" data-i18n="chart_90d">90G</button>
+          </div>
+        </div>
+        <div class="chart-area">
+          <svg class="chart-svg" viewBox="0 0 500 200" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#635BFF" stop-opacity="0.15"/>
+                <stop offset="100%" stop-color="#635BFF" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <path d="M0 200 L0 160 L17 145 L34 155 L51 130 L68 125 L85 135 L102 110 L119 100 L136 105 L153 85 L170 90 L187 75 L204 80 L221 60 L238 55 L255 65 L272 50 L289 45 L306 55 L323 40 L340 35 L357 45 L374 30 L391 25 L408 35 L425 20 L442 28 L459 15 L476 22 L500 10 L500 200 Z" fill="url(#chartGrad)"/>
+            <path d="M0 160 L17 145 L34 155 L51 130 L68 125 L85 135 L102 110 L119 100 L136 105 L153 85 L170 90 L187 75 L204 80 L221 60 L238 55 L255 65 L272 50 L289 45 L306 55 L323 40 L340 35 L357 45 L374 30 L391 25 L408 35 L425 20 L442 28 L459 15 L476 22 L500 10" fill="none" stroke="#635BFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <line x1="0" y1="50" x2="500" y2="50" stroke="#E3E8EE" stroke-width="0.5" stroke-dasharray="4"/>
+            <line x1="0" y1="100" x2="500" y2="100" stroke="#E3E8EE" stroke-width="0.5" stroke-dasharray="4"/>
+            <line x1="0" y1="150" x2="500" y2="150" stroke="#E3E8EE" stroke-width="0.5" stroke-dasharray="4"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- ACTIVITY FEED -->
+      <div class="chart-card animate-fade delay-5">
+        <div class="chart-header">
+          <div class="chart-title" data-i18n="activity_title">Son Aktiviteler</div>
+          <a class="section-link" data-i18n="activity_all">Tümü &rarr;</a>
+        </div>
+        <div class="activity-list">
+          <div class="activity-item">
+            <div class="activity-icon purple">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+            </div>
+            <div class="activity-content">
+              <div class="activity-text"><strong>Sales Copilot</strong> <span data-i18n="act_1">yeni bir müşteri adayını CRM'e ekledi</span></div>
+              <div class="activity-time">2 dk önce</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-icon green">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+            <div class="activity-content">
+              <div class="activity-text"><strong>HR Assistant</strong> <span data-i18n="act_2">izin talebini onay için yöneticiye iletti</span></div>
+              <div class="activity-time">15 dk önce</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-icon amber">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </div>
+            <div class="activity-content">
+              <div class="activity-text"><strong>Content Writer</strong> <span data-i18n="act_3">eğitim verisi yetersiz uyarısı aldı</span></div>
+              <div class="activity-time">42 dk önce</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-icon blue">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+            </div>
+            <div class="activity-content">
+              <div class="activity-text"><span data-i18n="act_4">Yeni skill eklendi:</span> <strong>email-composer v2.1</strong></div>
+              <div class="activity-time">1 saat önce</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-icon green">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <div class="activity-content">
+              <div class="activity-text" data-i18n="act_5">Günlük güvenlik taraması tamamlandı — <strong>0 tehdit</strong></div>
+              <div class="activity-time">3 saat önce</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COST + MODEL BREAKDOWN -->
+    <div class="cost-grid">
+      <div class="cost-card animate-fade delay-5">
+        <div class="chart-header" style="margin-bottom:16px">
+          <div class="chart-title" data-i18n="cost_title">Model Kullanımı</div>
+          <span class="badge badge-blue" data-i18n="cost_period">Bu Ay</span>
+        </div>
+        <div class="cost-total" id="costTotal">$0</div>
+        <div class="cost-label" id="costBudget">Bütçe: $2,000 (%0 kullanıldı)</div>
+        <div class="cost-bar-group" id="costBarGroup">
+          <div class="cost-bar-item">
+            <span class="cost-bar-label">Henüz kullanım yok</span>
+            <div class="cost-bar-track"><div class="cost-bar-fill" style="width:0%;background:var(--border)"></div></div>
+            <span class="cost-bar-value">$0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- QUICK ACTIONS -->
+      <div class="cost-card animate-fade delay-6">
+        <div class="chart-header" style="margin-bottom:16px">
+          <div class="chart-title" data-i18n="quick_title">Hızlı İşlemler</div>
+        </div>
+        <div class="quick-actions">
+          <a class="quick-action" onclick="window.parent.postMessage({type:'navigate',page:'agents',action:'new'},'*')">
+            <div class="quick-action-icon" style="background:var(--primary-bg);color:var(--primary)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </div>
+            <span class="quick-action-label" data-i18n="qa_new">Yeni Agent</span>
+          </a>
+          <a class="quick-action" onclick="window.parent.postMessage({type:'navigate',page:'market'},'*')">
+            <div class="quick-action-icon" style="background:var(--green-bg);color:var(--green)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+            </div>
+            <span class="quick-action-label" data-i18n="qa_skill">Skill Ekle</span>
+          </a>
+          <a class="quick-action" onclick="window.parent.postMessage({type:'navigate',page:'settings',tab:'integrations'},'*')">
+            <div class="quick-action-icon" style="background:var(--blue-bg);color:var(--blue)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            </div>
+            <span class="quick-action-label" data-i18n="qa_integrate">Entegrasyon</span>
+          </a>
+          <a class="quick-action" onclick="window.parent.postMessage({type:'navigate',page:'analytics'},'*')">
+            <div class="quick-action-icon" style="background:var(--amber-bg);color:var(--amber)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            </div>
+            <span class="quick-action-label" data-i18n="qa_report">Rapor Al</span>
+          </a>
+          <a class="quick-action" onclick="window.parent.postMessage({type:'navigate',page:'company'},'*')">
+            <div class="quick-action-icon" style="background:#FBEAF0;color:#D4537E">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 21h18M3 10h18M3 7l9-4 9 4M4 10v11M20 10v11"/></svg>
+            </div>
+            <span class="quick-action-label" data-i18n="qa_company">Kurum Profili</span>
+          </a>
+          <a class="quick-action" onclick="window.parent.postMessage({type:'navigate',page:'analytics',tab:'realtime'},'*')">
+            <div class="quick-action-icon" style="background:#E1F5EE;color:#0F6E56">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+            <span class="quick-action-label" data-i18n="qa_monitor">Canlı İzleme</span>
+          </a>
+          <a class="quick-action" onclick="window.parent.postMessage({type:'navigate',page:'workflow'},'*')">
+            <div class="quick-action-icon" style="background:var(--surface);color:var(--text-secondary)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            </div>
+            <span class="quick-action-label" data-i18n="qa_workflow">Workflow</span>
+          </a>
+          <a class="quick-action" onclick="window.parent.postMessage({type:'navigate',page:'settings'},'*')">
+            <div class="quick-action-icon" style="background:var(--surface);color:var(--text-secondary)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9"/></svg>
+            </div>
+            <span class="quick-action-label" data-i18n="qa_settings">Ayarlar</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- CHAT PANEL (fixed right sidebar) -->
+  <div class="chat-panel" id="chatPanel">
+    <div class="chat-header">
+      <div class="chat-header-avatar" id="chatAvatar">O</div>
+      <div class="chat-header-info">
+        <h3 id="chatAgentName">Orbicorp Main Agent</h3>
+        <p id="chatAgentDesc">Tüm agent'larınızı yönetin</p>
+      </div>
+      <div class="chat-header-actions">
+        <button class="chat-header-btn" title="Geçmiş"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></button>
+      </div>
+    </div>
+
+    <div class="chat-agent-switcher">
+      <div class="chat-agent-dropdown" id="agentDropdown">
+        <button class="chat-agent-dropdown-btn" onclick="toggleAgentDropdown()">
+          <span class="dot" style="background:var(--primary)" id="agentDot"></span>
+          <span id="agentDropdownLabel">Main Agent</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="14" height="14"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="chat-agent-dropdown-menu" id="agentDropdownMenu">
+          <div class="chat-agent-option active" data-agent="main" onclick="selectAgent('main')">
+            <span class="dot" style="background:var(--primary)"></span>
+            <div class="option-info">
+              <div class="option-name">Main Agent</div>
+              <div class="option-desc">Tüm agent'larınızı yönetin</div>
+            </div>
+          </div>
+          <div class="chat-agent-option" data-agent="knowledge" onclick="selectAgent('knowledge')">
+            <span class="dot" style="background:linear-gradient(135deg,var(--primary),var(--blue))"></span>
+            <div class="option-info">
+              <div class="option-name">📚 Bilgi Tabanı</div>
+              <div class="option-desc">Dokümantasyon araması</div>
+            </div>
+          </div>
+          <div class="chat-agent-option" data-agent="sales" onclick="selectAgent('sales')">
+            <span class="dot" style="background:var(--green)"></span>
+            <div class="option-info">
+              <div class="option-name">Sales Copilot</div>
+              <div class="option-desc">Satış departmanı asistanı</div>
+            </div>
+          </div>
+          <div class="chat-agent-option" data-agent="hr" onclick="selectAgent('hr')">
+            <span class="dot" style="background:var(--blue)"></span>
+            <div class="option-info">
+              <div class="option-name">HR Assistant</div>
+              <div class="option-desc">İnsan kaynakları asistanı</div>
+            </div>
+          </div>
+          <div class="chat-agent-option" data-agent="support" onclick="selectAgent('support')">
+            <span class="dot" style="background:var(--amber)"></span>
+            <div class="option-info">
+              <div class="option-name">Support Agent</div>
+              <div class="option-desc">Müşteri hizmetleri asistanı</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chat-messages" id="chatMessages"></div>
+
+    <div class="chat-input-area">
+      <div class="chat-input-wrapper">
+        <button class="chat-attach-btn" title="Dosya ekle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></button>
+        <textarea class="chat-textarea" id="chatInput" rows="1" placeholder="Mesajınızı yazın..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}"></textarea>
+      </div>
+      <button class="chat-send-btn" onclick="sendChat()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ═══ DASHBOARD API INTEGRATION ═══
+let dashboardData = null;
+
+async function loadDashboard() {
+  try {
+    const result = await window.orbicorpAPI.getDashboardStats();
+    if (result.success && result.data) {
+      dashboardData = result.data;
+      updateDashboardUI();
+    }
+  } catch (error) {
+    console.error('Dashboard load error:', error);
+    // Keep demo data on error
+  }
+}
+
+function updateDashboardUI() {
+  if (!dashboardData) return;
+  
+  const { summary, tasksByStatus, recentAgents, recentTasks } = dashboardData;
+  
+  // Update hero stats
+  document.getElementById('statActiveAgents').textContent = summary.activeAgents;
+  document.getElementById('statMessages').textContent = formatNumber(summary.messagesThisMonth || summary.sessionsThisMonth);
+  document.getElementById('statSuccessRate').textContent = summary.successRate + '%';
+  document.getElementById('statCost').textContent = '$' + (summary.estimatedMonthlyCost || 0).toLocaleString();
+  
+  // Update stat changes with real data from API
+  const activeChange = document.getElementById('statActiveAgentsChange');
+  if (activeChange) {
+    const sessionChange = summary.sessionChangePercent || 0;
+    const isUp = sessionChange >= 0;
+    activeChange.className = `hero-stat-change ${isUp ? 'up' : 'down'}`;
+    activeChange.innerHTML = `
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+        <path d="${isUp ? 'M18 15l-6-6-6 6' : 'M6 9l6 6 6-6'}"/>
+      </svg>
+      <span>${isUp ? '+' : ''}${sessionChange}%</span>
+    `;
+  }
+  
+  const msgChange = document.getElementById('statMessagesChange');
+  if (msgChange) {
+    const messageChange = summary.messageChangePercent || 0;
+    const isUp = messageChange >= 0;
+    msgChange.className = `hero-stat-change ${isUp ? 'up' : 'down'}`;
+    msgChange.innerHTML = `
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+        <path d="${isUp ? 'M18 15l-6-6-6 6' : 'M6 9l6 6 6-6'}"/>
+      </svg>
+      <span>${isUp ? '+' : ''}${messageChange}%</span>
+    `;
+  }
+  
+  // Update hero subtitle
+  const subtitle = document.querySelector('.hero-subtitle');
+  if (subtitle) {
+    const pendingText = summary.pendingApprovals > 0 ? ` ${summary.pendingApprovals} onay bekliyor.` : '';
+    subtitle.textContent = `${summary.activeAgents} aktif agent'ınız bu ay ${summary.tasksThisMonth || 0} görev tamamladı.${pendingText} Tüm sistemler sorunsuz çalışıyor.`;
+  }
+  
+  // Update greeting with user name
+  updateGreeting();
+  
+  // Update agent gallery
+  if (recentAgents && recentAgents.length > 0) {
+    renderAgentGallery(recentAgents);
+  }
+  
+  // Update cost section with budget from API
+  updateCostSection(summary.estimatedMonthlyCost || 0, summary.monthlyBudget || 2000);
+}
+
+function updateCostSection(totalCost, budget) {
+  const costTotal = document.getElementById('costTotal');
+  const costBudget = document.getElementById('costBudget');
+  
+  if (costTotal) costTotal.textContent = '$' + totalCost.toLocaleString();
+  
+  const percentage = budget > 0 ? Math.round((totalCost / budget) * 100) : 0;
+  if (costBudget) costBudget.textContent = `Bütçe: $${budget.toLocaleString()} (%${percentage} kullanıldı)`;
+  
+  // Load model usage from API
+  loadModelUsage();
+}
+
+async function loadModelUsage() {
+  const costBarGroup = document.getElementById('costBarGroup');
+  if (!costBarGroup) return;
+  
+  try {
+    const result = await window.orbicorpAPI.getModelUsage();
+    if (result.success && result.data && result.data.length > 0) {
+      const maxCost = Math.max(...result.data.map(m => m.cost));
+      
+      const colors = ['var(--primary)', '#7A73FF', 'var(--green)', 'var(--amber)', 'var(--blue)'];
+      
+      costBarGroup.innerHTML = result.data.map((model, idx) => {
+        const width = maxCost > 0 ? Math.round((model.cost / maxCost) * 100) : 0;
+        const color = colors[idx % colors.length];
+        return `
+          <div class="cost-bar-item">
+            <span class="cost-bar-label">${model.displayName}</span>
+            <div class="cost-bar-track"><div class="cost-bar-fill" style="width:${width}%;background:${color}"></div></div>
+            <span class="cost-bar-value">$${model.cost.toFixed(2)}</span>
+          </div>
+        `;
+      }).join('');
+    } else {
+      costBarGroup.innerHTML = `
+        <div class="cost-bar-item">
+          <span class="cost-bar-label">Henüz kullanım yok</span>
+          <div class="cost-bar-track"><div class="cost-bar-fill" style="width:0%;background:var(--border)"></div></div>
+          <span class="cost-bar-value">$0</span>
+        </div>
+      `;
+    }
+  } catch (error) {
+    console.error('Model usage load error:', error);
+  }
+}
+
+function formatNumber(num) {
+  if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+  if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+  return num.toString();
+}
+
+async function updateGreeting() {
+  try {
+    const user = await window.orbicorpAPI.getCurrentUser();
+    if (user && user.data) {
+      const name = user.data.firstName || user.data.email.split('@')[0];
+      const hour = new Date().getHours();
+      let greeting = 'Merhaba';
+      if (hour < 12) greeting = 'Günaydın';
+      else if (hour < 18) greeting = 'İyi günler';
+      else greeting = 'İyi akşamlar';
+      
+      const greetingEl = document.querySelector('.hero-greeting');
+      if (greetingEl) greetingEl.textContent = `${greeting}, ${name}`;
+    }
+  } catch (error) {
+    console.log('Could not load user for greeting');
+  }
+}
+
+function renderAgentGallery(agents) {
+  const grid = document.getElementById('agentsGrid');
+  if (!grid) return;
+  
+  const statusMap = {
+    'ACTIVE': { label: 'Active', cls: 'badge-green' },
+    'PAUSED': { label: 'Paused', cls: 'badge-amber' },
+    'ARCHIVED': { label: 'Archived', cls: 'badge-secondary' }
+  };
+  
+  const avatarColors = ['purple', 'green', 'blue', 'amber', 'teal', 'pink'];
+  const defaultIcon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`;
+  
+  const agentCards = agents.slice(0, 5).map((agent, idx) => {
+    const status = statusMap[agent.status] || statusMap['ACTIVE'];
+    const color = avatarColors[idx % avatarColors.length];
+    const stats = agent.stats || {};
+    const initial = agent.name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+    
+    return `
+      <div class="agent-card animate-fade delay-${idx + 3}" onclick="window.parent.postMessage({type:'navigate',page:'agents',agentId:'${agent.id}'},'*')">
+        <div class="agent-card-top">
+          <div class="agent-avatar ${color}">${defaultIcon}</div>
+          <div class="agent-info">
+            <div class="agent-name">${agent.name}</div>
+            <div class="agent-role">${agent.department || 'Genel'}</div>
+          </div>
+          <span class="badge ${status.cls}"><span class="badge-dot"></span> ${status.label}</span>
+        </div>
+        <div class="agent-card-stats">
+          <div class="agent-stat">
+            <div class="agent-stat-value">${stats.successRate || 0}%</div>
+            <div class="agent-stat-label">Başarı</div>
+          </div>
+          <div class="agent-stat">
+            <div class="agent-stat-value">${stats.avgResponseTime || '—'}</div>
+            <div class="agent-stat-label">Ort. Yanıt</div>
+          </div>
+          <div class="agent-stat">
+            <div class="agent-stat-value">${formatNumber(stats.monthlyTokens || 0)}</div>
+            <div class="agent-stat-label">Token</div>
+          </div>
+        </div>
+        <div class="agent-card-footer">
+          <button class="agent-card-btn" onclick="event.stopPropagation(); window.parent.postMessage({type:'navigate',page:'chat',agentId:'${agent.id}'},'*')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Konuş
+          </button>
+          <button class="agent-card-btn secondary" onclick="event.stopPropagation(); window.parent.postMessage({type:'navigate',page:'agents',agentId:'${agent.id}'},'*')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.604.852.997 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            Ayarlar
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+  
+  // Add "View All" card
+  const viewAllCard = `
+    <div class="agent-card agent-card-add animate-fade delay-${Math.min(agents.length + 3, 8)}" onclick="window.parent.postMessage({type:'navigate',page:'agents'},'*')">
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v8m-4-4h8"/></svg>
+      <span>Tüm Agent'ları Gör</span>
+    </div>
+  `;
+  
+  grid.innerHTML = agentCards + viewAllCard;
+}
+
+function updateRecentTasks(tasks) {
+  // Update activity feed with real tasks
+  const activityItems = document.querySelectorAll('.activity-item');
+  
+  tasks.slice(0, activityItems.length).forEach((task, idx) => {
+    if (activityItems[idx]) {
+      const item = activityItems[idx];
+      const timeEl = item.querySelector('.activity-time');
+      const textEl = item.querySelector('.activity-text');
+      
+      if (textEl) {
+        const statusEmoji = {
+          'COMPLETED': '✅',
+          'RUNNING': '🔄',
+          'PENDING': '⏳',
+          'FAILED': '❌',
+          'APPROVAL': '🔔'
+        };
+        textEl.innerHTML = `<strong>${task.agentName}</strong> ${statusEmoji[task.status] || ''} ${task.name}`;
+      }
+      
+      if (timeEl) {
+        timeEl.textContent = formatTimeAgo(task.createdAt);
+      }
+    }
+  });
+}
+
+function formatTimeAgo(dateStr) {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diff = Math.floor((now - date) / 1000);
+  
+  if (diff < 60) return 'Az önce';
+  if (diff < 3600) return Math.floor(diff / 60) + ' dk önce';
+  if (diff < 86400) return Math.floor(diff / 3600) + ' saat önce';
+  return Math.floor(diff / 86400) + ' gün önce';
+}
+
+// Load dashboard on page load
+document.addEventListener('DOMContentLoaded', function() {
+  // Check if API is available
+  if (window.orbicorpAPI) {
+    loadDashboard();
+  } else {
+    // Wait for API to be available
+    const checkAPI = setInterval(() => {
+      if (window.orbicorpAPI) {
+        clearInterval(checkAPI);
+        loadDashboard();
+      }
+    }, 100);
+  }
+});
+
+// ═══ SIDEBAR TOGGLE ═══
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('collapsed');
+}
+
+// ═══ CHAT ENGINE ═══
+let currentChatAgent = 'main';
+const chatHistories = { main: [], sales: [], hr: [], support: [], knowledge: [] };
+
+const agentProfiles = {
+  main: { name: 'Orbicorp Main Agent', desc: 'Tüm agent\'larınızı yönetin', avatar: 'O', color: 'linear-gradient(135deg,#635BFF,#0A2540)', dotColor: 'var(--primary)' },
+  knowledge: { name: 'Bilgi Tabanı', desc: 'Dokümantasyon araması', avatar: '📚', color: 'linear-gradient(135deg,var(--primary),var(--blue))', dotColor: 'linear-gradient(135deg,var(--primary),var(--blue))' },
+  sales: { name: 'Sales Copilot', desc: 'Satış departmanı asistanı', avatar: 'SC', color: 'var(--green-bg)', dotColor: 'var(--green)' },
+  hr: { name: 'HR Assistant', desc: 'İnsan kaynakları asistanı', avatar: 'HR', color: 'var(--blue-bg)', dotColor: 'var(--blue)' },
+  support: { name: 'Support Agent', desc: 'Müşteri hizmetleri asistanı', avatar: 'SA', color: 'var(--amber-bg)', dotColor: 'var(--amber)' },
+};
+
+const demoConversations = {
+  main: [
+    { role:'ai', text:'Merhaba! Ben Orbicorp Main Agent. Tüm agent\'larınızı yönetmenize, yapılandırmanıza ve izlemenize yardımcı olabilirim. Ne yapmak istersiniz?' }
+  ],
+  knowledge: [
+    { role:'ai', text:'Merhaba! Ben Bilgi Tabanı asistanıyım. 📚 OrbiCorp platformu hakkında sorularınızı yanıtlayabilirim. Dashboard, agent yönetimi, workflow, entegrasyonlar ve daha fazlası hakkında sorabilirsiniz.' }
+  ]
+};
+
+// ═══ AGENT DROPDOWN ═══
+function toggleAgentDropdown() {
+  document.getElementById('agentDropdown').classList.toggle('open');
+}
+
+function selectAgent(agent) {
+  // Dropdown'u kapat
+  document.getElementById('agentDropdown').classList.remove('open');
+  
+  // Aktif seçimi güncelle
+  document.querySelectorAll('.chat-agent-option').forEach(opt => {
+    opt.classList.toggle('active', opt.dataset.agent === agent);
+  });
+  
+  // Dropdown buton güncelle
+  const p = agentProfiles[agent];
+  document.getElementById('agentDropdownLabel').textContent = agent === 'knowledge' ? '📚 Bilgi Tabanı' : p.name;
+  document.getElementById('agentDot').style.background = p.dotColor;
+  
+  // Header güncelle
+  currentChatAgent = agent;
+  document.getElementById('chatAgentName').textContent = p.name;
+  document.getElementById('chatAgentDesc').textContent = p.desc;
+  document.getElementById('chatAvatar').textContent = p.avatar;
+  document.getElementById('chatAvatar').style.background = p.color;
+  
+  if (agent === 'main' || agent === 'knowledge') {
+    document.getElementById('chatAvatar').style.color = 'white';
+  } else {
+    document.getElementById('chatAvatar').style.color = agent==='sales'?'var(--green-text)':agent==='hr'?'var(--blue-text)':'var(--amber-text)';
+  }
+  
+  // Chat history
+  if (chatHistories[agent].length === 0) initChat(agent);
+  renderMessages(agent);
+}
+
+// Dropdown dışına tıklayınca kapat
+document.addEventListener('click', function(e) {
+  const dropdown = document.getElementById('agentDropdown');
+  if (dropdown && !dropdown.contains(e.target)) {
+    dropdown.classList.remove('open');
+  }
+});
+
+function switchChatAgent(btn, agent) {
+  document.querySelectorAll('.chat-agent-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  currentChatAgent = agent;
+  const p = agentProfiles[agent];
+  document.getElementById('chatAgentName').textContent = p.name;
+  document.getElementById('chatAgentDesc').textContent = p.desc;
+  document.getElementById('chatAvatar').textContent = p.avatar;
+  document.getElementById('chatAvatar').style.background = p.color;
+  if (agent !== 'main' && agent !== 'knowledge') {
+    document.getElementById('chatAvatar').style.color = agent==='sales'?'var(--green-text)':agent==='hr'?'var(--blue-text)':'var(--amber-text)';
+  } else {
+    document.getElementById('chatAvatar').style.color = 'white';
+  }
+  if (chatHistories[agent].length === 0) initChat(agent);
+  renderMessages(agent);
+}
+
+function initChat(agent) {
+  if (demoConversations[agent]) {
+    chatHistories[agent] = [...demoConversations[agent]];
+  } else {
+    chatHistories[agent] = [{ role:'ai', text:`Merhaba! Ben ${agentProfiles[agent].name}. Size nasıl yardımcı olabilirim?` }];
+  }
+  renderMessages(agent);
+}
+
+function renderMessages(agent) {
+  const container = document.getElementById('chatMessages');
+  container.innerHTML = chatHistories[agent].map(m => {
+    if (m.role === 'typing') {
+      return `<div class="chat-msg ai"><div class="chat-msg-avatar ai">O</div><div><div class="chat-msg-bubble"><div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div></div></div>`;
+    }
+    const isUser = m.role === 'user';
+    const avatarClass = isUser ? 'human' : 'ai';
+    const avatarText = isUser ? 'AY' : agentProfiles[agent].avatar;
+    let bubble = `<div class="chat-msg-bubble">${m.text}</div>`;
+    if (m.action) {
+      bubble += `<div class="chat-action-card">
+        <div class="chat-action-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg> ${m.action.title}</div>
+        <div class="chat-action-body">${m.action.body}</div>
+        <div class="chat-action-btns">
+          <button class="chat-action-btn approve" onclick="approveAction(this, '${m.action.id}')">Onayla</button>
+          <button class="chat-action-btn edit" onclick="editAction(this)">Düzenle ve Onayla</button>
+          <button class="chat-action-btn reject" onclick="rejectAction(this)">Reddet</button>
+        </div>
+      </div>`;
+    }
+    const time = m.time || '';
+    return `<div class="chat-msg ${isUser?'user':'ai'}"><div class="chat-msg-avatar ${avatarClass}">${avatarText}</div><div>${bubble}${time?`<div class="chat-msg-time">${time}</div>`:''}</div></div>`;
+  }).join('');
+  container.scrollTop = container.scrollHeight;
+}
+
+function sendChat() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+
+  const now = new Date();
+  const time = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+
+  chatHistories[currentChatAgent].push({ role: 'user', text, time });
+  renderMessages(currentChatAgent);
+
+  chatHistories[currentChatAgent].push({ role: 'typing' });
+  renderMessages(currentChatAgent);
+
+  setTimeout(() => {
+    chatHistories[currentChatAgent] = chatHistories[currentChatAgent].filter(m => m.role !== 'typing');
+    const response = generateResponse(text, currentChatAgent);
+    chatHistories[currentChatAgent].push(response);
+    renderMessages(currentChatAgent);
+  }, 1200 + Math.random() * 800);
+}
+
+function generateResponse(text, agent) {
+  const t = text.toLowerCase();
+  const now = new Date();
+  const time = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+
+  // Fatura scenario
+  if (t.includes('fatura') && (t.includes('mail') || t.includes('kategorize') || t.includes('çıkar'))) {
+    return { role:'ai', time, text:'Fatura maillerini otomatik işlemek için Support Agent\'a yeni bir skill atayacağım. Aşağıdaki yapılandırmayı inceleyip onaylayın:',
+      action: { id:'invoice', title:'Yeni Skill: invoice-extractor', body:'<strong>Agent:</strong> Support Agent<br><strong>Tetikleyici:</strong> Konu satırında "fatura" geçen mailler<br><strong>İşlem:</strong> PDF\'den fatura no, tutar, tarih çıkar &rarr; <code>finance_invoices</code> tablosuna kaydet<br><strong>Kategorizasyon:</strong> Tedarikçi, hizmet, lisans olarak otomatik sınıfla' }
+    };
+  }
+
+  // Performans scenario
+  if (t.includes('performans') || t.includes('rapor')) {
+    return { role:'ai', time, text:'Son 30 günlük agent performans özeti:<br><br><strong>En yüksek başarı:</strong> HR Assistant (%99.1)<br><strong>En hızlı yanıt:</strong> Onboarding Bot (0.6s)<br><strong>En çok etkileşim:</strong> Sales Copilot (3,241)<br><strong>En düşük maliyet:</strong> IT Helpdesk ($33)<br><br>Content Writer eğitim modunda ve %87.3 başarı oranıyla iyileşme gösteriyor. Detaylı rapor ister misiniz?' };
+  }
+
+  // Yeni agent scenario
+  if (t.includes('yeni') && (t.includes('agent') || t.includes('muhasebe') || t.includes('oluştur'))) {
+    const agentName = t.includes('muhasebe') ? 'Muhasebe Agent' : 'Yeni Agent';
+    return { role:'ai', time, text:`${agentName} oluşturmak için aşağıdaki yapılandırmayı hazırladım:`,
+      action: { id:'create', title:`Agent Oluştur: ${agentName}`, body:`<strong>Ad:</strong> ${agentName}<br><strong>Departman:</strong> Finans<br><strong>Model:</strong> Claude Sonnet 4.6<br><strong>Skill\'ler:</strong> <code>invoice-reader</code>, <code>expense-tracker</code>, <code>report-writer</code><br><strong>Kanallar:</strong> WebChat, E-posta<br><strong>System Prompt:</strong> "Sen bir muhasebe asistanısın. Faturaları işle, gider raporları oluştur, bütçe takibi yap..."` }
+    };
+  }
+
+  // Email yetkisi scenario
+  if (t.includes('email') && (t.includes('yetki') || t.includes('okuma') || t.includes('ver'))) {
+    const targetAgent = t.includes('sales') ? 'Sales Copilot' : 'İlgili Agent';
+    return { role:'ai', time, text:`${targetAgent} için email erişim yetkisi tanımlayacağım:`,
+      action: { id:'email', title:`Email Yetkisi: ${targetAgent}`, body:`<strong>Yetki türü:</strong> Okuma + Yanıtlama<br><strong>Kapsam:</strong> <code>sales@novatech.com.tr</code> gelen kutusu<br><strong>Filtre:</strong> "teklif", "sipariş", "müşteri" etiketli mailler<br><strong>Kısıtlama:</strong> Otomatik yanıt taslak olarak kaydedilir, gönderim için onay gerekir<br><strong>Skill:</strong> <code>email-composer v2.1</code> atanacak` }
+    };
+  }
+
+  // Default
+  return { role:'ai', time, text:'Anladım. Bu konuda size yardımcı olabilirim. Yapmamı istediğiniz işlemi biraz daha detaylandırır mısınız? Örneğin hangi agent üzerinde çalışmamı, ne tür bir değişiklik yapmamı istediğinizi belirtebilirsiniz.' };
+}
+
+function approveAction(btn, actionId) {
+  const card = btn.closest('.chat-action-card');
+  card.innerHTML = '<div style="display:flex;align-items:center;gap:8px;padding:4px 0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg><span style="font-size:13px;font-weight:500;color:var(--green-text)">Onaylandı ve uygulandı</span></div>';
+  const now = new Date();
+  const time = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+  setTimeout(() => {
+    chatHistories[currentChatAgent].push({ role:'ai', time, text:'Değişiklik başarıyla uygulandı! Agent yapılandırması güncellendi. Başka bir şey yapmamı ister misiniz?' });
+    renderMessages(currentChatAgent);
+  }, 600);
+}
+
+function editAction(btn) {
+  const body = btn.closest('.chat-action-card').querySelector('.chat-action-body');
+  body.setAttribute('contenteditable', 'true');
+  body.style.border = '1px solid var(--primary)';
+  body.style.borderRadius = '6px';
+  body.style.padding = '8px';
+  body.style.background = 'var(--primary-bg-subtle)';
+  body.focus();
+  btn.textContent = 'Düzenlemeyi Kaydet';
+  btn.onclick = function() {
+    body.removeAttribute('contenteditable');
+    body.style.border = 'none';
+    body.style.padding = '0';
+    body.style.background = 'none';
+    btn.textContent = 'Düzenle ve Onayla';
+    btn.onclick = function() { editAction(btn); };
+  };
+}
+
+function rejectAction(btn) {
+  const card = btn.closest('.chat-action-card');
+  card.innerHTML = '<div style="display:flex;align-items:center;gap:8px;padding:4px 0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg><span style="font-size:13px;font-weight:500;color:var(--red-text)">Reddedildi</span></div>';
+  const now = new Date();
+  const time = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+  setTimeout(() => {
+    chatHistories[currentChatAgent].push({ role:'ai', time, text:'Anladım, bu değişikliği uygulamayacağım. Farklı bir yapılandırma ister misiniz, yoksa başka bir konuda yardımcı olayım mı?' });
+    renderMessages(currentChatAgent);
+  }, 600);
+}
+
+// Init chat on load
+initChat('main');
+
+// ═══ TAB SWITCHING ═══
+document.querySelectorAll('.topnav-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.topnav-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+  });
+});
+
+document.querySelectorAll('.chart-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    tab.parentElement.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+  });
+});
+
+// ═══ i18n ═══
+const translations = {
+  tr: {
+    search: "Ara...",
+    sb_main: "Ana Menü",
+    sb_dashboard: "Dashboard",
+    sb_agents: "Agent'lar",
+    sb_company: "Kurum Profili",
+    sb_skills: "Skill Market",
+    sb_analytics_label: "Analitik",
+    sb_performance: "Performans",
+    sb_costs: "Maliyet",
+    sb_security: "Güvenlik",
+    sb_settings_label: "Sistem",
+    sb_users: "Kullanıcılar",
+    sb_settings: "Ayarlar",
+    hero_greeting: "Günaydın, Ahmet",
+    hero_subtitle: "12 aktif agent'ınız bugün toplam 847 etkileşim gerçekleştirdi. Tüm sistemler sorunsuz çalışıyor.",
+    hero_new_agent: "+ Yeni Agent",
+    hero_report: "Rapor İndir",
+    stat_active: "Aktif Agent",
+    stat_conversations: "Aylık Etkileşim",
+    stat_success: "Başarı Oranı",
+    stat_cost: "Aylık Maliyet",
+    agents_title: "Agent Galerisi",
+    agents_all: "Tümünü gör \u2192",
+    agent_sales_role: "Satış Departmanı",
+    agent_hr_role: "İnsan Kaynakları",
+    agent_content_role: "Pazarlama",
+    metric_conv: "Konuşma",
+    metric_success: "Başarı",
+    metric_response: "Yanıt",
+    chart_usage: "Etkileşim Trendi",
+    chart_7d: "7G",
+    chart_30d: "30G",
+    chart_90d: "90G",
+    activity_title: "Son Aktiviteler",
+    activity_all: "Tümü \u2192",
+    act_1: "yeni bir müşteri adayını CRM'e ekledi",
+    act_2: "izin talebini onay için yöneticiye iletti",
+    act_3: "eğitim verisi yetersiz uyarısı aldı",
+    act_4: "Yeni skill eklendi:",
+    act_5: "Günlük güvenlik taraması tamamlandı \u2014",
+    cost_title: "Model Kullanımı",
+    cost_period: "Bu Ay",
+    cost_budget: "Bütçe: $2,000 (%62 kullanıldı)",
+    quick_title: "Hızlı İşlemler",
+    qa_new: "Yeni Agent",
+    qa_skill: "Skill Ekle",
+    qa_integrate: "Entegrasyon",
+    qa_report: "Rapor Al",
+    qa_company: "Kurum Profili",
+    qa_monitor: "Canlı İzleme",
+    qa_workflow: "Workflow",
+    qa_settings: "Ayarlar",
+  },
+  en: {
+    search: "Search...",
+    sb_main: "Main Menu",
+    sb_dashboard: "Dashboard",
+    sb_agents: "Agents",
+    sb_company: "Company Profile",
+    sb_skills: "Skill Market",
+    sb_analytics_label: "Analytics",
+    sb_performance: "Performance",
+    sb_costs: "Costs",
+    sb_security: "Security",
+    sb_settings_label: "System",
+    sb_users: "Users",
+    sb_settings: "Settings",
+    hero_greeting: "Good morning, Ahmet",
+    hero_subtitle: "Your 12 active agents completed 847 interactions today. All systems running smoothly.",
+    hero_new_agent: "+ New Agent",
+    hero_report: "Download Report",
+    stat_active: "Active Agents",
+    stat_conversations: "Monthly Interactions",
+    stat_success: "Success Rate",
+    stat_cost: "Monthly Cost",
+    agents_title: "Agent Gallery",
+    agents_all: "View all \u2192",
+    agent_sales_role: "Sales Department",
+    agent_hr_role: "Human Resources",
+    agent_content_role: "Marketing",
+    metric_conv: "Chats",
+    metric_success: "Success",
+    metric_response: "Response",
+    chart_usage: "Interaction Trend",
+    chart_7d: "7D",
+    chart_30d: "30D",
+    chart_90d: "90D",
+    activity_title: "Recent Activity",
+    activity_all: "View all \u2192",
+    act_1: "added a new lead to CRM",
+    act_2: "forwarded leave request to manager for approval",
+    act_3: "received insufficient training data warning",
+    act_4: "New skill added:",
+    act_5: "Daily security scan completed \u2014",
+    cost_title: "Model Usage",
+    cost_period: "This Month",
+    cost_budget: "Budget: $2,000 (62% used)",
+    quick_title: "Quick Actions",
+    qa_new: "New Agent",
+    qa_skill: "Add Skill",
+    qa_integrate: "Integration",
+    qa_report: "Get Report",
+    qa_company: "Company Profile",
+    qa_monitor: "Live Monitor",
+    qa_workflow: "Workflow",
+    qa_settings: "Settings",
+  }
+};
+
+function setLang(lang) {
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.lang-btn[onclick="setLang('${lang}')"]`).classList.add('active');
+  const t = translations[lang];
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (t[key]) el.textContent = t[key];
+  });
+}
+</script>
+</body>
+</html>

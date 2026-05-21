@@ -1,0 +1,101 @@
+{
+  "name": "memory-tools",
+  "version": "1.0.0",
+  "type": "skill",
+  "displayName": "Hafıza Araçları",
+  "description": "Agent'a kullanıcılar ve konuşmalar hakkında bilgi hatırlama, anımsama ve unutma yetenekleri kazandırır.",
+  
+  "author": {
+    "name": "Orbicorp",
+    "email": "dev@orbicorp.ai"
+  },
+  
+  "icon": "🧠",
+  "category": "core",
+  "tags": ["memory", "hafıza", "hatırlama", "database"],
+  
+  "pricing": {
+    "model": "free"
+  },
+  
+  "compatibility": {
+    "orbicorpVersion": ">=1.0.0",
+    "providers": ["anthropic", "openai", "google"]
+  },
+  
+  "permissions": ["database.agentMemory.read", "database.agentMemory.write"],
+  
+  "tools": [
+    {
+      "name": "remember",
+      "description": "Kullanıcı hakkında önemli bir bilgiyi kalıcı olarak hafızaya kaydet. Tercihler, önemli tarihler, isimler gibi bilgiler için kullan.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "fact": {
+            "type": "string",
+            "description": "Hatırlanacak bilgi (örn: 'Kullanıcının adı Ahmet', 'Kahve içmeyi seviyor')"
+          },
+          "category": {
+            "type": "string",
+            "enum": ["FACT", "PREFERENCE", "LEARNING"],
+            "description": "Bilgi kategorisi: FACT (gerçek), PREFERENCE (tercih), LEARNING (öğrenilen)"
+          }
+        },
+        "required": ["fact"]
+      },
+      "handler": "builtin:memory.remember",
+      "examples": [
+        {
+          "input": { "fact": "Kullanıcının köpeğinin adı Max", "category": "FACT" },
+          "output": { "success": true, "message": "Bilgi hafızaya kaydedildi" }
+        }
+      ]
+    },
+    {
+      "name": "recall",
+      "description": "Hafızadan bilgi ara ve getir. Kullanıcı hakkında daha önce öğrenilen bilgileri hatırlamak için kullan.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Aranacak konu veya anahtar kelime"
+          },
+          "category": {
+            "type": "string",
+            "enum": ["FACT", "PREFERENCE", "LEARNING"],
+            "description": "Sadece belirli kategoride ara (opsiyonel)"
+          }
+        },
+        "required": ["query"]
+      },
+      "handler": "builtin:memory.recall",
+      "examples": [
+        {
+          "input": { "query": "köpek" },
+          "output": { "memories": ["Kullanıcının köpeğinin adı Max"] }
+        }
+      ]
+    },
+    {
+      "name": "forget",
+      "description": "Hafızadan belirli bir bilgiyi sil. Kullanıcı istediğinde veya bilgi artık geçerli değilse kullan.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "memoryId": {
+            "type": "string",
+            "description": "Silinecek hafıza kaydının ID'si"
+          }
+        },
+        "required": ["memoryId"]
+      },
+      "handler": "builtin:memory.forget"
+    }
+  ],
+  
+  "systemPromptAddition": "Kullanıcı hakkında önemli bilgileri (isim, tercihler, önemli tarihler) 'remember' tool'u ile kaydet. Konuşma başında 'recall' ile kullanıcı hakkında bildiklerini hatırla.",
+  
+  "readme": "# Hafıza Araçları\n\nBu skill, agent'ınıza kalıcı hafıza yeteneği kazandırır.\n\n## Özellikler\n- **remember**: Bilgi kaydetme\n- **recall**: Bilgi arama\n- **forget**: Bilgi silme\n\n## Kullanım\nSkill'i agent'a ekledikten sonra otomatik olarak aktif olur."
+}

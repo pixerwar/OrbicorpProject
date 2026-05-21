@@ -1,0 +1,273 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://orbicorp.com/schemas/package-manifest.json",
+  "title": "Orbicorp Package Manifest",
+  "description": "Orbicorp Skill Market paket tanım şeması",
+  "type": "object",
+  "required": ["name", "version", "type", "displayName", "description"],
+  
+  "properties": {
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$",
+      "description": "Paket benzersiz adı (slug)",
+      "examples": ["memory-tools", "web-search", "hr-assistant"]
+    },
+    
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Semantic versioning",
+      "examples": ["1.0.0", "2.1.3"]
+    },
+    
+    "type": {
+      "type": "string",
+      "enum": ["skill", "tool", "agent-template", "language-pack", "workflow-template"],
+      "description": "Paket tipi"
+    },
+    
+    "displayName": {
+      "type": "string",
+      "description": "Görünen ad (UI'da)",
+      "examples": ["Hafıza Araçları", "Web Arama"]
+    },
+    
+    "description": {
+      "type": "string",
+      "description": "Paket açıklaması"
+    },
+    
+    "author": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "url": { "type": "string", "format": "uri" }
+      },
+      "required": ["name"]
+    },
+    
+    "icon": {
+      "type": "string",
+      "description": "Emoji veya icon URL",
+      "examples": ["🧠", "🔍", "https://example.com/icon.png"]
+    },
+    
+    "category": {
+      "type": "string",
+      "enum": ["core", "productivity", "integration", "communication", "analytics", "automation", "custom"],
+      "description": "Market kategorisi"
+    },
+    
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Arama etiketleri",
+      "examples": [["memory", "database", "hatırlama"]]
+    },
+    
+    "pricing": {
+      "type": "object",
+      "properties": {
+        "model": { 
+          "type": "string", 
+          "enum": ["free", "one-time", "subscription"],
+          "default": "free"
+        },
+        "price": { "type": "number", "minimum": 0 },
+        "currency": { "type": "string", "default": "USD" }
+      },
+      "required": ["model"]
+    },
+    
+    "compatibility": {
+      "type": "object",
+      "properties": {
+        "orbicorpVersion": { "type": "string", "description": "Minimum Orbicorp sürümü" },
+        "providers": { 
+          "type": "array", 
+          "items": { "type": "string", "enum": ["anthropic", "openai", "google", "openrouter"] },
+          "description": "Desteklenen LLM sağlayıcıları"
+        }
+      }
+    },
+    
+    "permissions": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Gerekli izinler",
+      "examples": [["database.read", "database.write", "network.fetch", "email.send"]]
+    },
+    
+    "dependencies": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Bağımlı paketler",
+      "examples": [["memory-tools@^1.0.0"]]
+    },
+    
+    "tools": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/Tool" },
+      "description": "Paket içindeki tool'lar (skill ve tool tipleri için)"
+    },
+    
+    "systemPromptAddition": {
+      "type": "string",
+      "description": "Agent system prompt'una eklenecek metin"
+    },
+    
+    "agentTemplate": {
+      "$ref": "#/definitions/AgentTemplate",
+      "description": "Hazır agent şablonu (agent-template tipi için)"
+    },
+    
+    "translations": {
+      "$ref": "#/definitions/Translations",
+      "description": "Çeviriler (language-pack tipi için)"
+    },
+    
+    "workflow": {
+      "$ref": "#/definitions/WorkflowTemplate",
+      "description": "İş akışı şablonu (workflow-template tipi için)"
+    },
+    
+    "config": {
+      "type": "object",
+      "description": "Paket ayarları (API key, endpoint vs.)",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "type": { "type": "string", "enum": ["string", "number", "boolean", "secret"] },
+          "label": { "type": "string" },
+          "description": { "type": "string" },
+          "required": { "type": "boolean", "default": false },
+          "default": {}
+        }
+      }
+    },
+    
+    "readme": {
+      "type": "string",
+      "description": "README içeriği (Markdown)"
+    }
+  },
+  
+  "definitions": {
+    "Tool": {
+      "type": "object",
+      "required": ["name", "description", "parameters"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z_]+$",
+          "description": "Tool fonksiyon adı"
+        },
+        "description": {
+          "type": "string",
+          "description": "Tool açıklaması (LLM için)"
+        },
+        "parameters": {
+          "type": "object",
+          "description": "JSON Schema formatında parametreler",
+          "properties": {
+            "type": { "type": "string", "const": "object" },
+            "properties": { "type": "object" },
+            "required": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "handler": {
+          "type": "string",
+          "description": "Handler fonksiyon adı veya inline kod",
+          "examples": ["handleRemember", "builtin:remember"]
+        },
+        "returns": {
+          "type": "object",
+          "description": "Dönüş değeri şeması"
+        },
+        "examples": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "input": { "type": "object" },
+              "output": {}
+            }
+          }
+        }
+      }
+    },
+    
+    "AgentTemplate": {
+      "type": "object",
+      "required": ["name", "systemPrompt"],
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "department": { "type": "string" },
+        "systemPrompt": { "type": "string" },
+        "suggestedModel": {
+          "type": "object",
+          "properties": {
+            "provider": { "type": "string" },
+            "modelId": { "type": "string" }
+          }
+        },
+        "temperature": { "type": "number", "minimum": 0, "maximum": 2 },
+        "skills": { "type": "array", "items": { "type": "string" } },
+        "avatarUrl": { "type": "string" }
+      }
+    },
+    
+    "Translations": {
+      "type": "object",
+      "required": ["locale", "strings"],
+      "properties": {
+        "locale": { 
+          "type": "string", 
+          "pattern": "^[a-z]{2}(-[A-Z]{2})?$",
+          "examples": ["tr", "en", "de", "fr"]
+        },
+        "name": { "type": "string", "description": "Dil adı" },
+        "strings": {
+          "type": "object",
+          "additionalProperties": { "type": "string" },
+          "description": "Çeviri key-value çiftleri"
+        }
+      }
+    },
+    
+    "WorkflowTemplate": {
+      "type": "object",
+      "required": ["name", "steps"],
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "trigger": {
+          "type": "object",
+          "properties": {
+            "type": { "type": "string", "enum": ["manual", "schedule", "event", "webhook"] },
+            "config": { "type": "object" }
+          }
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "type": { "type": "string", "enum": ["agent", "condition", "action", "delay", "loop"] },
+              "config": { "type": "object" },
+              "next": { "type": "string" }
+            }
+          }
+        },
+        "variables": {
+          "type": "object",
+          "additionalProperties": { "type": "object" }
+        }
+      }
+    }
+  }
+}

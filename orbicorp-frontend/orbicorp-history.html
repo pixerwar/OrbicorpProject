@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orbicorp — Konuşma Geçmişi</title>
+<link rel="stylesheet" href="orbicorp-dark.css">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--primary:#635BFF;--primary-light:#7A73FF;--primary-bg:#F0EEFF;--primary-bg-subtle:#F8F7FF;--navy:#0A2540;--surface:#F6F9FC;--white:#FFFFFF;--border:#E3E8EE;--border-light:#EBEEF2;--text-primary:#0A2540;--text-secondary:#425466;--text-tertiary:#8792A2;--text-muted:#A3ACB9;--green:#0EA371;--green-bg:#EEFBF4;--green-text:#0C7D58;--amber:#D97706;--amber-bg:#FEF7E6;--amber-text:#92510A;--red:#DF1B41;--red-bg:#FDE8EC;--red-text:#A11534;--blue:#0570DE;--blue-bg:#E8F2FD;--blue-text:#0455A9;--radius-sm:6px;--radius-md:8px;--radius-lg:12px;--radius-xl:16px;--font:'Google Sans',-apple-system,BlinkMacSystemFont,sans-serif;--font-mono:'Google Sans Mono','SF Mono',monospace;--transition:0.2s cubic-bezier(0.4,0,0.2,1)}
+body{font-family:var(--font);background:var(--surface);color:var(--text-primary);-webkit-font-smoothing:antialiased;overflow-y:auto;min-height:100vh}
+
+/* TOPNAV (hidden in iframe) */
+.topnav{height:56px;background:var(--white);border-bottom:0.5px solid var(--border);display:flex;align-items:center;padding:0 24px;position:sticky;top:0;z-index:100}
+.topnav-brand{display:flex;align-items:center;gap:10px;margin-right:32px;text-decoration:none}
+.topnav-logo{width:32px;height:32px;background:linear-gradient(135deg,var(--primary),var(--navy));border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:14px}
+.topnav-name{font-size:16px;font-weight:700;color:var(--navy);letter-spacing:-0.3px}
+
+/* iframe detection */
+.in-iframe .topnav{display:none!important}
+.in-iframe .sidebar{display:none!important}
+.in-iframe .layout{margin-top:0!important;height:100vh!important}
+
+/* MAIN LAYOUT */
+.layout{display:flex;min-height:calc(100vh - 56px)}
+.sidebar{width:240px;background:var(--white);border-right:0.5px solid var(--border);padding:16px 12px;flex-shrink:0}
+.main{flex:1;padding:24px 32px;overflow-y:auto}
+
+/* PAGE HEADER */
+.page-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px}
+.page-head-left h2{font-size:18px;font-weight:600;color:var(--navy)}
+.page-head-left p{font-size:13px;color:var(--text-tertiary);margin-top:2px}
+.page-head-right{display:flex;gap:8px;align-items:center}
+
+/* Buttons */
+.btn{padding:8px 16px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;cursor:pointer;transition:all var(--transition);font-family:var(--font);display:inline-flex;align-items:center;gap:6px;border:0.5px solid var(--border);background:var(--white);color:var(--text-secondary)}
+.btn:hover{background:var(--surface);color:var(--text-primary);border-color:var(--primary)}
+.btn-primary{background:var(--primary);color:white;border-color:var(--primary)}
+.btn-primary:hover{background:var(--primary-light)}
+.btn svg{width:14px;height:14px}
+
+/* KPI ROW */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.kpi{background:var(--white);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:16px 18px}
+.kpi-label{font-size:12px;color:var(--text-tertiary);margin-bottom:4px;display:flex;align-items:center;gap:6px}
+.kpi-label svg{width:14px;height:14px}
+.kpi-value{font-size:24px;font-weight:700;color:var(--text-primary);letter-spacing:-0.5px}
+.kpi-sub{font-size:11px;font-weight:500;margin-top:4px;display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:999px}
+.kpi-sub.up{background:var(--green-bg);color:var(--green-text)}
+.kpi-sub.down{background:var(--red-bg);color:var(--red-text)}
+.kpi-sub.neutral{background:var(--surface);color:var(--text-tertiary)}
+
+/* FILTER BAR */
+.filter-bar{display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+.search-box{position:relative;flex:1;min-width:200px;max-width:360px}
+.search-box input{width:100%;padding:8px 12px 8px 36px;border:0.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:var(--font);color:var(--text-primary);background:var(--white);outline:none;transition:border-color var(--transition)}
+.search-box input:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-bg)}
+.search-box input::placeholder{color:var(--text-muted)}
+.search-box svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--text-muted)}
+.filter-select{padding:8px 30px 8px 12px;border:0.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:var(--font);color:var(--text-secondary);background:var(--white);outline:none;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238792A2' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;transition:border-color var(--transition)}
+.filter-select:focus{border-color:var(--primary)}
+.date-range{display:flex;align-items:center;gap:6px}
+.date-range input[type="date"]{padding:7px 10px;border:0.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px;font-family:var(--font);color:var(--text-secondary);background:var(--white);outline:none;cursor:pointer}
+.date-range input[type="date"]:focus{border-color:var(--primary)}
+.date-range-sep{font-size:11px;color:var(--text-muted)}
+.active-filters{display:flex;gap:6px;flex-wrap:wrap}
+.filter-tag{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:var(--primary-bg);color:var(--primary);font-size:11px;font-weight:500;border-radius:999px;cursor:pointer;transition:all var(--transition)}
+.filter-tag:hover{background:var(--primary);color:white}
+.filter-tag svg{width:12px;height:12px}
+
+/* CONVERSATION TABLE */
+.card{background:var(--white);border:0.5px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:14px}
+.card-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:0.5px solid var(--border-light)}
+.card-title{font-size:14px;font-weight:500;color:var(--text-primary);display:flex;align-items:center;gap:8px}
+.card-title svg{width:16px;height:16px;color:var(--primary)}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{padding:10px 16px;text-align:left;font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.04em;background:var(--surface);border-bottom:0.5px solid var(--border-light);white-space:nowrap;cursor:pointer;user-select:none;transition:color var(--transition)}
+th:hover{color:var(--text-primary)}
+th .sort-icon{display:inline-block;margin-left:4px;opacity:0.3;transition:opacity var(--transition)}
+th.sorted .sort-icon{opacity:1;color:var(--primary)}
+td{padding:12px 16px;font-size:13px;color:var(--text-secondary);border-bottom:0.5px solid var(--border-light);white-space:nowrap}
+tr{cursor:pointer;transition:background var(--transition)}
+tr:hover{background:var(--primary-bg-subtle)}
+tr:last-child td{border-bottom:none}
+
+/* Conversation row elements */
+.conv-agent{display:flex;align-items:center;gap:8px}
+.conv-agent-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.conv-agent-name{font-weight:500;color:var(--text-primary)}
+.conv-channel{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;background:var(--surface);border-radius:999px;font-size:11px;color:var(--text-tertiary)}
+.conv-channel svg{width:12px;height:12px}
+.conv-sentiment{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:500;padding:2px 8px;border-radius:999px}
+.conv-sentiment.positive{background:var(--green-bg);color:var(--green-text)}
+.conv-sentiment.neutral{background:var(--surface);color:var(--text-tertiary)}
+.conv-sentiment.negative{background:var(--red-bg);color:var(--red-text)}
+.conv-sentiment.mixed{background:var(--amber-bg);color:var(--amber-text)}
+.conv-status{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:500;padding:3px 10px;border-radius:999px}
+.conv-status.resolved{background:var(--green-bg);color:var(--green-text)}
+.conv-status.escalated{background:var(--red-bg);color:var(--red-text)}
+.conv-status.open{background:var(--blue-bg);color:var(--blue-text)}
+.conv-status.closed{background:var(--surface);color:var(--text-tertiary)}
+.conv-preview{max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-tertiary);font-size:12px}
+.conv-msgs{font-size:12px;color:var(--text-tertiary);font-weight:500}
+.conv-duration{font-size:12px;color:var(--text-tertiary)}
+.conv-rating{display:flex;gap:1px}
+.conv-rating svg{width:12px;height:12px}
+.conv-rating svg.filled{color:var(--amber);fill:var(--amber)}
+.conv-rating svg.empty{color:var(--border);fill:none}
+
+/* Pagination */
+.pagination{display:flex;align-items:center;justify-content:space-between;padding:12px 18px}
+.pagination-info{font-size:12px;color:var(--text-tertiary)}
+.pagination-btns{display:flex;gap:4px}
+.page-btn{width:32px;height:32px;border-radius:var(--radius-sm);border:0.5px solid var(--border);background:var(--white);color:var(--text-secondary);font-size:12px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all var(--transition);font-family:var(--font)}
+.page-btn:hover{border-color:var(--primary);color:var(--primary)}
+.page-btn.active{background:var(--primary);color:white;border-color:var(--primary)}
+.page-btn:disabled{opacity:0.4;cursor:default;border-color:var(--border);color:var(--text-muted)}
+.page-btn svg{width:14px;height:14px}
+
+/* CONVERSATION DETAIL MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(10,37,64,0.45);z-index:300;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.modal-overlay.open{display:flex}
+.modal{width:920px;max-width:95vw;max-height:90vh;background:var(--white);border-radius:var(--radius-xl);overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 80px rgba(0,0,0,0.18);animation:modalIn 0.3s ease}
+@keyframes modalIn{from{opacity:0;transform:translateY(16px) scale(0.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+.modal-head{padding:16px 20px;border-bottom:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.modal-head-left{display:flex;align-items:center;gap:12px}
+.modal-head-agent{display:flex;align-items:center;gap:8px}
+.modal-head-agent-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:white;background:linear-gradient(135deg,var(--primary),var(--navy))}
+.modal-head-agent-info h3{font-size:14px;font-weight:600;color:var(--text-primary)}
+.modal-head-agent-info span{font-size:11px;color:var(--text-tertiary)}
+.modal-head-right{display:flex;align-items:center;gap:6px}
+.modal-close{width:32px;height:32px;border-radius:var(--radius-sm);border:0.5px solid var(--border);background:var(--white);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-tertiary);transition:all var(--transition)}
+.modal-close:hover{background:var(--red-bg);color:var(--red);border-color:var(--red-bg)}
+.modal-close svg{width:16px;height:16px}
+
+/* Modal tabs */
+.modal-tabs{display:flex;gap:0;border-bottom:0.5px solid var(--border);padding:0 20px;flex-shrink:0;background:var(--surface)}
+.modal-tab{padding:10px 16px;font-size:12px;font-weight:500;color:var(--text-tertiary);cursor:pointer;border-bottom:2px solid transparent;transition:all var(--transition);font-family:var(--font);background:none;border-top:none;border-left:none;border-right:none}
+.modal-tab:hover{color:var(--text-primary)}
+.modal-tab.active{color:var(--primary);border-bottom-color:var(--primary)}
+
+/* Modal body */
+.modal-body{flex:1;overflow-y:auto;padding:0}
+.modal-section{display:none;padding:20px;animation:fadeUp 0.3s ease}
+.modal-section.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* Messages replay */
+.replay-messages{display:flex;flex-direction:column;gap:14px;max-width:680px;margin:0 auto}
+.replay-msg{display:flex;gap:10px;max-width:85%}
+.replay-msg.user{align-self:flex-end;flex-direction:row-reverse}
+.replay-msg-avatar{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;font-weight:600}
+.replay-msg-avatar.ai{background:linear-gradient(135deg,var(--primary),var(--navy));color:white}
+.replay-msg-avatar.human{background:var(--surface);color:var(--text-tertiary);border:0.5px solid var(--border)}
+.replay-msg-content{min-width:0}
+.replay-msg-bubble{padding:10px 14px;border-radius:14px;font-size:13px;line-height:1.6;color:var(--text-primary)}
+.replay-msg.user .replay-msg-bubble{background:var(--primary);color:white;border-bottom-right-radius:4px}
+.replay-msg.ai .replay-msg-bubble{background:var(--surface);border:0.5px solid var(--border-light);border-bottom-left-radius:4px}
+.replay-msg-time{font-size:10px;color:var(--text-muted);margin-top:3px;padding:0 4px}
+.replay-msg.user .replay-msg-time{text-align:right}
+.replay-msg-actions{display:flex;gap:4px;margin-top:4px}
+.replay-msg-action-card{background:var(--white);border:0.5px solid var(--border);border-radius:var(--radius-md);padding:10px 12px;margin-top:6px;font-size:12px}
+.replay-msg-action-card .action-label{font-size:11px;font-weight:600;color:var(--primary);margin-bottom:4px;display:flex;align-items:center;gap:4px}
+.replay-msg-action-card .action-label svg{width:12px;height:12px}
+.replay-msg-action-card .action-text{color:var(--text-secondary);line-height:1.5}
+
+/* Metadata panel */
+.meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.meta-card{background:var(--surface);border-radius:var(--radius-md);padding:14px 16px}
+.meta-card-label{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:8px}
+.meta-item{display:flex;align-items:center;justify-content:space-between;padding:6px 0;font-size:13px}
+.meta-item:not(:last-child){border-bottom:0.5px solid var(--border-light)}
+.meta-item-key{color:var(--text-tertiary)}
+.meta-item-val{font-weight:500;color:var(--text-primary)}
+
+/* Feedback section */
+.feedback-card{background:var(--surface);border-radius:var(--radius-md);padding:16px;margin-bottom:12px}
+.feedback-stars{display:flex;gap:2px;margin-bottom:8px}
+.feedback-stars svg{width:16px;height:16px}
+.feedback-text{font-size:13px;color:var(--text-secondary);line-height:1.5;font-style:italic}
+.feedback-author{font-size:11px;color:var(--text-muted);margin-top:6px}
+
+/* Timeline events */
+.timeline{display:flex;flex-direction:column;gap:0;padding-left:20px;border-left:2px solid var(--border-light);margin-left:8px}
+.timeline-item{position:relative;padding:8px 0 8px 20px}
+.timeline-item::before{content:'';position:absolute;left:-27px;top:12px;width:12px;height:12px;border-radius:50%;background:var(--white);border:2px solid var(--primary);z-index:1}
+.timeline-item.done::before{background:var(--green);border-color:var(--green)}
+.timeline-item.warn::before{background:var(--amber);border-color:var(--amber)}
+.timeline-item.error::before{background:var(--red);border-color:var(--red)}
+.timeline-time{font-size:10px;color:var(--text-muted);margin-bottom:2px}
+.timeline-text{font-size:12px;color:var(--text-secondary)}
+
+/* BADGE common */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:500}
+.badge-green{background:var(--green-bg);color:var(--green-text)}
+.badge-red{background:var(--red-bg);color:var(--red-text)}
+.badge-amber{background:var(--amber-bg);color:var(--amber-text)}
+.badge-blue{background:var(--blue-bg);color:var(--blue-text)}
+.badge-gray{background:var(--surface);color:var(--text-tertiary)}
+.badge-purple{background:var(--primary-bg);color:var(--primary)}
+
+/* Responsive */
+@media(max-width:1100px){.kpi-row{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:768px){
+  .kpi-row{grid-template-columns:1fr}
+  .filter-bar{flex-direction:column;align-items:stretch}
+  .search-box{max-width:100%}
+  .page-head{flex-direction:column;gap:12px}
+  .meta-grid{grid-template-columns:1fr}
+  .modal{max-width:100vw;max-height:100vh;border-radius:0}
+}
+
+/* Checkbox */
+.cb{width:16px;height:16px;border:1.5px solid var(--border);border-radius:4px;appearance:none;cursor:pointer;transition:all var(--transition);flex-shrink:0;position:relative}
+.cb:checked{background:var(--primary);border-color:var(--primary)}
+.cb:checked::after{content:'';position:absolute;left:4px;top:1px;width:5px;height:9px;border:solid white;border-width:0 2px 2px 0;transform:rotate(45deg)}
+
+/* Empty state */
+.empty-state{text-align:center;padding:60px 20px}
+.empty-state svg{width:48px;height:48px;color:var(--text-muted);margin-bottom:12px}
+.empty-state h3{font-size:15px;font-weight:600;color:var(--text-primary);margin-bottom:4px}
+.empty-state p{font-size:13px;color:var(--text-tertiary)}
+</style>
+</head>
+<body>
+
+<!-- TOPNAV (hidden when in iframe) -->
+<nav class="topnav">
+  <a class="topnav-brand">
+    <div class="topnav-logo">O</div>
+    <span class="topnav-name">Orbicorp</span>
+  </a>
+</nav>
+
+<div class="layout">
+<main class="main">
+
+  <!-- PAGE HEADER -->
+  <div class="page-head">
+    <div class="page-head-left">
+      <h2>Konuşma Geçmişi</h2>
+      <p>Tüm agent konuşmalarının arşivi — arama, filtreleme ve inceleme</p>
+    </div>
+    <div class="page-head-right">
+      <button class="btn" onclick="exportCSV()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Dışa Aktar
+      </button>
+      <button class="btn btn-primary" onclick="bulkActions()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        Toplu İşlem
+      </button>
+    </div>
+  </div>
+
+  <!-- KPI ROW -->
+  <div class="kpi-row">
+    <div class="kpi">
+      <div class="kpi-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Toplam Konuşma</div>
+      <div class="kpi-value">2,847</div>
+      <div class="kpi-sub up">↑ 12% bu ay</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Ort. Süre</div>
+      <div class="kpi-value">4m 32s</div>
+      <div class="kpi-sub down">↓ 8% iyileşme</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Çözüm Oranı</div>
+      <div class="kpi-value">%94.2</div>
+      <div class="kpi-sub up">↑ 3.1% artış</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg> Memnuniyet</div>
+      <div class="kpi-value">4.6<span style="font-size:14px;color:var(--text-muted)">/5</span></div>
+      <div class="kpi-sub up">↑ 0.3 puan</div>
+    </div>
+  </div>
+
+  <!-- FILTER BAR -->
+  <div class="filter-bar">
+    <div class="search-box">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" placeholder="Konuşma, müşteri veya içerik ara..." id="searchInput" oninput="filterConversations()">
+    </div>
+    <select class="filter-select" id="filterAgent" onchange="filterConversations()">
+      <option value="">Tüm Agent'lar</option>
+      <option value="sales">Sales Copilot</option>
+      <option value="support">Support Agent</option>
+      <option value="hr">HR Assistant</option>
+      <option value="content">Content Writer</option>
+      <option value="data">Data Analyst</option>
+      <option value="legal">Legal Advisor</option>
+      <option value="onboarding">Onboarding Bot</option>
+      <option value="it">IT Helpdesk</option>
+    </select>
+    <select class="filter-select" id="filterStatus" onchange="filterConversations()">
+      <option value="">Tüm Durumlar</option>
+      <option value="resolved">Çözüldü</option>
+      <option value="open">Açık</option>
+      <option value="escalated">Eskalasyon</option>
+      <option value="closed">Kapatıldı</option>
+    </select>
+    <select class="filter-select" id="filterSentiment" onchange="filterConversations()">
+      <option value="">Tüm Duygular</option>
+      <option value="positive">Pozitif</option>
+      <option value="neutral">Nötr</option>
+      <option value="negative">Negatif</option>
+      <option value="mixed">Karma</option>
+    </select>
+    <select class="filter-select" id="filterChannel" onchange="filterConversations()">
+      <option value="">Tüm Kanallar</option>
+      <option value="chat">Web Chat</option>
+      <option value="email">E-posta</option>
+      <option value="whatsapp">WhatsApp</option>
+      <option value="slack">Slack</option>
+      <option value="teams">Teams</option>
+    </select>
+    <div class="date-range">
+      <input type="date" id="dateFrom" value="2026-03-01" onchange="filterConversations()">
+      <span class="date-range-sep">—</span>
+      <input type="date" id="dateTo" value="2026-03-27" onchange="filterConversations()">
+    </div>
+  </div>
+
+  <!-- ACTIVE FILTERS -->
+  <div class="active-filters" id="activeFilters"></div>
+
+  <!-- CONVERSATION TABLE -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Konuşmalar <span style="font-weight:400;color:var(--text-muted);font-size:12px" id="resultCount">(24 sonuç)</span>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <span style="font-size:11px;color:var(--text-muted)">Sırala:</span>
+        <select class="filter-select" id="sortBy" onchange="sortConversations()" style="padding:5px 28px 5px 10px;font-size:11px">
+          <option value="date-desc">En Yeni</option>
+          <option value="date-asc">En Eski</option>
+          <option value="duration-desc">En Uzun</option>
+          <option value="messages-desc">En Çok Mesaj</option>
+          <option value="rating-desc">En Yüksek Puan</option>
+        </select>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:36px"><input type="checkbox" class="cb" id="selectAll" onchange="toggleSelectAll()"></th>
+            <th>Agent</th>
+            <th>Müşteri / Konu</th>
+            <th>Kanal</th>
+            <th>Mesaj</th>
+            <th>Süre</th>
+            <th>Duygu</th>
+            <th>Durum</th>
+            <th>Puan</th>
+            <th>Tarih</th>
+          </tr>
+        </thead>
+        <tbody id="convTableBody"></tbody>
+      </table>
+    </div>
+    <div class="pagination">
+      <div class="pagination-info" id="paginationInfo">1-15 / 24 konuşma gösteriliyor</div>
+      <div class="pagination-btns" id="paginationBtns"></div>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<!-- CONVERSATION DETAIL MODAL -->
+<div class="modal-overlay" id="detailOverlay" onclick="if(event.target===this)closeDetail()">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-head-left">
+        <div class="modal-head-agent" id="modalAgent"></div>
+        <div id="modalBadges" style="display:flex;gap:6px;margin-left:8px"></div>
+      </div>
+      <div class="modal-head-right">
+        <button class="btn" onclick="exportSingleConv()" style="padding:6px 12px;font-size:11px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:12px;height:12px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Dışa Aktar
+        </button>
+        <button class="modal-close" onclick="closeDetail()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+      </div>
+    </div>
+
+    <div class="modal-tabs">
+      <button class="modal-tab active" onclick="switchModalTab(this,'tabMessages')">Mesajlar</button>
+      <button class="modal-tab" onclick="switchModalTab(this,'tabMeta')">Detaylar</button>
+      <button class="modal-tab" onclick="switchModalTab(this,'tabTimeline')">Zaman Çizelgesi</button>
+      <button class="modal-tab" onclick="switchModalTab(this,'tabFeedback')">Geri Bildirim</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="modal-section active" id="tabMessages"></div>
+      <div class="modal-section" id="tabMeta"></div>
+      <div class="modal-section" id="tabTimeline"></div>
+      <div class="modal-section" id="tabFeedback"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══ IFRAME DETECTION ═══
+(function(){
+  if(window.self!==window.top){
+    document.body.classList.add("in-iframe");
+    try{ var pt=window.parent.document.documentElement.getAttribute("data-theme");
+      if(pt)document.documentElement.setAttribute("data-theme",pt);
+    }catch(e){}
+    window.addEventListener("message",function(e){
+      if(e.data&&e.data.type==="theme")document.documentElement.setAttribute("data-theme",e.data.value);
+    });
+  }
+})();
+
+// ═══ DEMO DATA ═══
+const agents = {
+  sales:{name:'Sales Copilot',color:'#635BFF',short:'SC'},
+  support:{name:'Support Agent',color:'#D97706',short:'SA'},
+  hr:{name:'HR Assistant',color:'#0EA371',short:'HR'},
+  content:{name:'Content Writer',color:'#0570DE',short:'CW'},
+  data:{name:'Data Analyst',color:'#0EA371',short:'DA'},
+  legal:{name:'Legal Advisor',color:'#8792A2',short:'LA'},
+  onboarding:{name:'Onboarding Bot',color:'#993556',short:'OB'},
+  it:{name:'IT Helpdesk',color:'#DF1B41',short:'IT'}
+};
+
+const conversations = [
+  {id:1,agent:'sales',customer:'Mehmet Aksoy',subject:'Enterprise plan fiyat teklifi',channel:'chat',messages:18,duration:'6m 42s',durationSec:402,sentiment:'positive',status:'resolved',rating:5,date:'2026-03-27T14:30:00',preview:'Merhaba, 50+ kullanıcı için enterprise planı hakkında bilgi almak istiyorum...'},
+  {id:2,agent:'support',customer:'Ayşe Kara',subject:'Fatura tutarı yanlış görünüyor',channel:'email',messages:12,duration:'8m 15s',durationSec:495,sentiment:'negative',status:'escalated',rating:2,date:'2026-03-27T13:10:00',preview:'Merhaba, bu ayki faturam geçen aya göre %40 daha yüksek. Neden olduğunu...'},
+  {id:3,agent:'hr',customer:'İç Talep — Elif Demir',subject:'Yıllık izin bakiyesi sorgulama',channel:'slack',messages:6,duration:'2m 10s',durationSec:130,sentiment:'positive',status:'resolved',rating:5,date:'2026-03-27T11:45:00',preview:'Merhaba HR, kalan yıllık izin günlerimi öğrenebilir miyim?'},
+  {id:4,agent:'support',customer:'Can Yıldız',subject:'API rate limit hatası',channel:'chat',messages:22,duration:'12m 30s',durationSec:750,sentiment:'mixed',status:'resolved',rating:4,date:'2026-03-27T10:20:00',preview:'API çağrılarımda sürekli 429 hatası alıyorum. Rate limit nedir?'},
+  {id:5,agent:'sales',customer:'Deniz Yılmaz',subject:'Demo talebi — 200 kullanıcı',channel:'chat',messages:14,duration:'5m 50s',durationSec:350,sentiment:'positive',status:'resolved',rating:5,date:'2026-03-26T16:00:00',preview:'Şirketimiz için bir demo planlamak istiyoruz. Yaklaşık 200 kişilik...'},
+  {id:6,agent:'content',customer:'Pazarlama Ekibi',subject:'Blog yazısı taslağı — AI Trendleri',channel:'slack',messages:8,duration:'3m 20s',durationSec:200,sentiment:'positive',status:'closed',rating:4,date:'2026-03-26T14:30:00',preview:'Bu haftaki blog yazısı için AI trendleri konusunda bir taslak hazırlayabilir misin?'},
+  {id:7,agent:'it',customer:'Serkan Hakan',subject:'VPN bağlantı sorunu',channel:'teams',messages:16,duration:'9m 45s',durationSec:585,sentiment:'negative',status:'escalated',rating:2,date:'2026-03-26T11:15:00',preview:'VPN\'e bağlanamıyorum, "connection timeout" hatası alıyorum sürekli...'},
+  {id:8,agent:'data',customer:'CFO — Mert Aydın',subject:'Q1 gelir analizi raporu',channel:'email',messages:4,duration:'1m 30s',durationSec:90,sentiment:'positive',status:'resolved',rating:5,date:'2026-03-26T09:00:00',preview:'Q1 gelir analizini hazırlayıp bana gönderir misin?'},
+  {id:9,agent:'legal',customer:'Hukuk Departmanı',subject:'NDA şablonu güncelleme',channel:'email',messages:10,duration:'7m 20s',durationSec:440,sentiment:'neutral',status:'closed',rating:3,date:'2026-03-25T15:30:00',preview:'Mevcut NDA şablonumuzun KVKK uyumlu olup olmadığını kontrol eder misin?'},
+  {id:10,agent:'onboarding',customer:'Yeni Çalışan — Ahmet B.',subject:'Onboarding süreci başlatma',channel:'chat',messages:20,duration:'11m 00s',durationSec:660,sentiment:'positive',status:'resolved',rating:4,date:'2026-03-25T10:00:00',preview:'Hoş geldiniz Ahmet! Onboarding sürecinizi başlatıyorum...'},
+  {id:11,agent:'support',customer:'Zehra Koç',subject:'Hesap şifre sıfırlama',channel:'whatsapp',messages:8,duration:'3m 10s',durationSec:190,sentiment:'neutral',status:'resolved',rating:4,date:'2026-03-25T09:20:00',preview:'Şifremi unuttum, sıfırlama maili gelmiyor...'},
+  {id:12,agent:'sales',customer:'Burak Tunç',subject:'Yıllık plan indirim talebi',channel:'chat',messages:16,duration:'7m 55s',durationSec:475,sentiment:'mixed',status:'resolved',rating:3,date:'2026-03-24T16:45:00',preview:'Yıllık plana geçmek istiyorum ama fiyat biraz yüksek. İndirim yapabilir misiniz?'},
+  {id:13,agent:'hr',customer:'İç Talep — Fatma K.',subject:'Yan haklar bilgilendirme',channel:'slack',messages:10,duration:'4m 20s',durationSec:260,sentiment:'positive',status:'closed',rating:5,date:'2026-03-24T14:00:00',preview:'Yeni yan haklar paketindeki değişiklikleri öğrenebilir miyim?'},
+  {id:14,agent:'support',customer:'Ali Vural',subject:'Entegrasyon API dokümantasyonu',channel:'chat',messages:24,duration:'15m 10s',durationSec:910,sentiment:'positive',status:'resolved',rating:5,date:'2026-03-24T11:30:00',preview:'Salesforce entegrasyonu için API dokümantasyonuna ihtiyacım var...'},
+  {id:15,agent:'it',customer:'Mert Kaya',subject:'MacBook disk doldu uyarısı',channel:'teams',messages:6,duration:'2m 50s',durationSec:170,sentiment:'neutral',status:'resolved',rating:4,date:'2026-03-24T09:00:00',preview:'Diskimde yer kalmadı diyor ama sadece %60 dolu görünüyor...'},
+  {id:16,agent:'sales',customer:'Nilgün Aras',subject:'Startup planı özellikleri',channel:'whatsapp',messages:12,duration:'4m 40s',durationSec:280,sentiment:'positive',status:'resolved',rating:4,date:'2026-03-23T15:20:00',preview:'Startup planınızda kaç agent kullanabiliyoruz?'},
+  {id:17,agent:'content',customer:'Pazarlama Ekibi',subject:'LinkedIn paylaşım serisi',channel:'slack',messages:14,duration:'6m 10s',durationSec:370,sentiment:'positive',status:'closed',rating:5,date:'2026-03-23T13:00:00',preview:'Haftalık LinkedIn paylaşım serisi için 5 içerik taslağı hazırlar mısın?'},
+  {id:18,agent:'support',customer:'Derya Çelik',subject:'Webhook tetiklenmiyor',channel:'email',messages:18,duration:'10m 25s',durationSec:625,sentiment:'negative',status:'resolved',rating:3,date:'2026-03-23T10:45:00',preview:'Webhook endpointimize istek gelmiyor. Status 200 dönüyor ama payload boş...'},
+  {id:19,agent:'data',customer:'VP Sales — Elif Demir',subject:'Haftalık satış dashboard güncellemesi',channel:'slack',messages:6,duration:'2m 00s',durationSec:120,sentiment:'positive',status:'resolved',rating:5,date:'2026-03-22T17:00:00',preview:'Dashboard verilerini güncelle, bu haftaki kapatılan deal\'ları ekle...'},
+  {id:20,agent:'onboarding',customer:'Yeni Çalışan — Elif K.',subject:'Eksik doküman hatırlatma',channel:'email',messages:4,duration:'1m 15s',durationSec:75,sentiment:'neutral',status:'open',rating:0,date:'2026-03-22T14:30:00',preview:'Elif, onboarding süreciniz için sağlık raporunuz henüz yüklenmedi...'},
+  {id:21,agent:'legal',customer:'Tedarikçi — ABC Ltd.',subject:'Sözleşme risk analizi',channel:'email',messages:8,duration:'5m 30s',durationSec:330,sentiment:'neutral',status:'resolved',rating:4,date:'2026-03-22T11:00:00',preview:'Yeni tedarikçi sözleşmesindeki risk maddelerini analiz edebilir misin?'},
+  {id:22,agent:'support',customer:'Kemal Özdemir',subject:'İki faktörlü doğrulama sorunu',channel:'chat',messages:10,duration:'4m 50s',durationSec:290,sentiment:'mixed',status:'resolved',rating:3,date:'2026-03-21T16:15:00',preview:'2FA kodları telefonuma gelmiyor artık. Başka bir yöntem var mı?'},
+  {id:23,agent:'hr',customer:'İç Talep — Tüm Çalışanlar',subject:'Şirket etkinliği duyurusu',channel:'slack',messages:2,duration:'0m 45s',durationSec:45,sentiment:'positive',status:'closed',rating:0,date:'2026-03-21T10:00:00',preview:'28 Mart Cuma günü saat 18:00\'da şirket happy hour etkinliğimiz var...'},
+  {id:24,agent:'sales',customer:'Gökhan Erdoğan',subject:'Rakip karşılaştırma sorusu',channel:'chat',messages:20,duration:'8m 30s',durationSec:510,sentiment:'mixed',status:'resolved',rating:4,date:'2026-03-21T09:30:00',preview:'Sizin ürününüz ile AcmeSoft arasındaki farklar nelerdir?'}
+];
+
+// Demo messages for detail modal
+const demoMessages = {
+  1:[
+    {role:'user',text:'Merhaba, 50+ kullanıcı için enterprise planı hakkında bilgi almak istiyorum.',time:'14:30'},
+    {role:'ai',text:'Merhaba Mehmet Bey, hoş geldiniz! Enterprise planımız 50+ kullanıcı için özel fiyatlandırma sunuyor. Size birkaç soru sorayım ihtiyaçlarınızı anlamak için.',time:'14:30'},
+    {role:'user',text:'Evet, tabii. Şu an 52 kişilik bir satış ekibimiz var.',time:'14:31'},
+    {role:'ai',text:'Harika! 52 kişilik ekip için Enterprise paketimiz şu avantajları sunuyor:',time:'14:31',action:{label:'Fiyat Teklifi Oluşturuldu',text:'Enterprise Plan — 52 kullanıcı\n• Aylık: $2,340/ay ($45/kullanıcı)\n• Yıllık: $22,464/yıl ($36/kullanıcı, %20 indirim)\n• Özel SLA: 99.9% uptime garantisi\n• Dedicated müşteri temsilcisi'}},
+    {role:'user',text:'Yıllık plan çok makul görünüyor. Demo ayarlayabilir miyiz?',time:'14:33'},
+    {role:'ai',text:'Kesinlikle! 30 Mart Pazartesi 14:00 veya 31 Mart Salı 10:00 müsait. Hangisi size uyar?',time:'14:33'},
+    {role:'user',text:'Pazartesi 14:00 olsun.',time:'14:34'},
+    {role:'ai',text:'Mükemmel! Demo randevunuz oluşturuldu. Takvim davetini mehmet.aksoy@novatech.com adresine gönderdim. Başka bir sorunuz var mı?',time:'14:34',action:{label:'Takvim Etkinliği Oluşturuldu',text:'Demo — Enterprise Plan\n30 Mart 2026, 14:00-14:45\nKatılımcılar: Mehmet Aksoy, Sales Ekibi'}},
+    {role:'user',text:'Harika, teşekkürler! Demo\'da görüşürüz.',time:'14:35'},
+    {role:'ai',text:'Rica ederim Mehmet Bey! Demo\'da görüşmek üzere. İyi günler! 😊',time:'14:35'}
+  ],
+  2:[
+    {role:'user',text:'Merhaba, bu ayki faturam geçen aya göre %40 daha yüksek. Neden olduğunu açıklayabilir misiniz?',time:'13:10'},
+    {role:'ai',text:'Merhaba Ayşe Hanım, faturanızı kontrol ediyorum...',time:'13:10'},
+    {role:'ai',text:'Faturanızı inceledim. Artışın sebebi Mart ayında eklenen 3 yeni agent ve API kullanım artışı. Detayları paylaşıyorum:',time:'13:11',action:{label:'Fatura Analizi',text:'Şubat: $420 → Mart: $588 (+%40)\n• +3 Agent lisansı: $90\n• API kullanım fazlası: $48\n• Token artışı: $30'}},
+    {role:'user',text:'Bu agentları ben eklemedim! Kim eklemiş bunları?',time:'13:13'},
+    {role:'ai',text:'Audit log\'a baktım — 5 Mart tarihinde Mert Kaya (Admin) tarafından eklenmiş. İsterseniz yöneticinize doğrulama için iletebilirim.',time:'13:14'},
+    {role:'user',text:'Evet lütfen, bu onaysız bir işlem. Üst yöneticime de bildirin.',time:'13:15'},
+    {role:'ai',text:'Anlaşıldı. Bu konuyu eskalasyon sürecine alıyorum. Yöneticiniz ve finans ekibine bildirim gönderiyorum.',time:'13:15',action:{label:'⚠ Eskalasyon Başlatıldı',text:'Konu: Onaysız agent ekleme — fatura etkisi\nSeviye: P2 (Yüksek)\nBildirilen: Elif Demir (Yönetici), Burak Tunç (Finans)'}}
+  ]
+};
+
+// ═══ RENDER TABLE ═══
+let filteredConvs = [...conversations];
+const PER_PAGE = 15;
+let currentPage = 1;
+
+function renderTable() {
+  const start = (currentPage - 1) * PER_PAGE;
+  const pageData = filteredConvs.slice(start, start + PER_PAGE);
+  const tbody = document.getElementById('convTableBody');
+
+  tbody.innerHTML = pageData.map(c => {
+    const a = agents[c.agent];
+    const stars = renderStars(c.rating);
+    const dateStr = formatDate(c.date);
+    return `<tr onclick="openDetail(${c.id})">
+      <td><input type="checkbox" class="cb conv-cb" data-id="${c.id}" onclick="event.stopPropagation()"></td>
+      <td><div class="conv-agent"><span class="conv-agent-dot" style="background:${a.color}"></span><span class="conv-agent-name">${a.name}</span></div></td>
+      <td><div><div style="font-weight:500;color:var(--text-primary);font-size:13px">${c.customer}</div><div class="conv-preview">${c.subject}</div></div></td>
+      <td><span class="conv-channel">${channelIcon(c.channel)} ${channelLabel(c.channel)}</span></td>
+      <td><span class="conv-msgs">${c.messages}</span></td>
+      <td><span class="conv-duration">${c.duration}</span></td>
+      <td><span class="conv-sentiment ${c.sentiment}">${sentimentLabel(c.sentiment)}</span></td>
+      <td><span class="conv-status ${c.status}">${statusLabel(c.status)}</span></td>
+      <td>${stars}</td>
+      <td style="font-size:12px;color:var(--text-tertiary)">${dateStr}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('resultCount').textContent = `(${filteredConvs.length} sonuç)`;
+  document.getElementById('paginationInfo').textContent = `${start+1}-${Math.min(start+PER_PAGE, filteredConvs.length)} / ${filteredConvs.length} konuşma gösteriliyor`;
+  renderPagination();
+}
+
+function renderPagination() {
+  const totalPages = Math.ceil(filteredConvs.length / PER_PAGE);
+  const container = document.getElementById('paginationBtns');
+  let html = `<button class="page-btn" onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></button>`;
+  for(let i=1;i<=totalPages;i++){
+    html += `<button class="page-btn ${i===currentPage?'active':''}" onclick="goPage(${i})">${i}</button>`;
+  }
+  html += `<button class="page-btn" onclick="goPage(${currentPage+1})" ${currentPage===totalPages?'disabled':''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>`;
+  container.innerHTML = html;
+}
+
+function goPage(p) {
+  const totalPages = Math.ceil(filteredConvs.length / PER_PAGE);
+  if(p<1||p>totalPages) return;
+  currentPage = p;
+  renderTable();
+}
+
+// ═══ FILTERS ═══
+function filterConversations() {
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const agent = document.getElementById('filterAgent').value;
+  const status = document.getElementById('filterStatus').value;
+  const sentiment = document.getElementById('filterSentiment').value;
+  const channel = document.getElementById('filterChannel').value;
+  const dateFrom = document.getElementById('dateFrom').value;
+  const dateTo = document.getElementById('dateTo').value;
+
+  filteredConvs = conversations.filter(c => {
+    if(search && !c.customer.toLowerCase().includes(search) && !c.subject.toLowerCase().includes(search) && !c.preview.toLowerCase().includes(search)) return false;
+    if(agent && c.agent !== agent) return false;
+    if(status && c.status !== status) return false;
+    if(sentiment && c.sentiment !== sentiment) return false;
+    if(channel && c.channel !== channel) return false;
+    if(dateFrom) { const d = c.date.split('T')[0]; if(d < dateFrom) return false; }
+    if(dateTo) { const d = c.date.split('T')[0]; if(d > dateTo) return false; }
+    return true;
+  });
+
+  currentPage = 1;
+  renderTable();
+  renderActiveFilters();
+}
+
+function renderActiveFilters() {
+  const tags = [];
+  const agent = document.getElementById('filterAgent');
+  const status = document.getElementById('filterStatus');
+  const sentiment = document.getElementById('filterSentiment');
+  const channel = document.getElementById('filterChannel');
+  if(agent.value) tags.push({label:agent.options[agent.selectedIndex].text, clear:()=>{agent.value='';filterConversations();}});
+  if(status.value) tags.push({label:status.options[status.selectedIndex].text, clear:()=>{status.value='';filterConversations();}});
+  if(sentiment.value) tags.push({label:sentiment.options[sentiment.selectedIndex].text, clear:()=>{sentiment.value='';filterConversations();}});
+  if(channel.value) tags.push({label:channel.options[channel.selectedIndex].text, clear:()=>{channel.value='';filterConversations();}});
+
+  const container = document.getElementById('activeFilters');
+  if(tags.length === 0){ container.innerHTML = ''; container.style.marginBottom = '0'; return; }
+  container.style.marginBottom = '12px';
+  container.innerHTML = tags.map((t,i) => `<span class="filter-tag" onclick="clearFilter(${i})">${t.label} <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg></span>`).join('');
+  // store clear functions
+  container._clears = tags.map(t => t.clear);
+}
+function clearFilter(i) {
+  const container = document.getElementById('activeFilters');
+  if(container._clears && container._clears[i]) container._clears[i]();
+}
+
+function sortConversations() {
+  const sort = document.getElementById('sortBy').value;
+  const [key, dir] = sort.split('-');
+  filteredConvs.sort((a,b) => {
+    let va, vb;
+    if(key==='date'){ va=new Date(a.date); vb=new Date(b.date); }
+    else if(key==='duration'){ va=a.durationSec; vb=b.durationSec; }
+    else if(key==='messages'){ va=a.messages; vb=b.messages; }
+    else if(key==='rating'){ va=a.rating; vb=b.rating; }
+    return dir==='desc' ? vb-va : va-vb;
+  });
+  currentPage = 1;
+  renderTable();
+}
+
+// ═══ HELPERS ═══
+function channelIcon(ch) {
+  const icons = {
+    chat:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+    email:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>',
+    whatsapp:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>',
+    slack:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14.5 10c-.83 0-1.5-.67-1.5-1.5v-5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5v5c0 .83-.67 1.5-1.5 1.5z"/><path d="M20.5 10H19V8.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>',
+    teams:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>'
+  };
+  return icons[ch] || icons.chat;
+}
+function channelLabel(ch) {
+  return {chat:'Web Chat',email:'E-posta',whatsapp:'WhatsApp',slack:'Slack',teams:'Teams'}[ch] || ch;
+}
+function sentimentLabel(s) {
+  return {positive:'Pozitif',neutral:'Nötr',negative:'Negatif',mixed:'Karma'}[s] || s;
+}
+function statusLabel(s) {
+  return {resolved:'Çözüldü',escalated:'Eskalasyon',open:'Açık',closed:'Kapatıldı'}[s] || s;
+}
+function renderStars(r) {
+  if(!r) return '<span style="font-size:11px;color:var(--text-muted)">—</span>';
+  let html = '<div class="conv-rating">';
+  for(let i=1;i<=5;i++){
+    html += i<=r
+      ? '<svg viewBox="0 0 24 24" class="filled"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>'
+      : '<svg viewBox="0 0 24 24" class="empty" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+  }
+  return html + '</div>';
+}
+function formatDate(d) {
+  const dt = new Date(d);
+  const now = new Date();
+  const diff = now - dt;
+  if(diff < 3600000) return Math.floor(diff/60000) + ' dk önce';
+  if(diff < 86400000) return Math.floor(diff/3600000) + ' saat önce';
+  const day = dt.getDate().toString().padStart(2,'0');
+  const month = (dt.getMonth()+1).toString().padStart(2,'0');
+  return `${day}.${month}.${dt.getFullYear()} ${dt.getHours().toString().padStart(2,'0')}:${dt.getMinutes().toString().padStart(2,'0')}`;
+}
+
+// ═══ DETAIL MODAL ═══
+let currentConvId = null;
+
+function openDetail(id) {
+  currentConvId = id;
+  const c = conversations.find(x => x.id === id);
+  if(!c) return;
+  const a = agents[c.agent];
+
+  // Header
+  document.getElementById('modalAgent').innerHTML = `
+    <div class="modal-head-agent-avatar" style="background:linear-gradient(135deg,${a.color},${a.color}dd)">${a.short}</div>
+    <div class="modal-head-agent-info">
+      <h3>${c.customer} — ${c.subject}</h3>
+      <span>${a.name} · ${channelLabel(c.channel)} · ${formatDate(c.date)}</span>
+    </div>`;
+  document.getElementById('modalBadges').innerHTML = `
+    <span class="conv-status ${c.status}">${statusLabel(c.status)}</span>
+    <span class="conv-sentiment ${c.sentiment}">${sentimentLabel(c.sentiment)}</span>`;
+
+  // Messages tab
+  const msgs = demoMessages[id] || generateDemoMessages(c);
+  document.getElementById('tabMessages').innerHTML = `<div class="replay-messages">${msgs.map(m => `
+    <div class="replay-msg ${m.role==='user'?'user':'ai'}">
+      <div class="replay-msg-avatar ${m.role==='user'?'human':'ai'}">${m.role==='user'?'MÜ':a.short}</div>
+      <div class="replay-msg-content">
+        <div class="replay-msg-bubble">${m.text}</div>
+        ${m.action ? `<div class="replay-msg-action-card"><div class="action-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> ${m.action.label}</div><div class="action-text" style="white-space:pre-line">${m.action.text}</div></div>` : ''}
+        <div class="replay-msg-time">${m.time}</div>
+      </div>
+    </div>`).join('')}</div>`;
+
+  // Metadata tab
+  document.getElementById('tabMeta').innerHTML = `
+    <div class="meta-grid">
+      <div class="meta-card">
+        <div class="meta-card-label">Konuşma Bilgileri</div>
+        <div class="meta-item"><span class="meta-item-key">Konuşma ID</span><span class="meta-item-val">#CONV-${String(c.id).padStart(5,'0')}</span></div>
+        <div class="meta-item"><span class="meta-item-key">Agent</span><span class="meta-item-val">${a.name}</span></div>
+        <div class="meta-item"><span class="meta-item-key">Kanal</span><span class="meta-item-val">${channelLabel(c.channel)}</span></div>
+        <div class="meta-item"><span class="meta-item-key">Mesaj Sayısı</span><span class="meta-item-val">${c.messages}</span></div>
+        <div class="meta-item"><span class="meta-item-key">Süre</span><span class="meta-item-val">${c.duration}</span></div>
+        <div class="meta-item"><span class="meta-item-key">İlk Yanıt</span><span class="meta-item-val">1.2 saniye</span></div>
+      </div>
+      <div class="meta-card">
+        <div class="meta-card-label">Müşteri Bilgileri</div>
+        <div class="meta-item"><span class="meta-item-key">İsim</span><span class="meta-item-val">${c.customer}</span></div>
+        <div class="meta-item"><span class="meta-item-key">E-posta</span><span class="meta-item-val">${c.customer.split(' ')[0].toLowerCase()}@novatech.com</span></div>
+        <div class="meta-item"><span class="meta-item-key">Önceki Konuşma</span><span class="meta-item-val">${Math.floor(Math.random()*15+1)} kez</span></div>
+        <div class="meta-item"><span class="meta-item-key">Müşteri Segmenti</span><span class="meta-item-val">${['Enterprise','Startup','SMB','İç Kullanıcı'][Math.floor(Math.random()*4)]}</span></div>
+      </div>
+      <div class="meta-card">
+        <div class="meta-card-label">AI Metrikleri</div>
+        <div class="meta-item"><span class="meta-item-key">Token Kullanımı</span><span class="meta-item-val">${(c.messages * 120 + Math.floor(Math.random()*500)).toLocaleString()} token</span></div>
+        <div class="meta-item"><span class="meta-item-key">Tahmini Maliyet</span><span class="meta-item-val">$${(c.messages * 0.003).toFixed(3)}</span></div>
+        <div class="meta-item"><span class="meta-item-key">Model</span><span class="meta-item-val">Claude Sonnet 4</span></div>
+        <div class="meta-item"><span class="meta-item-key">Güven Skoru</span><span class="meta-item-val">${(85 + Math.floor(Math.random()*14))}%</span></div>
+      </div>
+      <div class="meta-card">
+        <div class="meta-card-label">Etiketler & Kategoriler</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">
+          <span class="badge badge-purple">${c.agent}</span>
+          <span class="badge badge-blue">${channelLabel(c.channel)}</span>
+          <span class="badge ${c.sentiment==='positive'?'badge-green':c.sentiment==='negative'?'badge-red':c.sentiment==='mixed'?'badge-amber':'badge-gray'}">${sentimentLabel(c.sentiment)}</span>
+          <span class="badge badge-gray">${c.subject.split(' ').slice(0,2).join(' ')}</span>
+        </div>
+      </div>
+    </div>`;
+
+  // Timeline tab
+  const timeline = generateTimeline(c);
+  document.getElementById('tabTimeline').innerHTML = `
+    <div style="max-width:600px">
+      <div class="timeline">${timeline.map(t => `
+        <div class="timeline-item ${t.type}">
+          <div class="timeline-time">${t.time}</div>
+          <div class="timeline-text">${t.text}</div>
+        </div>`).join('')}
+      </div>
+    </div>`;
+
+  // Feedback tab
+  document.getElementById('tabFeedback').innerHTML = c.rating ? `
+    <div style="max-width:500px">
+      <div class="feedback-card">
+        <div class="feedback-stars">${Array.from({length:5},(_, i) =>
+          i < c.rating
+            ? '<svg viewBox="0 0 24 24" fill="var(--amber)" stroke="var(--amber)" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>'
+            : '<svg viewBox="0 0 24 24" fill="none" stroke="var(--border)" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>'
+        ).join('')}</div>
+        <div class="feedback-text">"${feedbackText(c)}"</div>
+        <div class="feedback-author">— ${c.customer}, ${formatDate(c.date)}</div>
+      </div>
+      <div style="margin-top:20px">
+        <div style="font-size:13px;font-weight:500;color:var(--text-primary);margin-bottom:8px">AI Duygu Analizi</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <span class="badge ${c.sentiment==='positive'?'badge-green':c.sentiment==='negative'?'badge-red':c.sentiment==='mixed'?'badge-amber':'badge-gray'}">Genel: ${sentimentLabel(c.sentiment)}</span>
+          <span class="badge badge-blue">Güven: ${(80+Math.floor(Math.random()*18))}%</span>
+          <span class="badge badge-gray">Konuşma akışı: Normal</span>
+        </div>
+      </div>
+    </div>` :
+    `<div class="empty-state">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+      <h3>Geri bildirim yok</h3>
+      <p>Bu konuşma için henüz müşteri geri bildirimi alınmamış.</p>
+    </div>`;
+
+  // Reset tabs
+  document.querySelectorAll('.modal-tab').forEach((t,i) => t.classList.toggle('active', i===0));
+  document.querySelectorAll('.modal-section').forEach((s,i) => s.classList.toggle('active', i===0));
+
+  document.getElementById('detailOverlay').classList.add('open');
+}
+
+function closeDetail() {
+  document.getElementById('detailOverlay').classList.remove('open');
+  currentConvId = null;
+}
+
+function switchModalTab(btn, tabId) {
+  document.querySelectorAll('.modal-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.modal-section').forEach(s => s.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+}
+
+function generateDemoMessages(c) {
+  const a = agents[c.agent];
+  return [
+    {role:'user', text:c.preview, time:c.date.split('T')[1].slice(0,5)},
+    {role:'ai', text:`Merhaba! ${a.name} olarak size yardımcı olayım. İsteğinizi inceliyorum...`, time:c.date.split('T')[1].slice(0,5)},
+    {role:'ai', text:`"${c.subject}" konusu hakkında araştırma yaptım. Size en uygun çözümü sunuyorum.`, time:c.date.split('T')[1].slice(0,5)},
+    {role:'user', text:'Teşekkürler, bu çok faydalı oldu.', time:c.date.split('T')[1].slice(0,5)}
+  ];
+}
+
+function generateTimeline(c) {
+  const t = c.date.split('T')[1].slice(0,5);
+  const events = [
+    {time:t, text:`Konuşma başlatıldı — ${channelLabel(c.channel)} kanalı`, type:'done'},
+    {time:t, text:`${agents[c.agent].name} bağlandı`, type:'done'},
+    {time:t, text:`İlk yanıt gönderildi (1.2s)`, type:'done'}
+  ];
+  if(c.status === 'escalated') events.push({time:t, text:'⚠ Konuşma eskalasyon sürecine alındı', type:'warn'});
+  if(c.status === 'resolved') events.push({time:t, text:'Sorun çözüldü — konuşma kapatıldı', type:'done'});
+  if(c.status === 'closed') events.push({time:t, text:'Konuşma kapatıldı', type:'done'});
+  if(c.status === 'open') events.push({time:t, text:'Konuşma hâlâ açık', type:'warn'});
+  if(c.rating) events.push({time:t, text:`Müşteri ${c.rating}/5 puan verdi`, type:c.rating>=4?'done':'warn'});
+  return events;
+}
+
+function feedbackText(c) {
+  const texts = {
+    5:['Çok hızlı ve profesyonel destek aldım, teşekkürler!','Mükemmel hizmet, her şey çok net açıklandı.','İnanılmaz hızlı çözüm, çok memnunum!'],
+    4:['Genel olarak iyi bir deneyimdi, bazı detaylar daha açık olabilirdi.','Hızlı dönüş için teşekkürler, faydalı oldu.'],
+    3:['İdare eder düzeyde, daha detaylı bilgi beklerdim.','Orta düzeyde memnun kaldım.'],
+    2:['Sorunuma tam çözüm bulunamadı, daha fazla destek beklerdim.','Beklediğimden uzun sürdü.'],
+    1:['Hiç memnun kalmadım, sorunum çözülmedi.']
+  };
+  const arr = texts[c.rating] || texts[3];
+  return arr[c.id % arr.length];
+}
+
+// ═══ BULK / EXPORT ═══
+function toggleSelectAll() {
+  const checked = document.getElementById('selectAll').checked;
+  document.querySelectorAll('.conv-cb').forEach(cb => cb.checked = checked);
+}
+
+function exportCSV() {
+  alert('CSV dışa aktarma başlatıldı! (Demo)');
+}
+function exportSingleConv() {
+  alert(`Konuşma #CONV-${String(currentConvId).padStart(5,'0')} dışa aktarılıyor... (Demo)`);
+}
+function bulkActions() {
+  const selected = document.querySelectorAll('.conv-cb:checked');
+  if(selected.length === 0) { alert('Lütfen en az bir konuşma seçin.'); return; }
+  alert(`${selected.length} konuşma seçildi. Toplu işlem menüsü açılıyor... (Demo)`);
+}
+
+// ═══ INIT ═══
+renderTable();
+</script>
+</body>
+</html>

@@ -1,0 +1,1759 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orbicorp — Agent Yönetim Konsolu</title>
+<link rel="stylesheet" href="orbicorp-dark.css">
+<script src="orbicorp-api.js"></script>
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --primary: #635BFF; --primary-light: #7A73FF; --primary-bg: #F0EEFF; --primary-bg-subtle: #F8F7FF;
+  --navy: #0A2540; --navy-muted: #425466;
+  --surface: #F6F9FC; --white: #FFFFFF;
+  --border: #E3E8EE; --border-light: #EBEEF2;
+  --text-primary: #0A2540; --text-secondary: #425466; --text-tertiary: #8792A2; --text-muted: #A3ACB9;
+  --green: #0EA371; --green-bg: #EEFBF4; --green-text: #0C7D58;
+  --amber: #D97706; --amber-bg: #FEF7E6; --amber-text: #92510A;
+  --red: #DF1B41; --red-bg: #FDE8EC; --red-text: #A11534;
+  --blue: #0570DE; --blue-bg: #E8F2FD; --blue-text: #0455A9;
+  --radius-sm: 6px; --radius-md: 8px; --radius-lg: 12px; --radius-xl: 16px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04); --shadow-card: 0 1px 3px rgba(0,0,0,0.04), 0 0 0 0.5px var(--border);
+  --font: 'Google Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'Google Sans Mono', 'SF Mono', monospace;
+  --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+body { font-family: var(--font); background: var(--surface); color: var(--text-primary); -webkit-font-smoothing: antialiased; }
+
+/* ═══ TOP NAV ═══ */
+.topnav { height: 56px; background: var(--white); border-bottom: 0.5px solid var(--border); display: flex; align-items: center; padding: 0 24px; position: sticky; top: 0; z-index: 100; }
+.topnav-brand { display: flex; align-items: center; gap: 10px; margin-right: 32px; text-decoration: none; }
+.topnav-logo { width: 32px; height: 32px; background: linear-gradient(135deg, var(--primary), var(--navy)); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 14px; }
+.topnav-name { font-size: 16px; font-weight: 700; color: var(--navy); letter-spacing: -0.3px; }
+.topnav-tabs { display: flex; gap: 4px; flex: 1; }
+.topnav-tab { padding: 8px 14px; font-size: 14px; color: var(--text-secondary); border-radius: var(--radius-sm); cursor: pointer; transition: all var(--transition); text-decoration: none; }
+.topnav-tab:hover { background: var(--surface); color: var(--text-primary); }
+.topnav-tab.active { background: var(--primary-bg); color: var(--primary); font-weight: 500; }
+.topnav-right { display: flex; align-items: center; gap: 12px; margin-left: auto; }
+.lang-switch { display: flex; gap: 2px; padding: 3px; background: var(--surface); border-radius: var(--radius-sm); border: 0.5px solid var(--border); }
+.lang-btn { padding: 4px 10px; font-size: 11px; font-weight: 500; border-radius: 4px; cursor: pointer; border: none; background: none; color: var(--text-tertiary); font-family: var(--font); transition: all var(--transition); }
+.lang-btn.active { background: var(--white); color: var(--text-primary); box-shadow: var(--shadow-sm); }
+.topnav-avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: white; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+/* ═══ LAYOUT ═══ */
+.layout { display: flex; min-height: calc(100vh - 56px); }
+.sidebar { width: 240px; background: var(--white); border-right: 0.5px solid var(--border); padding: 16px 12px; flex-shrink: 0; transition: width 0.3s ease; overflow: hidden; }
+.sidebar.collapsed { width: 56px; padding: 16px 8px; }
+.sidebar-toggle { display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: var(--radius-sm); border: 0.5px solid var(--border); background: var(--white); cursor: pointer; margin-bottom: 16px; margin-left: auto; transition: all var(--transition); }
+.sidebar-toggle:hover { background: var(--surface); }
+.sidebar-toggle svg { width: 14px; height: 14px; color: var(--text-tertiary); transition: transform 0.3s ease; }
+.sidebar.collapsed .sidebar-toggle { margin: 0 auto 16px; }
+.sidebar.collapsed .sidebar-toggle svg { transform: rotate(180deg); }
+.sidebar-section { margin-bottom: 24px; }
+.sidebar-label { font-size: 11px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; padding: 0 10px; margin-bottom: 6px; white-space: nowrap; }
+.sidebar.collapsed .sidebar-label { opacity: 0; height: 0; margin: 0; }
+.sidebar-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--radius-sm); font-size: 14px; color: var(--text-secondary); cursor: pointer; transition: all var(--transition); white-space: nowrap; text-decoration: none; }
+.sidebar-item:hover { background: var(--surface); color: var(--text-primary); }
+.sidebar-item.active { background: var(--primary-bg); color: var(--primary); font-weight: 500; }
+.sidebar-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+.sidebar.collapsed .sidebar-item span { opacity: 0; width: 0; }
+.sidebar.collapsed .sidebar-item { justify-content: center; padding: 10px; }
+.sidebar-badge { margin-left: auto; font-size: 11px; background: var(--primary-bg); color: var(--primary); padding: 1px 7px; border-radius: 999px; font-weight: 500; }
+.sidebar.collapsed .sidebar-badge { display: none; }
+
+.main { flex: 1; padding: 28px 32px; max-width: 1200px; overflow-x: hidden; }
+
+/* ═══ PAGE HEADER ═══ */
+.page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+.page-header-left h1 { font-size: 22px; font-weight: 600; color: var(--navy); letter-spacing: -0.3px; margin-bottom: 4px; }
+.page-header-left p { font-size: 14px; color: var(--text-tertiary); }
+.page-header-actions { display: flex; gap: 8px; }
+.btn { padding: 9px 18px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; cursor: pointer; transition: all var(--transition); border: 0.5px solid var(--border); font-family: var(--font); display: inline-flex; align-items: center; gap: 6px; }
+.btn-primary { background: var(--primary); color: white; border-color: var(--primary); }
+.btn-primary:hover { background: var(--primary-light); transform: translateY(-1px); }
+.btn-secondary { background: var(--white); color: var(--text-secondary); }
+.btn-secondary:hover { background: var(--surface); }
+.btn-danger { background: var(--white); color: var(--red); border-color: var(--red-bg); }
+.btn-danger:hover { background: var(--red-bg); }
+.btn svg { width: 15px; height: 15px; }
+
+/* ═══ SUMMARY CARDS ═══ */
+.summary-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+.summary-card { background: var(--white); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 18px 20px; transition: all var(--transition); cursor: default; }
+.summary-card:hover { border-color: var(--primary); }
+.summary-card-label { font-size: 12px; color: var(--text-tertiary); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+.summary-card-label svg { width: 14px; height: 14px; }
+.summary-card-value { font-size: 28px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.5px; }
+.summary-card-sub { font-size: 12px; color: var(--text-tertiary); margin-top: 4px; display: flex; align-items: center; gap: 4px; }
+.summary-card-sub .up { color: var(--green); font-weight: 500; }
+.summary-card-sub .down { color: var(--red); font-weight: 500; }
+
+/* ═══ TOOLBAR ═══ */
+.toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+.search-box { display: flex; align-items: center; gap: 8px; padding: 8px 14px; background: var(--white); border: 0.5px solid var(--border); border-radius: var(--radius-sm); min-width: 260px; transition: border-color var(--transition); }
+.search-box:focus-within { border-color: var(--primary); }
+.search-box svg { width: 15px; height: 15px; color: var(--text-muted); flex-shrink: 0; }
+.search-box input { border: none; outline: none; font-size: 13px; color: var(--text-primary); background: none; width: 100%; font-family: var(--font); }
+.search-box input::placeholder { color: var(--text-muted); }
+.filter-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; background: var(--white); border: 0.5px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; color: var(--text-secondary); cursor: pointer; transition: all var(--transition); font-family: var(--font); }
+.filter-btn:hover { border-color: var(--primary); color: var(--primary); }
+.filter-btn.active { background: var(--primary-bg); border-color: var(--primary); color: var(--primary); font-weight: 500; }
+.filter-btn svg { width: 14px; height: 14px; }
+.toolbar-right { margin-left: auto; display: flex; gap: 6px; align-items: center; }
+.bulk-bar { display: none; align-items: center; gap: 10px; padding: 10px 16px; background: var(--primary-bg-subtle); border: 0.5px solid var(--primary-bg); border-radius: var(--radius-md); margin-bottom: 12px; }
+.bulk-bar.visible { display: flex; }
+.bulk-bar-text { font-size: 13px; color: var(--primary); font-weight: 500; flex: 1; }
+.bulk-bar .btn { padding: 6px 12px; font-size: 12px; }
+
+/* ═══ TABLE ═══ */
+.table-wrap { background: var(--white); border: 0.5px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 24px; }
+table { width: 100%; border-collapse: collapse; }
+thead th { padding: 12px 16px; font-size: 11px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; text-align: left; background: var(--surface-warm, #FAFBFD); border-bottom: 0.5px solid var(--border); cursor: pointer; user-select: none; white-space: nowrap; }
+thead th:hover { color: var(--text-primary); }
+thead th svg { width: 12px; height: 12px; vertical-align: middle; margin-left: 4px; }
+tbody tr { border-bottom: 0.5px solid var(--border-light); transition: background var(--transition); }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: var(--primary-bg-subtle); }
+tbody tr.selected { background: var(--primary-bg); }
+td { padding: 14px 16px; font-size: 13px; color: var(--text-secondary); vertical-align: middle; }
+.td-agent { display: flex; align-items: center; gap: 12px; }
+.td-checkbox { width: 40px; }
+.td-checkbox input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer; border-radius: 4px; }
+.agent-avatar-sm { width: 36px; height: 36px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; cursor: pointer; position: relative; }
+.agent-avatar-sm.purple { background: var(--primary-bg); color: var(--primary); }
+.agent-avatar-sm.green { background: var(--green-bg); color: var(--green-text); }
+.agent-avatar-sm.blue { background: var(--blue-bg); color: var(--blue-text); }
+.agent-avatar-sm.amber { background: var(--amber-bg); color: var(--amber-text); }
+.agent-avatar-sm.red { background: var(--red-bg); color: var(--red-text); }
+.agent-avatar-sm.pink { background: #FBEAF0; color: #993556; }
+.agent-avatar-sm.teal { background: #E1F5EE; color: #0F6E56; }
+.agent-avatar-sm.gray { background: #F1EFE8; color: #5F5E5A; }
+.agent-avatar-sm:hover::after { content: '\270E'; position: absolute; inset: 0; background: rgba(0,0,0,0.4); color: white; font-size: 14px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md); }
+.td-agent-info { min-width: 0; }
+.td-agent-name { font-size: 14px; font-weight: 500; color: var(--text-primary); cursor: pointer; }
+.td-agent-name:hover { color: var(--primary); }
+.td-agent-dept { font-size: 12px; color: var(--text-tertiary); }
+.badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; padding: 3px 10px; border-radius: 999px; font-weight: 500; white-space: nowrap; }
+.badge-green { background: var(--green-bg); color: var(--green-text); }
+.badge-amber { background: var(--amber-bg); color: var(--amber-text); }
+.badge-red { background: var(--red-bg); color: var(--red-text); }
+.badge-blue { background: var(--blue-bg); color: var(--blue-text); }
+.badge-gray { background: #F1EFE8; color: #5F5E5A; }
+.badge-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.model-tag { font-size: 11px; padding: 3px 8px; border-radius: 4px; background: var(--surface); color: var(--text-secondary); font-family: var(--font-mono); font-weight: 500; }
+.metric-bar { display: flex; align-items: center; gap: 6px; }
+.metric-bar-track { width: 48px; height: 5px; background: var(--border-light); border-radius: 999px; overflow: hidden; }
+.metric-bar-fill { height: 100%; border-radius: 999px; }
+.actions-cell { display: flex; gap: 4px; }
+.action-btn { width: 30px; height: 30px; border-radius: var(--radius-sm); border: 0.5px solid transparent; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all var(--transition); color: var(--text-tertiary); }
+.action-btn:hover { background: var(--surface); border-color: var(--border); color: var(--text-primary); }
+.action-btn.danger:hover { background: var(--red-bg); color: var(--red); }
+.action-btn svg { width: 15px; height: 15px; }
+
+/* ═══ BOTTOM CTA ═══ */
+.bottom-cta { display: flex; align-items: center; justify-content: center; padding: 24px; border: 1.5px dashed var(--border); border-radius: var(--radius-lg); background: var(--white); cursor: pointer; transition: all var(--transition); gap: 10px; }
+.bottom-cta:hover { border-color: var(--primary); background: var(--primary-bg-subtle); }
+.bottom-cta svg { width: 20px; height: 20px; color: var(--primary); }
+.bottom-cta span { font-size: 14px; color: var(--primary); font-weight: 500; }
+
+/* ═══ MODAL ═══ */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(10,37,64,0.45); z-index: 500; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
+.modal-overlay.open { display: flex; }
+.modal { background: var(--white); border-radius: var(--radius-xl); width: 680px; max-width: 94vw; max-height: 88vh; display: flex; flex-direction: column; box-shadow: 0 24px 80px rgba(0,0,0,0.18); animation: modalIn 0.25s ease; }
+@keyframes modalIn { from { opacity: 0; transform: translateY(16px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+.modal-header { display: flex; align-items: center; gap: 14px; padding: 20px 24px; border-bottom: 0.5px solid var(--border); }
+.modal-avatar { width: 44px; height: 44px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.modal-header-info { flex: 1; }
+.modal-header-info h2 { font-size: 17px; font-weight: 600; color: var(--text-primary); }
+.modal-header-info p { font-size: 13px; color: var(--text-tertiary); }
+.modal-close { width: 32px; height: 32px; border-radius: var(--radius-sm); border: none; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-tertiary); transition: all var(--transition); }
+.modal-close:hover { background: var(--surface); color: var(--text-primary); }
+.modal-tabs { display: flex; gap: 0; padding: 0 24px; border-bottom: 0.5px solid var(--border); overflow-x: auto; }
+.modal-tab { padding: 12px 16px; font-size: 13px; color: var(--text-tertiary); cursor: pointer; border-bottom: 2px solid transparent; transition: all var(--transition); white-space: nowrap; font-family: var(--font); background: none; border-top: none; border-left: none; border-right: none; }
+.modal-tab:hover { color: var(--text-primary); }
+.modal-tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 500; }
+.modal-body { flex: 1; overflow-y: auto; padding: 20px 24px; }
+.modal-section { margin-bottom: 20px; }
+.modal-section-title { font-size: 12px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
+.modal-field { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 0.5px solid var(--border-light); }
+.modal-field:last-child { border-bottom: none; }
+.modal-field-label { font-size: 13px; color: var(--text-tertiary); }
+.modal-field-value { font-size: 13px; color: var(--text-primary); font-weight: 500; }
+.skill-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.skill-tag { display: inline-flex; align-items: center; gap: 4px; padding: 5px 12px; background: var(--surface); border: 0.5px solid var(--border); border-radius: 999px; font-size: 12px; color: var(--text-secondary); }
+.skill-tag .remove { cursor: pointer; color: var(--text-muted); margin-left: 2px; font-size: 14px; }
+.skill-tag .remove:hover { color: var(--red); }
+.mini-chart { height: 120px; background: var(--surface); border-radius: var(--radius-md); display: flex; align-items: flex-end; padding: 12px 8px 8px; gap: 4px; }
+.mini-chart-bar { flex: 1; background: var(--primary); border-radius: 3px 3px 0 0; min-height: 4px; transition: height 0.4s ease; opacity: 0.7; }
+.mini-chart-bar:hover { opacity: 1; }
+.convo-item { display: flex; gap: 10px; padding: 10px 0; border-bottom: 0.5px solid var(--border-light); }
+.convo-item:last-child { border-bottom: none; }
+.convo-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--surface); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.convo-avatar svg { width: 13px; height: 13px; color: var(--text-tertiary); }
+.convo-text { font-size: 13px; color: var(--text-secondary); line-height: 1.4; flex: 1; }
+.convo-text strong { color: var(--text-primary); font-weight: 500; }
+.convo-time { font-size: 11px; color: var(--text-muted); white-space: nowrap; }
+.cost-mini { display: flex; gap: 12px; }
+.cost-mini-card { flex: 1; background: var(--surface); border-radius: var(--radius-md); padding: 14px; text-align: center; }
+.cost-mini-value { font-size: 20px; font-weight: 700; color: var(--text-primary); }
+.cost-mini-label { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; }
+.config-block { background: var(--surface); border-radius: var(--radius-md); padding: 14px; font-family: var(--font-mono); font-size: 12px; color: var(--text-secondary); line-height: 1.6; white-space: pre-wrap; max-height: 140px; overflow-y: auto; }
+.modal-footer { padding: 16px 24px; border-top: 0.5px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; }
+
+/* ═══ WIZARD MODAL ═══ */
+.wizard-overlay { display: none; position: fixed; inset: 0; background: rgba(10,37,64,0.45); z-index: 600; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
+.wizard-overlay.open { display: flex; }
+.wizard { background: var(--white); border-radius: var(--radius-xl); width: 620px; max-width: 94vw; max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 24px 80px rgba(0,0,0,0.18); animation: modalIn 0.25s ease; }
+.wizard-header { padding: 20px 24px 0; }
+.wizard-header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.wizard-header h2 { font-size: 17px; font-weight: 600; color: var(--text-primary); }
+.wizard-stepper { display: flex; gap: 8px; align-items: center; padding-bottom: 20px; border-bottom: 0.5px solid var(--border); }
+.wizard-step { display: flex; align-items: center; gap: 8px; }
+.wizard-step-num { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; border: 1.5px solid var(--border); color: var(--text-muted); background: var(--white); transition: all 0.3s ease; }
+.wizard-step.active .wizard-step-num { background: var(--primary); color: white; border-color: var(--primary); }
+.wizard-step.done .wizard-step-num { background: var(--green-bg); color: var(--green); border-color: var(--green); }
+.wizard-step-label { font-size: 12px; color: var(--text-muted); font-weight: 500; transition: color 0.3s ease; }
+.wizard-step.active .wizard-step-label { color: var(--primary); }
+.wizard-step.done .wizard-step-label { color: var(--green-text); }
+.wizard-step-line { width: 24px; height: 1.5px; background: var(--border); }
+.wizard-step-line.done { background: var(--green); }
+.wizard-body { flex: 1; overflow-y: auto; padding: 24px; }
+.wizard-panel { display: none; }
+.wizard-panel.active { display: block; }
+.wiz-field { margin-bottom: 18px; }
+.wiz-label { display: block; font-size: 13px; font-weight: 500; color: var(--text-primary); margin-bottom: 6px; }
+.wiz-label span { color: var(--red); }
+.wiz-input { width: 100%; padding: 10px 14px; border: 0.5px solid var(--border); border-radius: var(--radius-sm); font-size: 14px; font-family: var(--font); color: var(--text-primary); transition: border-color var(--transition); background: var(--white); }
+.wiz-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-bg); }
+.wiz-input::placeholder { color: var(--text-muted); }
+textarea.wiz-input { min-height: 100px; resize: vertical; line-height: 1.5; }
+select.wiz-input { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238792A2' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px; }
+.wiz-hint { font-size: 11px; color: var(--text-tertiary); margin-top: 4px; }
+.avatar-picker { display: flex; gap: 8px; flex-wrap: wrap; }
+.avatar-option { width: 44px; height: 44px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid transparent; transition: all var(--transition); }
+.avatar-option:hover { border-color: var(--border); }
+.avatar-option.selected { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-bg); }
+.avatar-option.purple { background: var(--primary-bg); color: var(--primary); }
+.avatar-option.green { background: var(--green-bg); color: var(--green-text); }
+.avatar-option.blue { background: var(--blue-bg); color: var(--blue-text); }
+.avatar-option.amber { background: var(--amber-bg); color: var(--amber-text); }
+.avatar-option.red { background: var(--red-bg); color: var(--red-text); }
+.avatar-option.pink { background: #FBEAF0; color: #993556; }
+.avatar-option.teal { background: #E1F5EE; color: #0F6E56; }
+.avatar-option.gray { background: #F1EFE8; color: #5F5E5A; }
+.icon-picker { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+.icon-option { width: 38px; height: 38px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1.5px solid transparent; background: var(--surface); color: var(--text-secondary); transition: all var(--transition); }
+.icon-option:hover { border-color: var(--border); }
+.icon-option.selected { border-color: var(--primary); background: var(--primary-bg); color: var(--primary); }
+.icon-option svg { width: 18px; height: 18px; }
+.model-option { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border: 0.5px solid var(--border); border-radius: var(--radius-md); cursor: pointer; transition: all var(--transition); margin-bottom: 8px; }
+.model-option:hover { border-color: var(--primary); }
+.model-option.selected { border-color: var(--primary); background: var(--primary-bg-subtle); }
+.model-option-radio { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.model-option.selected .model-option-radio { border-color: var(--primary); }
+.model-option.selected .model-option-radio::after { content: ''; width: 10px; height: 10px; border-radius: 50%; background: var(--primary); }
+.model-option-info { flex: 1; }
+.model-option-name { font-size: 14px; font-weight: 500; color: var(--text-primary); }
+.model-option-desc { font-size: 12px; color: var(--text-tertiary); }
+.skill-picker { display: flex; flex-wrap: wrap; gap: 6px; }
+.skill-chip { padding: 6px 14px; border-radius: 999px; font-size: 12px; font-weight: 500; border: 0.5px solid var(--border); background: var(--white); color: var(--text-secondary); cursor: pointer; transition: all var(--transition); }
+.skill-chip:hover { border-color: var(--primary); }
+.skill-chip.selected { background: var(--primary-bg); border-color: var(--primary); color: var(--primary); }
+.channel-picker { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.channel-option { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border: 0.5px solid var(--border); border-radius: var(--radius-md); cursor: pointer; transition: all var(--transition); font-size: 13px; color: var(--text-secondary); }
+.channel-option:hover { border-color: var(--primary); }
+.channel-option.selected { border-color: var(--primary); background: var(--primary-bg-subtle); color: var(--primary); font-weight: 500; }
+.channel-option svg { width: 16px; height: 16px; flex-shrink: 0; }
+.wizard-footer { padding: 16px 24px; border-top: 0.5px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.wizard-footer-left { font-size: 12px; color: var(--text-tertiary); }
+.wizard-footer-right { display: flex; gap: 8px; }
+.wiz-summary { background: var(--surface); border-radius: var(--radius-md); padding: 16px; margin-bottom: 14px; }
+.wiz-summary-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 13px; }
+.wiz-summary-row .label { color: var(--text-tertiary); }
+.wiz-summary-row .value { color: var(--text-primary); font-weight: 500; }
+
+/* ═══ ANIMATIONS ═══ */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+.anim { animation: fadeUp 0.4s ease forwards; opacity: 0; }
+.d1 { animation-delay: 0.05s; } .d2 { animation-delay: 0.1s; } .d3 { animation-delay: 0.15s; } .d4 { animation-delay: 0.2s; }
+</style>
+<link rel="stylesheet" href="orbicorp-dark.css">
+<style>
+.in-iframe .topnav{display:none!important}
+.in-iframe .sidebar{display:none!important}
+.in-iframe .layout{margin-top:0!important;height:100vh!important}
+.in-iframe .settings-nav{top:0!important;height:100vh!important}
+.in-iframe .chat-panel{top:0!important;height:100vh!important}
+</style>
+</head>
+<body>
+<script>
+(function(){
+  // If in iframe, hide own nav/sidebar and sync theme from parent
+  if(window.self!==window.top){
+    document.body.classList.add("in-iframe");
+    try{
+      var pt=window.parent.document.documentElement.getAttribute("data-theme");
+      if(pt)document.documentElement.setAttribute("data-theme",pt);
+    }catch(e){}
+    // Listen for theme changes from parent
+    window.addEventListener("message",function(e){
+      if(e.data&&e.data.type==="theme")document.documentElement.setAttribute("data-theme",e.data.value);
+      if(e.data&&e.data.type==="lang")window._orbicorpLang=e.data.value;
+    });
+  }
+})();
+</script>
+
+<!-- TOP NAV -->
+<nav class="topnav">
+  <a class="topnav-brand" href="#"><div class="topnav-logo">O</div><span class="topnav-name">Orbicorp</span></a>
+  <div class="topnav-tabs">
+    <a class="topnav-tab" href="#">Overview</a>
+    <a class="topnav-tab active">Agents</a>
+    <a class="topnav-tab">Company Profile</a>
+    <a class="topnav-tab">Skills</a>
+    <a class="topnav-tab">Analytics</a>
+    <a class="topnav-tab">Integrations</a>
+  </div>
+  <div class="topnav-right">
+    <div class="lang-switch"><button class="lang-btn active" onclick="setLang('tr')">TR</button><button class="lang-btn" onclick="setLang('en')">EN</button></div>
+    <div class="topnav-avatar">AY</div>
+  </div>
+</nav>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-toggle" onclick="document.getElementById('sidebar').classList.toggle('collapsed')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Ana Menü</div>
+      <a href="orbicorp-dashboard.html" class="sidebar-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>Dashboard</span></a>
+      <a href="orbicorp-agents.html" class="sidebar-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2"/></svg><span>Agent'lar</span><span class="sidebar-badge">8</span></a>
+      <a href="orbicorp-company.html" class="sidebar-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 21h18M3 10h18M3 7l9-4 9 4M4 10v11M20 10v11"/></svg><span>Kurum Profili</span></a>
+      <a href="orbicorp-market.html" class="sidebar-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg><span>Skill Market</span></a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Analitik</div>
+      <a href="orbicorp-analytics.html" class="sidebar-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 20V10M12 20V4M6 20v-6"/></svg><span>Performans</span></a>
+      <a href="orbicorp-analytics.html" class="sidebar-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><span>Maliyet</span></a>
+      <a href="orbicorp-settings.html" class="sidebar-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span>Güvenlik</span></a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <!-- PAGE HEADER -->
+    <div class="page-header anim">
+      <div class="page-header-left">
+        <h1 data-i18n="page_title">Agent Yönetim Konsolu</h1>
+        <p data-i18n="page_desc">Tüm AI agent'larınızı tek noktadan yönetin, izleyin ve optimize edin.</p>
+      </div>
+      <div class="page-header-actions">
+        <button class="btn btn-secondary" data-i18n="btn_export">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Dışa Aktar
+        </button>
+        <button class="btn btn-primary" onclick="openWizard()" data-i18n="btn_new_agent">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Yeni Agent Oluştur
+        </button>
+      </div>
+    </div>
+
+    <!-- SUMMARY CARDS -->
+    <div class="summary-cards">
+      <div class="summary-card anim d1">
+        <div class="summary-card-label"><svg viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2"/></svg> <span data-i18n="sum_active">Aktif</span></div>
+        <div class="summary-card-value">6</div>
+        <div class="summary-card-sub"><span class="up">+2</span> <span data-i18n="sum_vs">geçen aya göre</span></div>
+      </div>
+      <div class="summary-card anim d2">
+        <div class="summary-card-label"><svg viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2" stroke-linecap="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83"/></svg> <span data-i18n="sum_training">Eğitimde</span></div>
+        <div class="summary-card-value">1</div>
+        <div class="summary-card-sub" data-i18n="sum_training_sub">Content Writer</div>
+      </div>
+      <div class="summary-card anim d3">
+        <div class="summary-card-label"><svg viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" stroke-width="2" stroke-linecap="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg> <span data-i18n="sum_paused">Duraklatılmış</span></div>
+        <div class="summary-card-value">1</div>
+        <div class="summary-card-sub" data-i18n="sum_paused_sub">Legal Advisor</div>
+      </div>
+      <div class="summary-card anim d4">
+        <div class="summary-card-label"><svg viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> <span data-i18n="sum_cost">Toplam Maliyet</span></div>
+        <div class="summary-card-value">$1,247</div>
+        <div class="summary-card-sub"><span class="down">-8%</span> <span data-i18n="sum_vs">geçen aya göre</span></div>
+      </div>
+    </div>
+
+    <!-- TOOLBAR -->
+    <div class="toolbar anim d3">
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input type="text" placeholder="Agent ara..." id="searchInput" oninput="filterTable()">
+      </div>
+      <button class="filter-btn" onclick="this.classList.toggle('active'); filterByStatus('all')" data-i18n="filter_all">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+        Tümü
+      </button>
+      <button class="filter-btn" onclick="filterByStatus('active')">Active</button>
+      <button class="filter-btn" onclick="filterByStatus('training')">Training</button>
+      <button class="filter-btn" onclick="filterByStatus('paused')">Paused</button>
+      <button class="filter-btn" onclick="filterByStatus('error')">Error</button>
+      <div class="toolbar-right">
+        <select id="sortSelect" onchange="sortTable()" style="padding:8px 12px;border:0.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:var(--font);color:var(--text-secondary);background:var(--white);cursor:pointer">
+          <option value="name" data-i18n="sort_name">Ada Göre</option>
+          <option value="success" data-i18n="sort_success">Başarıya Göre</option>
+          <option value="cost" data-i18n="sort_cost">Maliyete Göre</option>
+          <option value="activity" data-i18n="sort_activity">Aktiviteye Göre</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- BULK BAR -->
+    <div class="bulk-bar" id="bulkBar">
+      <span class="bulk-bar-text"><span id="bulkCount">0</span> agent seçildi</span>
+      <button class="btn btn-secondary" onclick="bulkAction('pause')">Duraklat</button>
+      <button class="btn btn-secondary" onclick="bulkAction('start')">Başlat</button>
+      <button class="btn btn-danger" onclick="bulkAction('delete')">Sil</button>
+      <button class="btn btn-secondary" onclick="clearSelection()">İptal</button>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-wrap anim d4">
+      <table>
+        <thead>
+          <tr>
+            <th class="td-checkbox"><input type="checkbox" onchange="toggleAll(this)"></th>
+            <th onclick="sortTable('name')">Agent <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 15l4 4 4-4M8 9l4-4 4 4"/></svg></th>
+            <th>Durum</th>
+            <th>Model</th>
+            <th onclick="sortTable('success')">Başarı <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 15l4 4 4-4M8 9l4-4 4 4"/></svg></th>
+            <th>Yanıt</th>
+            <th onclick="sortTable('cost')">Maliyet <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 15l4 4 4-4M8 9l4-4 4 4"/></svg></th>
+            <th onclick="sortTable('activity')">Son Aktivite <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 15l4 4 4-4M8 9l4-4 4 4"/></svg></th>
+            <th>Kaynaklar</th>
+            <th>İşlemler</th>
+          </tr>
+        </thead>
+        <tbody id="agentTableBody"></tbody>
+      </table>
+    </div>
+
+    <!-- BOTTOM CTA -->
+    <div class="bottom-cta anim d4" onclick="openWizard()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <span data-i18n="cta_new">Yeni Agent Oluştur</span>
+    </div>
+  </main>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-avatar" id="modalAvatar"></div>
+      <div class="modal-header-info"><h2 id="modalName"></h2><p id="modalDept"></p></div>
+      <span id="modalBadge" class="badge"></span>
+      <button class="modal-close" onclick="closeModal()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="modal-tabs">
+      <button class="modal-tab active" onclick="switchTab(this,'tab-general')">Genel</button>
+      <button class="modal-tab" onclick="switchTab(this,'tab-skills')">Skill'ler</button>
+      <button class="modal-tab" onclick="switchTab(this,'tab-perf')">Performans</button>
+      <button class="modal-tab" onclick="switchTab(this,'tab-convos')">Konuşmalar</button>
+      <button class="modal-tab" onclick="switchTab(this,'tab-cost')">Maliyet</button>
+      <button class="modal-tab" onclick="switchTab(this,'tab-resources')">Kaynaklar</button>
+      <button class="modal-tab" onclick="switchTab(this,'tab-config')">Konfigürasyon</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal()">Kapat</button>
+      <button class="btn btn-primary" id="modalSaveBtn" onclick="saveCurrentAgent()">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- WIZARD MODAL -->
+<div class="wizard-overlay" id="wizardOverlay" onclick="if(event.target===this)closeWizard()">
+  <div class="wizard">
+    <div class="wizard-header">
+      <div class="wizard-header-top">
+        <h2>Yeni Agent Oluştur</h2>
+        <button class="modal-close" onclick="closeWizard()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+      </div>
+      <div class="wizard-stepper" id="wizStepper">
+        <div class="wizard-step active" data-step="1"><div class="wizard-step-num">1</div><span class="wizard-step-label">Temel Bilgiler</span></div>
+        <div class="wizard-step-line"></div>
+        <div class="wizard-step" data-step="2"><div class="wizard-step-num">2</div><span class="wizard-step-label">Model & Skill</span></div>
+        <div class="wizard-step-line"></div>
+        <div class="wizard-step" data-step="3"><div class="wizard-step-num">3</div><span class="wizard-step-label">Prompt & Kanal</span></div>
+        <div class="wizard-step-line"></div>
+        <div class="wizard-step" data-step="4"><div class="wizard-step-num">4</div><span class="wizard-step-label">Önizleme</span></div>
+      </div>
+    </div>
+    <div class="wizard-body">
+      <!-- STEP 1 -->
+      <div class="wizard-panel active" id="wizStep1">
+        <div class="wiz-field">
+          <label class="wiz-label">Agent Adı <span>*</span></label>
+          <input class="wiz-input" id="wiz_name" placeholder="Örn: Sales Copilot, HR Assistant...">
+        </div>
+        <div class="wiz-field">
+          <label class="wiz-label">Açıklama</label>
+          <input class="wiz-input" id="wiz_desc" placeholder="Bu agent ne iş yapar? Kısa bir açıklama...">
+        </div>
+        <div class="wiz-field">
+          <label class="wiz-label">Departman <span>*</span></label>
+          <select class="wiz-input" id="wiz_dept">
+            <option value="">Departman seçin...</option>
+            <option value="Satış">Satış</option>
+            <option value="Pazarlama">Pazarlama</option>
+            <option value="İnsan Kaynakları">İnsan Kaynakları</option>
+            <option value="Müşteri Hizmetleri">Müşteri Hizmetleri</option>
+            <option value="Bilgi Teknolojileri">Bilgi Teknolojileri</option>
+            <option value="Hukuk">Hukuk</option>
+            <option value="Finans">Finans</option>
+            <option value="Veri & Analitik">Veri & Analitik</option>
+            <option value="Operasyon">Operasyon</option>
+          </select>
+        </div>
+        <div class="wiz-field">
+          <label class="wiz-label">Rol / Görev Tanımı</label>
+          <textarea class="wiz-input" id="wiz_role" placeholder="Örn: Müşteri sorularını yanıtlar, CRM'e kayıt ekler, haftalık satış raporları oluşturur. Çözemediği sorunları ilgili departmana yönlendirir..." style="min-height:90px"></textarea>
+          <div class="wiz-hint">Agent'ın görev kapsamını detaylı tanımlayın. Ne kadar net olursa, agent o kadar doğru çalışır.</div>
+        </div>
+        <div class="wiz-field">
+          <label class="wiz-label">Avatar Rengi</label>
+          <div class="avatar-picker" id="avatarPicker">
+            <div class="avatar-option purple selected" data-color="purple" onclick="selectAvatar(this)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg></div>
+            <div class="avatar-option green" data-color="green" onclick="selectAvatar(this)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg></div>
+            <div class="avatar-option blue" data-color="blue" onclick="selectAvatar(this)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg></div>
+            <div class="avatar-option amber" data-color="amber" onclick="selectAvatar(this)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg></div>
+            <div class="avatar-option red" data-color="red" onclick="selectAvatar(this)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg></div>
+            <div class="avatar-option pink" data-color="pink" onclick="selectAvatar(this)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg></div>
+            <div class="avatar-option teal" data-color="teal" onclick="selectAvatar(this)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg></div>
+            <div class="avatar-option gray" data-color="gray" onclick="selectAvatar(this)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg></div>
+          </div>
+        </div>
+        <div class="wiz-field">
+          <label class="wiz-label">Avatar İkonu</label>
+          <div class="icon-picker" id="iconPicker">
+            <div class="icon-option selected" data-icon="chat" onclick="selectIcon(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+            <div class="icon-option" data-icon="user" onclick="selectIcon(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/></svg></div>
+            <div class="icon-option" data-icon="edit" onclick="selectIcon(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>
+            <div class="icon-option" data-icon="chart" onclick="selectIcon(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></div>
+            <div class="icon-option" data-icon="shield" onclick="selectIcon(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+            <div class="icon-option" data-icon="monitor" onclick="selectIcon(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+            <div class="icon-option" data-icon="coffee" onclick="selectIcon(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg></div>
+            <div class="icon-option" data-icon="users" onclick="selectIcon(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2 -->
+      <div class="wizard-panel" id="wizStep2">
+        <div class="wiz-field">
+          <label class="wiz-label">LLM Model Seçimi <span>*</span></label>
+          <div id="modelPicker">
+            <!-- Dinamik olarak doldurulacak -->
+            <div class="model-loading" style="text-align:center;padding:20px;color:var(--text-tertiary)">
+              Yapılandırılmış modeller yükleniyor...
+            </div>
+          </div>
+          <div id="noModelsWarning" style="display:none;padding:16px;background:var(--amber-bg);border-radius:var(--radius-md);margin-top:12px">
+            <div style="display:flex;align-items:center;gap:10px;color:var(--amber-text)">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <div>
+                <strong>LLM Yapılandırması Gerekli</strong>
+                <p style="font-size:12px;margin-top:4px">Agent oluşturmak için önce Ayarlar sayfasından en az bir LLM API anahtarı eklemelisiniz.</p>
+              </div>
+            </div>
+            <button class="btn btn-secondary" style="margin-top:12px" onclick="goToSettings()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+              Ayarlar'a Git
+            </button>
+          </div>
+        </div>
+        <div class="wiz-field">
+          <label class="wiz-label">Skill Seçimi</label>
+          <div class="wiz-hint" style="margin-bottom:8px">Agent'ın kullanacağı becerileri seçin. Sonradan da ekleyebilirsiniz.</div>
+          <div class="skill-picker" id="skillPicker">
+            <div class="skill-chip" onclick="this.classList.toggle('selected')">crm-connector</div>
+            <div class="skill-chip" onclick="this.classList.toggle('selected')">email-composer</div>
+            <div class="skill-chip" onclick="this.classList.toggle('selected')">lead-scoring</div>
+            <div class="skill-chip" onclick="this.classList.toggle('selected')">ticket-handler</div>
+            <div class="skill-chip" onclick="this.classList.toggle('selected')">knowledge-base</div>
+            <div class="skill-chip" onclick="this.classList.toggle('selected')">escalation</div>
+            <div class="skill-chip" onclick="this.classList.toggle('selected')">sentiment-analysis</div>
+            <div class="skill-chip" onclick="this.classList.toggle('selected')">sql-generator</div>
+            <div class="skill-chip" onclick="this.classList.toggle('selected')">report-writer</div>
+            <div class="skill-chip" onclick="this.classList.toggle('selected')">blog-writer</div>
+            <div class="skill-chip" onclick="this.classList.toggle('selected')">seo-optimizer</div>
+            <div class="skill-chip" onclick="this.classList.toggle('selected')">contract-review</div>
+            <div class="skill-chip" onclick="this.classList.toggle('selected')">leave-manager</div>
+            <div class="skill-chip" onclick="this.classList.toggle('selected')">password-reset</div>
+            <div class="skill-chip" onclick="this.classList.toggle('selected')">brand-voice</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 3 -->
+      <div class="wizard-panel" id="wizStep3">
+        <div class="wiz-field">
+          <label class="wiz-label">System Prompt <span>*</span></label>
+          <textarea class="wiz-input" id="wiz_prompt" placeholder="Agent'ın davranışını belirleyen talimatları yazın...&#10;&#10;Örnek: Sen bir müşteri hizmetleri asistanısın. Türkçe yanıt ver. Müşteri şikayetlerini empatiyle karşıla. Çözemediğin sorunları yöneticiye ilet."></textarea>
+          <div class="wiz-hint">Bu prompt agent'ın tüm yanıtlarının temelini oluşturur. Ne kadar detaylı olursa agent o kadar tutarlı çalışır.</div>
+        </div>
+        <div class="wiz-field">
+          <label class="wiz-label">Aktif Kanallar</label>
+          <div class="wiz-hint" style="margin-bottom:10px">Agent hangi platformlarda kullanılabilir olsun?</div>
+          <div class="channel-picker" id="channelPicker">
+            <div class="channel-option selected" onclick="this.classList.toggle('selected')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              WebChat
+            </div>
+            <div class="channel-option" onclick="this.classList.toggle('selected')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              WhatsApp
+            </div>
+            <div class="channel-option" onclick="this.classList.toggle('selected')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14.5 10c-.83 0-1.5-.67-1.5-1.5v-5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5v5c0 .83-.67 1.5-1.5 1.5z"/><path d="M20.5 10H19V8.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+              Slack
+            </div>
+            <div class="channel-option" onclick="this.classList.toggle('selected')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+              Teams
+            </div>
+            <div class="channel-option" onclick="this.classList.toggle('selected')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              E-posta
+            </div>
+            <div class="channel-option" onclick="this.classList.toggle('selected')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+              Telegram
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 4: PREVIEW -->
+      <div class="wizard-panel" id="wizStep4">
+        <div style="text-align:center;margin-bottom:20px">
+          <div id="wizPreviewAvatar" style="width:56px;height:56px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:10px"></div>
+          <h3 id="wizPreviewName" style="font-size:18px;font-weight:600;color:var(--text-primary)"></h3>
+          <p id="wizPreviewDesc" style="font-size:13px;color:var(--text-tertiary);margin-top:2px"></p>
+        </div>
+        <div class="wiz-summary" id="wizSummary"></div>
+        <div class="wiz-field">
+          <label class="wiz-label">Seçilen Skill'ler</label>
+          <div id="wizPreviewSkills" class="skill-tags" style="margin-top:6px"></div>
+        </div>
+        <div class="wiz-field">
+          <label class="wiz-label">Aktif Kanallar</label>
+          <div id="wizPreviewChannels" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"></div>
+        </div>
+        <div class="wiz-field">
+          <label class="wiz-label">System Prompt Önizleme</label>
+          <div class="config-block" id="wizPreviewPrompt" style="margin-top:6px"></div>
+        </div>
+      </div>
+    </div>
+    <div class="wizard-footer">
+      <div class="wizard-footer-left" id="wizFooterHint">Adım 1 / 4</div>
+      <div class="wizard-footer-right">
+        <button class="btn btn-secondary" id="wizBtnBack" onclick="wizBack()" style="display:none">Geri</button>
+        <button class="btn btn-primary" id="wizBtnNext" onclick="wizNext()">Devam Et</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Backend'den gelecek agent listesi
+let agents = [];
+let userInfo = null;
+let currentEditAgent = null; // Modal'da düzenlenen agent
+
+// ═══ TOOL TANIMLARI ═══
+const ALL_TOOLS = {
+  // Browser Tools
+  browse_web: { name: 'Web Tarayıcı', icon: '🌐', category: 'browser', desc: 'Web sitelerini ziyaret et' },
+  read_current_page: { name: 'Sayfa Oku', icon: '📄', category: 'browser', desc: 'Açık sayfayı oku' },
+  fill_form: { name: 'Form Doldur', icon: '📝', category: 'browser', desc: 'Web formlarını doldur' },
+  click_button: { name: 'Buton Tıkla', icon: '👆', category: 'browser', desc: 'Sayfa elemanlarına tıkla' },
+  close_browser: { name: 'Browser Kapat', icon: '❌', category: 'browser', desc: 'Tarayıcıyı kapat' },
+  // Payment Tools
+  list_my_cards: { name: 'Kartları Listele', icon: '💳', category: 'payment', desc: 'Atanan kartları görüntüle' },
+  request_payment: { name: 'Ödeme İste', icon: '💰', category: 'payment', desc: 'Ödeme onayı iste' },
+  fill_card_info: { name: 'Kart Bilgisi Gir', icon: '🔢', category: 'payment', desc: 'Kart bilgilerini forma gir' },
+  // Task Tools
+  create_task: { name: 'Görev Oluştur', icon: '✅', category: 'task', desc: 'Yeni görev oluştur' },
+  list_tasks: { name: 'Görevleri Listele', icon: '📋', category: 'task', desc: 'Görevleri görüntüle' },
+  update_task: { name: 'Görev Güncelle', icon: '✏️', category: 'task', desc: 'Görev durumunu güncelle' },
+  // Memory Tools
+  remember: { name: 'Hatırla', icon: '💾', category: 'memory', desc: 'Bilgi kaydet' },
+  recall: { name: 'Anımsa', icon: '🔍', category: 'memory', desc: 'Kayıtlı bilgiyi getir' },
+  forget: { name: 'Unut', icon: '🗑️', category: 'memory', desc: 'Kayıtlı bilgiyi sil' },
+  // Multi-Agent Tools
+  list_agents: { name: 'Agentları Listele', icon: '🤖', category: 'agent', desc: 'Diğer agentları gör' },
+  ask_agent: { name: 'Agent\'a Sor', icon: '💬', category: 'agent', desc: 'Başka agent\'a soru sor' },
+  delegate_task: { name: 'Görev Delege Et', icon: '📤', category: 'agent', desc: 'Görevi başka agent\'a ver' },
+  create_agent: { name: 'Agent Oluştur', icon: '➕', category: 'agent', desc: 'Yeni agent oluştur' },
+  delete_agent: { name: 'Agent Sil', icon: '🗑️', category: 'agent', desc: 'Agent\'ı sil' }
+};
+
+const TOOL_CATEGORIES = {
+  browser: { name: 'Browser', color: '#0570DE', bg: '#E8F2FD' },
+  payment: { name: 'Ödeme', color: '#D97706', bg: '#FEF7E6' },
+  task: { name: 'Görevler', color: '#0EA371', bg: '#EEFBF4' },
+  memory: { name: 'Hafıza', color: '#8B5CF6', bg: '#F3E8FF' },
+  agent: { name: 'Multi-Agent', color: '#EC4899', bg: '#FCE7F3' }
+};
+
+// Tools grid render
+function renderToolsGrid(enabledTools = []) {
+  const enabledSet = new Set(enabledTools);
+  let html = '';
+  
+  // Kategorilere göre grupla
+  const categories = {};
+  for (const [toolId, tool] of Object.entries(ALL_TOOLS)) {
+    if (!categories[tool.category]) categories[tool.category] = [];
+    categories[tool.category].push({ id: toolId, ...tool });
+  }
+  
+  for (const [catId, tools] of Object.entries(categories)) {
+    const cat = TOOL_CATEGORIES[catId];
+    html += `<div style="grid-column:span 2;margin-top:${catId === 'browser' ? '0' : '8px'}">
+      <div style="font-size:11px;font-weight:600;color:${cat.color};margin-bottom:6px;display:flex;align-items:center;gap:6px">
+        <span style="width:16px;height:16px;background:${cat.bg};border-radius:4px;display:inline-flex;align-items:center;justify-content:center;font-size:10px">${tools[0].icon}</span>
+        ${cat.name}
+      </div>
+    </div>`;
+    
+    for (const tool of tools) {
+      const isEnabled = enabledSet.has(tool.id);
+      html += `
+        <label style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:${isEnabled ? cat.bg : 'var(--surface)'};border:1px solid ${isEnabled ? cat.color + '40' : 'var(--border)'};border-radius:6px;cursor:pointer;transition:all 0.15s" 
+               onmouseenter="this.style.borderColor='${cat.color}'" 
+               onmouseleave="this.style.borderColor='${isEnabled ? cat.color + '40' : 'var(--border)'}'"
+               onclick="this.style.background=this.querySelector('input').checked?'var(--surface)':'${cat.bg}'">
+          <input type="checkbox" name="agent_tool" value="${tool.id}" ${isEnabled ? 'checked' : ''} 
+                 style="width:14px;height:14px;accent-color:${cat.color}">
+          <span style="font-size:14px">${tool.icon}</span>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:12px;font-weight:500;color:var(--text-primary)">${tool.name}</div>
+            <div style="font-size:10px;color:var(--text-tertiary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${tool.desc}</div>
+          </div>
+        </label>`;
+    }
+  }
+  
+  return html;
+}
+
+// Agent tools kaydet
+async function saveAgentTools() {
+  if (!currentEditAgent) return;
+  
+  const checkboxes = document.querySelectorAll('input[name="agent_tool"]:checked');
+  const selectedTools = Array.from(checkboxes).map(cb => cb.value);
+  
+  try {
+    const result = await window.orbicorpAPI.updateAgent(currentEditAgent.id, {
+      tools: selectedTools
+    });
+    
+    if (result.success) {
+      // Local state güncelle
+      const idx = agents.findIndex(a => a.id === currentEditAgent.id);
+      if (idx >= 0) {
+        agents[idx].tools = selectedTools;
+        currentEditAgent.tools = selectedTools;
+      }
+      
+      // Başarı mesajı göster
+      showToast('Araçlar başarıyla güncellendi', 'success');
+    } else {
+      showToast('Güncelleme başarısız: ' + (result.error || 'Bilinmeyen hata'), 'error');
+    }
+  } catch (err) {
+    console.error('Tools update error:', err);
+    showToast('Bir hata oluştu', 'error');
+  }
+}
+
+// Toast mesajı göster
+function showToast(message, type = 'info') {
+  const existing = document.querySelector('.toast-message');
+  if (existing) existing.remove();
+  
+  const colors = {
+    success: { bg: 'var(--green-bg)', color: 'var(--green-text)', icon: '✓' },
+    error: { bg: 'var(--red-bg)', color: 'var(--red-text)', icon: '✗' },
+    info: { bg: 'var(--blue-bg)', color: 'var(--blue-text)', icon: 'ℹ' }
+  };
+  const c = colors[type] || colors.info;
+  
+  const toast = document.createElement('div');
+  toast.className = 'toast-message';
+  toast.style.cssText = `position:fixed;bottom:24px;right:24px;padding:12px 20px;background:${c.bg};color:${c.color};border-radius:8px;font-size:13px;font-weight:500;display:flex;align-items:center;gap:8px;z-index:9999;animation:slideIn 0.3s ease;box-shadow:0 4px 12px rgba(0,0,0,0.15)`;
+  toast.innerHTML = `<span>${c.icon}</span> ${message}`;
+  document.body.appendChild(toast);
+  
+  setTimeout(() => {
+    toast.style.animation = 'slideOut 0.3s ease';
+    setTimeout(() => toast.remove(), 300);
+  }, 3000);
+}
+
+// Toast animasyonları için CSS ekle
+const toastStyle = document.createElement('style');
+toastStyle.textContent = `
+  @keyframes slideIn { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100px); opacity: 0; } }
+`;
+document.head.appendChild(toastStyle);
+
+const statusMap = { 
+  ACTIVE: {label:"Active", cls:"badge-green"}, 
+  TRAINING: {label:"Training", cls:"badge-amber"}, 
+  PAUSED: {label:"Paused", cls:"badge-gray"}, 
+  ERROR: {label:"Error", cls:"badge-red"},
+  // Eski format uyumluluğu
+  active: {label:"Active", cls:"badge-green"}, 
+  training: {label:"Training", cls:"badge-amber"}, 
+  paused: {label:"Paused", cls:"badge-gray"}, 
+  error: {label:"Error", cls:"badge-red"}
+};
+
+const providerIcons = {
+  anthropic: '<svg width="14" height="14" viewBox="0 0 24 24" fill="#D97757"><path d="M17.304 3.541l-5.357 16.918H8.028L2.696 3.541h3.894l3.449 11.962 3.449-11.962h3.816zm5.357 0l-5.357 16.918h-3.919l5.357-16.918h3.919z"/></svg>',
+  openai: '<svg width="14" height="14" viewBox="0 0 24 24" fill="#10A37F"><path d="M22.282 9.821a5.985 5.985 0 0 0-.516-4.91 6.046 6.046 0 0 0-6.51-2.9A6.065 6.065 0 0 0 4.981 4.18a5.985 5.985 0 0 0-3.998 2.9 6.046 6.046 0 0 0 .743 7.097 5.98 5.98 0 0 0 .51 4.911 6.051 6.051 0 0 0 6.515 2.9A5.985 5.985 0 0 0 13.26 24a6.056 6.056 0 0 0 5.772-4.206 5.99 5.99 0 0 0 3.997-2.9 6.056 6.056 0 0 0-.747-7.073z"/></svg>',
+  google: '<svg width="14" height="14" viewBox="0 0 24 24" fill="#4285F4"><path d="M12 11h8.533c.044.385.067.78.067 1.184 0 2.734-.98 5.036-2.678 6.6-1.485 1.371-3.518 2.175-5.922 2.175A8.976 8.976 0 0 1 3 12 8.976 8.976 0 0 1 12 3c2.42 0 4.473.894 6.044 2.36l-2.45 2.45C14.538 6.822 13.347 6.4 12 6.4a5.599 5.599 0 0 0 0 11.2c2.426 0 4.13-1.378 4.635-3.6H12V11z"/></svg>',
+  openrouter: '<svg width="14" height="14" viewBox="0 0 24 24" fill="#6366F1"><circle cx="12" cy="12" r="10"/></svg>'
+};
+
+const defaultIcon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
+
+let selectedIds = new Set();
+
+// Auth check ve sayfa init
+async function initPage() {
+  // iframe içindeyse ana sayfa zaten auth kontrolü yapıyor, redirect yapma
+  const isInIframe = window.self !== window.top;
+  
+  const token = localStorage.getItem('orbicorp_access_token');
+  if (!token) {
+    if (isInIframe) {
+      // iframe içinde token yoksa parent'a bildir
+      window.parent.postMessage({type: 'auth-required'}, '*');
+      return;
+    }
+    window.location.href = 'orbicorp-login.html';
+    return;
+  }
+
+  try {
+    // Kullanıcı bilgisini al
+    const meResult = await window.orbicorpAPI.getMe();
+    if (!meResult.success) {
+      throw new Error('Auth failed');
+    }
+    userInfo = meResult.data;
+    
+    // Avatar güncelle (sadece standalone modda)
+    if (!isInIframe) {
+      const avatar = document.querySelector('.topnav-avatar');
+      if (avatar && userInfo) {
+        avatar.textContent = ((userInfo.firstName?.[0] || '') + (userInfo.lastName?.[0] || '')).toUpperCase() || 'U';
+      }
+    }
+
+    // Agent listesini yükle
+    await loadAgents();
+    
+    // Check if we have a navigated agent from dashboard
+    const navigatedAgentId = sessionStorage.getItem('navigateAgentId');
+    const navigateAction = sessionStorage.getItem('navigateAction');
+    
+    if (navigateAction === 'new') {
+      sessionStorage.removeItem('navigateAction');
+      // Open new agent modal
+      openModal();
+    } else if (navigatedAgentId) {
+      sessionStorage.removeItem('navigateAgentId');
+      // Find and open the agent in edit mode
+      const targetAgent = agents.find(a => a.id === navigatedAgentId);
+      if (targetAgent) {
+        openModal(targetAgent);
+      }
+    }
+  } catch (error) {
+    console.error('Init error:', error);
+    if (isInIframe) {
+      // iframe içinde hata olursa parent'a bildir
+      window.parent.postMessage({type: 'auth-required'}, '*');
+      return;
+    }
+    localStorage.removeItem('orbicorp_access_token');
+    localStorage.removeItem('orbicorp_refresh_token');
+    window.location.href = 'orbicorp-login.html';
+  }
+}
+
+async function loadAgents() {
+  try {
+    const result = await window.orbicorpAPI.getAgents();
+    if (result.success && result.data) {
+      // Backend formatından frontend formatına dönüştür
+      agents = result.data.map(transformAgent);
+      renderTable(agents);
+      updateSummaryCards();
+      
+      // Sidebar badge güncelle
+      const badge = document.querySelector('.sidebar-badge');
+      if (badge) badge.textContent = agents.length;
+    }
+  } catch (error) {
+    console.error('Failed to load agents:', error);
+    showToast('Agent listesi yüklenemedi', 'error');
+  }
+}
+
+function transformAgent(a) {
+  // Backend agent'ını frontend formatına dönüştür
+  const stats = a.stats || {};
+  const modelName = getModelDisplayName(a.modelProvider, a.modelId);
+  
+  return {
+    id: a.id,
+    name: a.name,
+    description: a.description,
+    dept: a.department || 'Genel',
+    deptEn: a.department || 'General',
+    status: (a.status || 'ACTIVE').toLowerCase(),
+    model: modelName,
+    modelProvider: a.modelProvider,
+    modelId: a.modelId,
+    avatar: getAvatarClass(a.name),
+    icon: defaultIcon,
+    success: stats.successRate || 0,
+    response: stats.avgResponseTime || '—',
+    cost: stats.monthlyCost || 0,
+    activity: formatActivity(a.updatedAt),
+    activityEn: formatActivity(a.updatedAt),
+    skills: a.skills || [],
+    tools: a.tools || [],
+    channels: a.channels || ['WEB'],
+    convos: [],
+    tokens: stats.monthlyTokens || 0,
+    budget: 500,
+    prompt: a.systemPrompt || '',
+    isMain: a.isMain || false,
+    notificationChannelId: a.notificationChannelId || null
+  };
+}
+
+function getModelDisplayName(provider, modelId) {
+  if (!provider && !modelId) return 'Yapılandırılmamış';
+  
+  const modelNames = {
+    'claude-sonnet-4-20250514': 'Claude Sonnet',
+    'claude-3-5-sonnet-20241022': 'Claude Sonnet',
+    'claude-3-opus-20240229': 'Claude Opus',
+    'claude-3-haiku-20240307': 'Claude Haiku',
+    'gpt-4o': 'GPT-4o',
+    'gpt-4-turbo': 'GPT-4 Turbo',
+    'gpt-3.5-turbo': 'GPT-3.5',
+    'gemini-1.5-pro': 'Gemini Pro',
+    'gemini-1.5-flash': 'Gemini Flash'
+  };
+  
+  return modelNames[modelId] || modelId || provider || 'Unknown';
+}
+
+function getAvatarClass(name) {
+  const colors = ['purple', 'green', 'blue', 'amber', 'teal', 'pink', 'red', 'gray'];
+  const hash = name.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+  return colors[hash % colors.length];
+}
+
+function formatActivity(dateStr) {
+  if (!dateStr) return '—';
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now - date;
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+  
+  if (diffMins < 1) return 'Az önce';
+  if (diffMins < 60) return `${diffMins} dk önce`;
+  if (diffHours < 24) return `${diffHours} saat önce`;
+  return `${diffDays} gün önce`;
+}
+
+function updateSummaryCards() {
+  const activeCount = agents.filter(a => a.status === 'active').length;
+  const totalCost = agents.reduce((sum, a) => sum + (a.cost || 0), 0);
+  const avgSuccess = agents.length > 0 
+    ? (agents.reduce((sum, a) => sum + (a.success || 0), 0) / agents.length).toFixed(1)
+    : 0;
+  const totalTokens = agents.reduce((sum, a) => sum + (a.tokens || 0), 0);
+
+  // Summary card'ları güncelle
+  const cards = document.querySelectorAll('.summary-card-value');
+  if (cards[0]) cards[0].textContent = activeCount;
+  if (cards[1]) cards[1].textContent = `$${totalCost.toFixed(0)}`;
+  if (cards[2]) cards[2].textContent = `${avgSuccess}%`;
+  if (cards[3]) cards[3].textContent = `${(totalTokens/1000).toFixed(0)}K`;
+}
+
+function showToast(message, type = 'info') {
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  toast.textContent = message;
+  toast.style.cssText = 'position:fixed;bottom:20px;right:20px;padding:12px 20px;border-radius:8px;color:white;font-size:14px;z-index:9999;animation:fadeIn 0.3s';
+  toast.style.background = type === 'error' ? 'var(--red)' : type === 'success' ? 'var(--green)' : 'var(--primary)';
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+
+function renderTable(list) {
+  const tbody = document.getElementById('agentTableBody');
+  tbody.innerHTML = list.map(a => {
+    const st = statusMap[a.status] || statusMap['active'];
+    const successColor = a.success >= 95 ? 'var(--green)' : a.success >= 90 ? 'var(--primary)' : a.success >= 85 ? 'var(--amber)' : 'var(--red)';
+    const sel = selectedIds.has(a.id) ? 'selected' : '';
+    const providerIcon = a.modelProvider ? (providerIcons[a.modelProvider] || '') : '';
+    const modelDisplay = providerIcon ? `${providerIcon} <span style="margin-left:4px">${a.model}</span>` : a.model;
+    const mainBadge = a.isMain ? '<span style="margin-left:6px;font-size:9px;background:var(--primary-bg);color:var(--primary);padding:2px 6px;border-radius:4px;font-weight:600">ANA</span>' : '';
+    
+    return `<tr class="${sel}" data-id="${a.id}" data-status="${a.status}" data-name="${a.name.toLowerCase()}" data-dept="${a.dept.toLowerCase()}">
+      <td class="td-checkbox"><input type="checkbox" ${selectedIds.has(a.id)?'checked':''} onchange="toggleSelect('${a.id}',this)"></td>
+      <td><div class="td-agent"><div class="agent-avatar-sm ${a.avatar}" title="Avatar değiştir">${a.icon}</div><div class="td-agent-info"><div class="td-agent-name" onclick="openAgentModal('${a.id}')">${a.name}${mainBadge}</div><div class="td-agent-dept">${a.dept}</div></div></div></td>
+      <td><span class="badge ${st.cls}"><span class="badge-dot"></span>${st.label}</span></td>
+      <td><span class="model-tag" style="display:inline-flex;align-items:center;gap:4px">${modelDisplay}</span></td>
+      <td><div class="metric-bar"><div class="metric-bar-track"><div class="metric-bar-fill" style="width:${a.success}%;background:${successColor}"></div></div><span style="font-weight:500;color:var(--text-primary)">${a.success}%</span></div></td>
+      <td style="color:var(--text-primary);font-weight:500">${a.response}</td>
+      <td style="font-weight:500">$${a.cost}</td>
+      <td style="color:var(--text-tertiary);font-size:12px">${a.activity}</td>
+      <td style="font-size:11px">${a.card || a.phone ? `<div style="display:flex;gap:4px;flex-wrap:wrap">${a.card?`<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;background:var(--primary-bg);color:var(--primary);border-radius:999px;font-weight:500"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>&bull;&bull;${a.card.last4}</span>`:''}${a.phone?`<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;background:var(--green-bg);color:var(--green-text);border-radius:999px;font-weight:500"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>Tel</span>`:''}</div>` : '<span style="color:var(--text-muted)">\u2014</span>'}</td>
+      <td><div class="actions-cell">
+        <button class="action-btn" title="${a.status==='active'?'Duraklat':'Başlat'}" onclick="toggleAgentStatus('${a.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">${a.status==='active'?'<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>':'<polygon points="5 3 19 12 5 21 5 3"/>'}</svg></button>
+        <button class="action-btn" title="Düzenle" onclick="openAgentModal('${a.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></button>
+        <button class="action-btn danger" title="Sil" onclick="deleteAgent('${a.id}')" ${a.isMain ? 'disabled style="opacity:0.3;cursor:not-allowed"' : ''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+function filterTable() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const rows = document.querySelectorAll('#agentTableBody tr');
+  rows.forEach(r => {
+    const name = r.dataset.name || '';
+    const dept = r.dataset.dept || '';
+    r.style.display = (name.includes(q) || dept.includes(q)) ? '' : 'none';
+  });
+}
+
+function filterByStatus(status) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  if (status === 'all') { renderTable(agents); return; }
+  renderTable(agents.filter(a => a.status === status));
+}
+
+function sortTable(key) {
+  const sorted = [...agents];
+  if (key === 'name') sorted.sort((a,b) => a.name.localeCompare(b.name));
+  else if (key === 'success') sorted.sort((a,b) => b.success - a.success);
+  else if (key === 'cost') sorted.sort((a,b) => b.cost - a.cost);
+  else if (key === 'activity') sorted.sort((a,b) => a.id - b.id);
+  renderTable(sorted);
+}
+
+function toggleSelect(id, cb) {
+  if (cb.checked) selectedIds.add(id); else selectedIds.delete(id);
+  cb.closest('tr').classList.toggle('selected', cb.checked);
+  updateBulkBar();
+}
+
+function toggleAll(cb) {
+  const checkboxes = document.querySelectorAll('#agentTableBody input[type=checkbox]');
+  checkboxes.forEach(c => { c.checked = cb.checked; const id = parseInt(c.closest('tr').dataset.id);
+    if (cb.checked) selectedIds.add(id); else selectedIds.delete(id);
+    c.closest('tr').classList.toggle('selected', cb.checked);
+  });
+  updateBulkBar();
+}
+
+function clearSelection() { selectedIds.clear(); document.querySelectorAll('#agentTableBody input[type=checkbox]').forEach(c=>{c.checked=false;c.closest('tr').classList.remove('selected')}); updateBulkBar(); }
+function updateBulkBar() { const bar=document.getElementById('bulkBar'); const cnt=document.getElementById('bulkCount'); cnt.textContent=selectedIds.size; bar.classList.toggle('visible',selectedIds.size>0); }
+function bulkAction(action) { alert(`${action} işlemi ${selectedIds.size} agent için uygulandı (demo)`); clearSelection(); }
+
+// Backend entegrasyonlu agent işlemleri
+async function toggleAgentStatus(id) {
+  const agent = agents.find(a => a.id === id);
+  if (!agent) return;
+  
+  try {
+    let result;
+    if (agent.status === 'active') {
+      result = await window.orbicorpAPI.pauseAgent(id);
+    } else {
+      result = await window.orbicorpAPI.resumeAgent(id);
+    }
+    
+    if (result.success) {
+      // Listeyi yenile
+      await loadAgents();
+      showToast(`Agent ${agent.status === 'active' ? 'duraklatıldı' : 'başlatıldı'}`, 'success');
+    } else {
+      throw new Error(result.message || 'İşlem başarısız');
+    }
+  } catch (error) {
+    console.error('Toggle agent error:', error);
+    showToast(error.message || 'İşlem başarısız', 'error');
+  }
+}
+
+async function deleteAgent(id) {
+  const agent = agents.find(a => a.id === id);
+  if (!agent) return;
+  
+  if (agent.isMain) {
+    showToast('Ana agent silinemez', 'error');
+    return;
+  }
+  
+  if (!confirm(`"${agent.name}" agent'ını silmek istediğinize emin misiniz?`)) {
+    return;
+  }
+  
+  try {
+    const result = await window.orbicorpAPI.deleteAgent(id);
+    if (result.success) {
+      await loadAgents();
+      showToast('Agent silindi', 'success');
+    } else {
+      throw new Error(result.message || 'Silme başarısız');
+    }
+  } catch (error) {
+    console.error('Delete agent error:', error);
+    showToast(error.message || 'Silme başarısız', 'error');
+  }
+}
+
+function openAgentModal(id) {
+  const agent = agents.find(a => a.id === id);
+  if (agent) {
+    openModal(agent);
+  }
+}
+
+// ═══ MODAL ═══
+function openModal(a) {
+  if(!a) return;
+  currentEditAgent = a; // Footer Kaydet butonu için
+  document.getElementById('modalOverlay').classList.add('open');
+  const st = statusMap[a.status];
+  document.getElementById('modalAvatar').className = `modal-avatar ${a.avatar}`;
+  document.getElementById('modalAvatar').innerHTML = a.icon.replace('16','20');
+  document.getElementById('modalName').textContent = a.name;
+  document.getElementById('modalDept').textContent = a.dept;
+  document.getElementById('modalBadge').className = `badge ${st.cls}`;
+  document.getElementById('modalBadge').innerHTML = `<span class="badge-dot"></span>${st.label}`;
+  document.querySelectorAll('.modal-tab').forEach((t,i)=>{t.classList.toggle('active',i===0)});
+  renderModalTab('tab-general', a);
+}
+function closeModal() { 
+  document.getElementById('modalOverlay').classList.remove('open'); 
+  currentEditAgent = null;
+}
+
+async function loadEditModels(agent) {
+  currentEditAgent = agent;
+  const picker = document.getElementById('editModelPicker');
+  
+  try {
+    const result = await window.orbicorpAPI.getLLMConfig();
+    if (!result.success) throw new Error('Config yüklenemedi');
+    
+    const data = result.data || {};
+    const providers = data.providers || {};
+    
+    const configuredProviders = Object.keys(providers).filter(k => {
+      const val = providers[k];
+      return val && typeof val === 'object' && val.configured === true;
+    });
+    
+    if (configuredProviders.length === 0) {
+      picker.innerHTML = '<div style="color:var(--amber);padding:10px">Önce Ayarlar\'dan API anahtarı ekleyin.</div>';
+      return;
+    }
+    
+    let html = '';
+    configuredProviders.forEach(provider => {
+      const models = allModels[provider] || [];
+      if (models.length > 0) {
+        html += `<div style="font-size:10px;font-weight:600;color:var(--text-tertiary);text-transform:uppercase;margin:8px 0 4px">${providerNames[provider]}</div>`;
+        
+        models.forEach(model => {
+          const isSelected = agent.modelProvider === provider && agent.modelId === model.id;
+          html += `
+            <div class="model-option ${isSelected ? 'selected' : ''}" data-provider="${provider}" data-model-id="${model.id}" onclick="selectEditModel(this)" style="padding:8px 12px;margin-bottom:4px">
+              <div class="model-option-radio"></div>
+              <div class="model-option-info">
+                <div class="model-option-name" style="font-size:13px">${model.name}</div>
+              </div>
+              <span class="model-tag" style="font-size:10px">${model.price}</span>
+            </div>
+          `;
+        });
+      }
+    });
+    
+    picker.innerHTML = html;
+  } catch (error) {
+    console.error('Edit models load error:', error);
+    picker.innerHTML = '<div style="color:var(--red);padding:10px">Modeller yüklenemedi.</div>';
+  }
+}
+
+function selectEditModel(el) {
+  document.querySelectorAll('#editModelPicker .model-option').forEach(m => m.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+async function saveAgentConfig(agentId) {
+  const selected = document.querySelector('#editModelPicker .model-option.selected');
+  const systemPrompt = document.getElementById('editSystemPrompt')?.value || '';
+  const notificationChannelId = document.getElementById('editNotificationChannel')?.value || null;
+  
+  console.log('Saving agent config:', { agentId, systemPrompt: systemPrompt.substring(0, 50), selected: !!selected, notificationChannelId });
+  
+  if (!selected) {
+    showToast('Lütfen bir model seçin', 'error');
+    return;
+  }
+  
+  const modelProvider = selected.dataset.provider;
+  const modelId = selected.dataset.modelId;
+  
+  const payload = {
+    modelProvider,
+    modelId,
+    systemPrompt,
+    notificationChannelId: notificationChannelId || null
+  };
+  
+  console.log('Update payload:', payload);
+  
+  try {
+    const result = await window.orbicorpAPI.updateAgent(agentId, payload);
+    
+    console.log('Update result:', result);
+    
+    if (result.success) {
+      showToast('Agent güncellendi!', 'success');
+      // Modal'ı kapatmadan önce local agents array'i de güncelle
+      const idx = agents.findIndex(a => a.id === agentId);
+      if (idx !== -1) {
+        agents[idx].prompt = systemPrompt;
+        agents[idx].modelProvider = modelProvider;
+        agents[idx].modelId = modelId;
+        agents[idx].notificationChannelId = notificationChannelId;
+      }
+      closeModal();
+      await loadAgents(); // Listeyi yenile
+    } else {
+      throw new Error(result.message || 'Güncelleme başarısız');
+    }
+  } catch (error) {
+    console.error('Save agent error:', error);
+    console.error('Error details:', error.data || error.message);
+    showToast(error.message || 'Kaydetme hatası', 'error');
+  }
+}
+
+// Footer'daki Kaydet butonu için wrapper
+async function saveCurrentAgent() {
+  if (!currentEditAgent) {
+    showToast('Kaydedilecek agent bulunamadı', 'error');
+    return;
+  }
+  
+  // Config tab açık mı kontrol et
+  const configTab = document.querySelector('.modal-tab[onclick*="tab-config"]');
+  const isConfigTabActive = configTab?.classList.contains('active');
+  
+  if (!isConfigTabActive) {
+    // Config tab'a geç ve kaydet
+    configTab?.click();
+    // Biraz bekle ki tab render olsun
+    await new Promise(resolve => setTimeout(resolve, 100));
+  }
+  
+  // Şimdi saveAgentConfig'i çağır
+  await saveAgentConfig(currentEditAgent.id);
+}
+
+// Load notification channels for agent config dropdown
+async function loadNotificationChannels(agent) {
+  const select = document.getElementById('editNotificationChannel');
+  if (!select) return;
+  
+  try {
+    const channels = await window.orbicorpAPI.getChannelsDropdown();
+    
+    let options = '<option value="">Seçilmedi (sadece uygulama içi)</option>';
+    
+    if (Array.isArray(channels) && channels.length > 0) {
+      const typeIcons = { TELEGRAM: '📱', WHATSAPP: '💬', SLACK: '💼', EMAIL: '✉️' };
+      channels.forEach(ch => {
+        const icon = typeIcons[ch.type] || '📡';
+        const selected = agent.notificationChannelId === ch.id ? 'selected' : '';
+        options += `<option value="${ch.id}" ${selected}>${icon} ${ch.name}</option>`;
+      });
+    }
+    
+    select.innerHTML = options;
+  } catch (error) {
+    console.error('Failed to load channels:', error);
+    select.innerHTML = '<option value="">Kanallar yüklenemedi</option>';
+  }
+}
+
+function switchTab(btn, tabId) {
+  document.querySelectorAll('.modal-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  const name = document.getElementById('modalName').textContent;
+  const a = agents.find(x=>x.name===name);
+  if(a) renderModalTab(tabId, a);
+}
+function renderModalTab(tabId, a) {
+  const body = document.getElementById('modalBody');
+  const chartBars = Array.from({length:30},()=>Math.floor(Math.random()*85+15));
+
+  const tabs = {
+    'tab-general': `
+      <div class="modal-section"><div class="modal-section-title">Genel Bilgiler</div>
+        <div class="modal-field"><span class="modal-field-label">Ad</span><span class="modal-field-value">${a.name}</span></div>
+        <div class="modal-field"><span class="modal-field-label">Departman</span><span class="modal-field-value">${a.dept}</span></div>
+        <div class="modal-field"><span class="modal-field-label">Durum</span><span class="badge ${statusMap[a.status].cls}"><span class="badge-dot"></span>${statusMap[a.status].label}</span></div>
+        <div class="modal-field"><span class="modal-field-label">Model</span><span class="model-tag">${a.model}</span></div>
+        <div class="modal-field"><span class="modal-field-label">Başarı Oranı</span><span class="modal-field-value">${a.success}%</span></div>
+        <div class="modal-field"><span class="modal-field-label">Ortalama Yanıt</span><span class="modal-field-value">${a.response}</span></div>
+        <div class="modal-field"><span class="modal-field-label">Son Aktivite</span><span class="modal-field-value">${a.activity}</span></div>
+        <div class="modal-field"><span class="modal-field-label">Avatar</span><div class="agent-avatar-sm ${a.avatar}" style="cursor:pointer" title="Değiştirmek için tıkla">${a.icon}</div></div>
+      </div>`,
+    'tab-skills': `
+      <div class="modal-section"><div class="modal-section-title">Atanmış Skill'ler (${a.skills.length})</div>
+        <div class="skill-tags">${a.skills.map(s=>`<span class="skill-tag">${s}<span class="remove" onclick="this.parentElement.remove()">&times;</span></span>`).join('')}</div>
+        <button class="btn btn-secondary" style="margin-top:14px"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Skill Ekle</button>
+      </div>`,
+    'tab-perf': `
+      <div class="modal-section"><div class="modal-section-title">Son 30 Günlük Etkileşim</div>
+        <div class="mini-chart">${chartBars.map(h=>`<div class="mini-chart-bar" style="height:${h}%"></div>`).join('')}</div>
+      </div>
+      <div class="modal-section" style="margin-top:16px"><div class="modal-section-title">Metrikler</div>
+        <div class="modal-field"><span class="modal-field-label">Toplam Konuşma</span><span class="modal-field-value">${a.convos.length > 0 ? (a.tokens/80).toFixed(0) : '0'}</span></div>
+        <div class="modal-field"><span class="modal-field-label">Başarı Oranı</span><span class="modal-field-value">${a.success}%</span></div>
+        <div class="modal-field"><span class="modal-field-label">Ort. Yanıt Süresi</span><span class="modal-field-value">${a.response}</span></div>
+        <div class="modal-field"><span class="modal-field-label">Eskalasyon Oranı</span><span class="modal-field-value">${(100-a.success).toFixed(1)}%</span></div>
+      </div>`,
+    'tab-convos': `
+      <div class="modal-section"><div class="modal-section-title">Son Konuşmalar</div>
+        ${a.convos.length === 0 ? '<p style="color:var(--text-tertiary);font-size:13px">Henüz konuşma kaydı yok.</p>' :
+          a.convos.map(c=>`<div class="convo-item"><div class="convo-avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div class="convo-text"><strong>${c.user}</strong>: ${c.text}</div><span class="convo-time">${c.time}</span></div>`).join('')}
+      </div>`,
+    'tab-cost': `
+      <div class="modal-section"><div class="modal-section-title">Maliyet Özeti</div>
+        <div class="cost-mini">
+          <div class="cost-mini-card"><div class="cost-mini-value">$${a.cost}</div><div class="cost-mini-label">Bu Ay</div></div>
+          <div class="cost-mini-card"><div class="cost-mini-value">${(a.tokens/1000).toFixed(0)}K</div><div class="cost-mini-label">Token Kullanımı</div></div>
+          <div class="cost-mini-card"><div class="cost-mini-value">$${a.budget}</div><div class="cost-mini-label">Aylık Bütçe</div></div>
+        </div>
+      </div>
+      <div class="modal-section" style="margin-top:16px"><div class="modal-section-title">Bütçe Durumu</div>
+        <div style="background:var(--border-light);height:10px;border-radius:999px;overflow:hidden;margin-top:8px"><div style="height:100%;border-radius:999px;width:${Math.min((a.cost/a.budget)*100,100)}%;background:${(a.cost/a.budget)>0.9?'var(--red)':((a.cost/a.budget)>0.7?'var(--amber)':'var(--primary)')}"></div></div>
+        <p style="font-size:12px;color:var(--text-tertiary);margin-top:6px">${Math.round((a.cost/a.budget)*100)}% kullanıldı — $${a.budget - a.cost} kalan</p>
+      </div>`,
+    'tab-resources': `
+      <div class="modal-section"><div class="modal-section-title">Araçlar (Tools)</div>
+        <p style="font-size:12px;color:var(--text-tertiary);margin-bottom:12px">Agent'ın kullanabileceği yetenekleri seçin</p>
+        <div id="toolsGrid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">
+          ${renderToolsGrid(a.tools || [])}
+        </div>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button class="btn btn-primary" style="font-size:12px" onclick="saveAgentTools()">Değişiklikleri Kaydet</button>
+        </div>
+      </div>
+      <div class="modal-section"><div class="modal-section-title">Sanal Kredi Kartı</div>
+        ${a.card ? `
+        <div style="background:linear-gradient(135deg,var(--primary),var(--navy));border-radius:12px;padding:16px 20px;color:white;margin-bottom:12px;position:relative;overflow:hidden">
+          <div style="position:absolute;top:-30%;right:-5%;width:150px;height:150px;background:radial-gradient(circle,rgba(255,255,255,0.06) 0%,transparent 70%);pointer-events:none"></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><span style="font-size:12px;font-weight:700;letter-spacing:0.5px">ORBICORP</span><div style="width:28px;height:20px;background:linear-gradient(135deg,#d4af37,#f0d060);border-radius:3px"></div></div>
+          <div style="font-size:15px;font-family:var(--font-mono);letter-spacing:2px;margin-bottom:10px">4532 &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; ${a.card.last4}</div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;opacity:0.7"><span>$${a.card.spent} / $${a.card.limit.toLocaleString()}</span><span>${Math.round(a.card.spent/a.card.limit*100)}% kullanıldı</span></div>
+          <div style="height:3px;background:rgba(255,255,255,0.2);border-radius:999px;margin-top:4px;overflow:hidden"><div style="height:100%;background:rgba(255,255,255,0.8);border-radius:999px;width:${Math.round(a.card.spent/a.card.limit*100)}%"></div></div>
+        </div>
+        <div class="modal-field"><span class="modal-field-label">Aylık Limit</span><span class="modal-field-value">$${a.card.limit.toLocaleString()}</span></div>
+        <div class="modal-field"><span class="modal-field-label">Bu Ay Harcanan</span><span class="modal-field-value">$${a.card.spent}</span></div>
+        <div class="modal-field"><span class="modal-field-label">Durum</span><span class="badge badge-green">Aktif</span></div>
+        <div style="display:flex;gap:8px;margin-top:12px"><button class="btn btn-secondary" style="font-size:12px">Kartı Düzenle</button><button class="btn btn-secondary" style="font-size:12px;color:var(--amber)">Dondur</button><button class="btn btn-secondary" style="font-size:12px;color:var(--red)">Kaldır</button></div>
+        ` : `<div style="text-align:center;padding:20px;color:var(--text-muted)"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--border)" stroke-width="1.5" style="margin:0 auto 8px;display:block"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg><p style="font-size:13px;margin-bottom:8px">Kart atanmamış</p><button class="btn btn-primary" style="font-size:12px">Kart Ata</button></div>`}
+      </div>
+      <div class="modal-section"><div class="modal-section-title">Sanal Telefon</div>
+        ${a.phone ? `
+        <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--surface);border-radius:8px">
+          <div style="width:36px;height:36px;border-radius:50%;background:var(--green-bg);color:var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72"/></svg></div>
+          <div><div style="font-size:14px;font-weight:600;font-family:var(--font-mono);letter-spacing:1px">${a.phone}</div><div style="font-size:11px;color:var(--text-tertiary)">SMS + PIN doğrulama</div></div>
+          <span class="badge badge-green" style="margin-left:auto">Aktif</span>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-secondary" style="font-size:12px">Numarayı Değiştir</button><button class="btn btn-secondary" style="font-size:12px;color:var(--red)">Kaldır</button></div>
+        ` : `<div style="text-align:center;padding:20px;color:var(--text-muted)"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--border)" stroke-width="1.5" style="margin:0 auto 8px;display:block"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72"/></svg><p style="font-size:13px;margin-bottom:8px">Telefon atanmamış</p><button class="btn btn-primary" style="font-size:12px">Numara Ata</button></div>`}
+      </div>`,
+    'tab-config': `
+      <div class="modal-section"><div class="modal-section-title">Model Konfigürasyonu</div>
+        <div class="wiz-field" style="margin-bottom:12px">
+          <label class="wiz-label" style="font-size:12px;margin-bottom:6px">LLM Model</label>
+          <div id="editModelPicker" style="max-height:200px;overflow-y:auto">
+            <div style="color:var(--text-tertiary);padding:10px;text-align:center">Modeller yükleniyor...</div>
+          </div>
+        </div>
+        <div class="modal-field"><span class="modal-field-label">Temperature</span><span class="modal-field-value">0.7</span></div>
+        <div class="modal-field"><span class="modal-field-label">Max Tokens</span><span class="modal-field-value">4,096</span></div>
+      </div>
+      <div class="modal-section"><div class="modal-section-title">System Prompt</div>
+        <textarea id="editSystemPrompt" class="wiz-input" style="min-height:100px;font-size:13px">${a.prompt || ''}</textarea>
+      </div>
+      <div class="modal-section"><div class="modal-section-title">Bildirim Kanalı</div>
+        <p style="font-size:12px;color:var(--text-tertiary);margin-bottom:10px">Bu agent onay istediğinde hangi kanal üzerinden bildirim göndersin?</p>
+        <select id="editNotificationChannel" class="wiz-input" style="font-size:13px">
+          <option value="">Seçilmedi (sadece uygulama içi)</option>
+        </select>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Kanal eklemek için Ayarlar → İletişim Kanalları'nı ziyaret edin</div>
+      </div>`
+  };
+  body.innerHTML = tabs[tabId] || tabs['tab-general'];
+  
+  // tab-config açıldığında modelleri yükle
+  if (tabId === 'tab-config') {
+    loadEditModels(a);
+    loadNotificationChannels(a);
+  }
+}
+
+// ═══ LANG ═══
+function setLang(lang) {
+  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));
+  event.target.classList.add('active');
+}
+
+// ═══ WIZARD ═══
+let wizStep = 1;
+let wizData = { name:'', desc:'', dept:'', role:'', avatar:'purple', icon:'chat', model:'', modelProvider:'', modelId:'', skills:[], channels:['WebChat'], prompt:'' };
+let availableModels = [];
+
+// Model tanımları - her provider için modeller
+const allModels = {
+  anthropic: [
+    { id: 'claude-sonnet-4-20250514', name: 'Claude Sonnet 4', desc: 'Dengeli performans ve maliyet. Çoğu kullanım için önerilen.', price: '$3/M tok' },
+    { id: 'claude-3-haiku-20240307', name: 'Claude Haiku', desc: 'Hızlı ve ekonomik. Basit görevler için ideal.', price: '$0.25/M tok' },
+    { id: 'claude-3-opus-20240229', name: 'Claude Opus', desc: 'En güçlü model. Karmaşık analiz ve kodlama için.', price: '$15/M tok' },
+  ],
+  openai: [
+    { id: 'gpt-4o', name: 'GPT-4o', desc: 'OpenAI\'ın en gelişmiş çoklu modal modeli.', price: '$5/M tok' },
+    { id: 'gpt-4-turbo', name: 'GPT-4 Turbo', desc: 'Hızlı ve güçlü. Uzun bağlam desteği.', price: '$10/M tok' },
+    { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo', desc: 'Ekonomik seçenek. Basit görevler için.', price: '$0.5/M tok' },
+  ],
+  google: [
+    { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', desc: 'Google\'ın kurumsal AI modeli.', price: '$3.5/M tok' },
+    { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash', desc: 'Hızlı ve ekonomik Google modeli.', price: '$0.35/M tok' },
+  ],
+  openrouter: [
+    { id: 'anthropic/claude-3.5-sonnet', name: 'Claude 3.5 Sonnet (OR)', desc: 'OpenRouter üzerinden Claude erişimi.', price: 'Değişken' },
+    { id: 'openai/gpt-4o', name: 'GPT-4o (OR)', desc: 'OpenRouter üzerinden GPT-4o erişimi.', price: 'Değişken' },
+    { id: 'meta-llama/llama-3-70b-instruct', name: 'Llama 3 70B', desc: 'Meta\'nın açık kaynak modeli.', price: '$0.8/M tok' },
+  ]
+};
+
+const providerNames = {
+  anthropic: 'Anthropic',
+  openai: 'OpenAI', 
+  google: 'Google',
+  openrouter: 'OpenRouter'
+};
+
+async function loadAvailableModels() {
+  console.log('loadAvailableModels called');
+  const picker = document.getElementById('modelPicker');
+  const warning = document.getElementById('noModelsWarning');
+  
+  try {
+    console.log('Fetching LLM config...');
+    const result = await window.orbicorpAPI.getLLMConfig();
+    console.log('LLM config result:', result);
+    
+    if (!result.success) {
+      throw new Error('LLM config yüklenemedi');
+    }
+    
+    // Backend providers objesi içinde döndürüyor
+    const data = result.data || {};
+    const providers = data.providers || data; // providers varsa onu kullan, yoksa direkt data
+    console.log('Providers:', providers);
+    
+    // Yapılandırılmış provider'ları bul (configured: true olanlar)
+    const configuredProviders = Object.keys(providers).filter(k => {
+      const val = providers[k];
+      // Obje ise configured: true kontrol et, string ise boş değilse
+      if (val && typeof val === 'object') {
+        return val.configured === true;
+      }
+      return val && typeof val === 'string' && val.length > 0;
+    });
+    console.log('Configured providers:', configuredProviders);
+    
+    if (configuredProviders.length === 0) {
+      picker.innerHTML = '';
+      warning.style.display = 'block';
+      availableModels = [];
+      return;
+    }
+    
+    warning.style.display = 'none';
+    availableModels = [];
+    
+    // Her yapılandırılmış provider için modelleri ekle
+    let html = '';
+    configuredProviders.forEach(provider => {
+      const models = allModels[provider] || [];
+      if (models.length > 0) {
+        html += `<div style="font-size:11px;font-weight:600;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.05em;margin:12px 0 8px;padding-left:4px">${providerNames[provider]}</div>`;
+        
+        models.forEach((model, idx) => {
+          const isFirst = availableModels.length === 0;
+          availableModels.push({ ...model, provider });
+          
+          html += `
+            <div class="model-option ${isFirst ? 'selected' : ''}" data-model="${model.name}" data-provider="${provider}" data-model-id="${model.id}" onclick="selectModel(this)">
+              <div class="model-option-radio"></div>
+              <div class="model-option-info">
+                <div class="model-option-name">${model.name}</div>
+                <div class="model-option-desc">${model.desc}</div>
+              </div>
+              <span class="model-tag">${model.price}</span>
+            </div>
+          `;
+        });
+      }
+    });
+    
+    console.log('Generated HTML length:', html.length);
+    picker.innerHTML = html;
+    
+    // İlk modeli seç
+    if (availableModels.length > 0) {
+      const first = availableModels[0];
+      wizData.model = first.name;
+      wizData.modelProvider = first.provider;
+      wizData.modelId = first.id;
+      console.log('Selected first model:', first);
+    }
+    
+  } catch (error) {
+    console.error('Failed to load models:', error);
+    picker.innerHTML = '<div style="color:var(--red);padding:12px">Modeller yüklenirken hata oluştu.</div>';
+  }
+}
+
+async function openWizard() {
+  wizStep = 1;
+  wizData = { name:'', desc:'', dept:'', role:'', avatar:'purple', icon:'chat', model:'', modelProvider:'', modelId:'', skills:[], channels:['WebChat'], prompt:'' };
+  document.getElementById('wiz_name').value = '';
+  document.getElementById('wiz_desc').value = '';
+  document.getElementById('wiz_dept').value = '';
+  document.getElementById('wiz_role').value = '';
+  document.getElementById('wiz_prompt').value = '';
+  document.querySelectorAll('.avatar-option').forEach(a => a.classList.toggle('selected', a.dataset.color === 'purple'));
+  document.querySelectorAll('.icon-option').forEach(i => i.classList.toggle('selected', i.dataset.icon === 'chat'));
+  document.querySelectorAll('.skill-chip').forEach(s => s.classList.remove('selected'));
+  document.querySelectorAll('.channel-option').forEach(c => c.classList.toggle('selected', c.textContent.trim() === 'WebChat'));
+  
+  // Modelleri yükle
+  await loadAvailableModels();
+  
+  updateWizUI();
+  document.getElementById('wizardOverlay').classList.add('open');
+}
+
+function closeWizard() { document.getElementById('wizardOverlay').classList.remove('open'); }
+
+function goToSettings() {
+  closeWizard();
+  // iframe içindeyse parent'a navigate mesajı gönder
+  if (window.self !== window.top && window.parent.navigate) {
+    window.parent.navigate('settings');
+  } else if (window.self !== window.top) {
+    // Parent fonksiyona erişemiyorsak, parent'ın contentFrame'ini değiştir
+    try {
+      window.parent.document.getElementById('contentFrame').src = 'orbicorp-settings.html';
+      // Aktif tab'ı güncelle
+      window.parent.document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.page === 'settings'));
+    } catch(e) {
+      // Cross-origin hatası olursa direkt yönlendir
+      window.location.href = 'orbicorp-settings.html';
+    }
+  } else {
+    window.location.href = 'orbicorp-settings.html';
+  }
+}
+
+function updateWizUI() {
+  document.querySelectorAll('.wizard-panel').forEach((p,i) => p.classList.toggle('active', i === wizStep - 1));
+  document.querySelectorAll('.wizard-step').forEach((s,i) => {
+    s.classList.toggle('active', i === wizStep - 1);
+    s.classList.toggle('done', i < wizStep - 1);
+  });
+  document.querySelectorAll('.wizard-step-line').forEach((l,i) => l.classList.toggle('done', i < wizStep - 1));
+  document.getElementById('wizBtnBack').style.display = wizStep > 1 ? '' : 'none';
+  document.getElementById('wizBtnNext').textContent = wizStep === 4 ? 'Agent Oluştur' : 'Devam Et';
+  document.getElementById('wizFooterHint').textContent = `Adım ${wizStep} / 4`;
+  if (wizStep === 4) buildPreview();
+}
+
+function wizNext() {
+  if (wizStep === 1) {
+    const name = document.getElementById('wiz_name').value.trim();
+    const dept = document.getElementById('wiz_dept').value;
+    if (!name) { document.getElementById('wiz_name').focus(); document.getElementById('wiz_name').style.borderColor='var(--red)'; return; }
+    if (!dept) { document.getElementById('wiz_dept').focus(); document.getElementById('wiz_dept').style.borderColor='var(--red)'; return; }
+    document.getElementById('wiz_name').style.borderColor='';
+    document.getElementById('wiz_dept').style.borderColor='';
+    wizData.name = name;
+    wizData.desc = document.getElementById('wiz_desc').value.trim();
+    wizData.dept = dept;
+    wizData.role = document.getElementById('wiz_role').value.trim();
+  } else if (wizStep === 2) {
+    wizData.skills = Array.from(document.querySelectorAll('.skill-chip.selected')).map(s => s.textContent);
+  } else if (wizStep === 3) {
+    wizData.prompt = document.getElementById('wiz_prompt').value.trim();
+    wizData.channels = Array.from(document.querySelectorAll('.channel-option.selected')).map(c => c.textContent.trim());
+  } else if (wizStep === 4) {
+    createAgent();
+    return;
+  }
+  wizStep = Math.min(wizStep + 1, 4);
+  updateWizUI();
+}
+
+function wizBack() {
+  wizStep = Math.max(wizStep - 1, 1);
+  updateWizUI();
+}
+
+function selectAvatar(el) {
+  document.querySelectorAll('.avatar-option').forEach(a => a.classList.remove('selected'));
+  el.classList.add('selected');
+  wizData.avatar = el.dataset.color;
+}
+
+function selectIcon(el) {
+  document.querySelectorAll('.icon-option').forEach(i => i.classList.remove('selected'));
+  el.classList.add('selected');
+  wizData.icon = el.dataset.icon;
+}
+
+function selectModel(el) {
+  document.querySelectorAll('.model-option').forEach(m => m.classList.remove('selected'));
+  el.classList.add('selected');
+  wizData.model = el.dataset.model;
+  wizData.modelProvider = el.dataset.provider;
+  wizData.modelId = el.dataset.modelId;
+}
+
+const iconSvgs = {
+  chat: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+  user: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/></svg>',
+  edit: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>',
+  chart: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>',
+  shield: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+  monitor: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>',
+  coffee: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg>',
+  users: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>'
+};
+
+function buildPreview() {
+  const av = document.getElementById('wizPreviewAvatar');
+  av.className = `agent-avatar-sm ${wizData.avatar}`;
+  av.style.width = '56px'; av.style.height = '56px'; av.style.borderRadius = '12px'; av.style.fontSize = '24px';
+  av.innerHTML = iconSvgs[wizData.icon].replace('16','24');
+  document.getElementById('wizPreviewName').textContent = wizData.name || 'Adsız Agent';
+  document.getElementById('wizPreviewDesc').textContent = wizData.desc || wizData.role || 'Açıklama eklenmedi';
+  document.getElementById('wizSummary').innerHTML = [
+    ['Departman', wizData.dept],
+    ['Rol', wizData.role || '—'],
+    ['Model', wizData.model],
+    ['Skill Sayısı', wizData.skills.length + ' skill'],
+    ['Kanal Sayısı', wizData.channels.length + ' kanal']
+  ].map(([l,v]) => `<div class="wiz-summary-row"><span class="label">${l}</span><span class="value">${v}</span></div>`).join('');
+  document.getElementById('wizPreviewSkills').innerHTML = wizData.skills.length
+    ? wizData.skills.map(s => `<span class="skill-tag">${s}</span>`).join('')
+    : '<span style="color:var(--text-tertiary);font-size:13px">Skill seçilmedi</span>';
+  document.getElementById('wizPreviewChannels').innerHTML = wizData.channels.map(c =>
+    `<span class="badge badge-blue">${c}</span>`
+  ).join('');
+  document.getElementById('wizPreviewPrompt').textContent = wizData.prompt || 'System prompt yazılmadı';
+}
+
+async function createAgent() {
+  // Model seçilmemişse uyar
+  if (!wizData.modelProvider || !wizData.modelId) {
+    showToast('Lütfen bir LLM model seçin', 'error');
+    return;
+  }
+
+  const agentData = {
+    name: wizData.name,
+    description: wizData.desc || wizData.role || '',
+    department: wizData.dept,
+    systemPrompt: wizData.prompt,
+    modelProvider: wizData.modelProvider,
+    modelId: wizData.modelId,
+    skills: wizData.skills,
+    channels: wizData.channels.map(c => c.toUpperCase().replace(/\s+/g, '_')),
+    temperature: 0.7,
+    maxTokens: 2048,
+  };
+
+  try {
+    const result = await window.orbicorpAPI.createAgent(agentData);
+    
+    if (result.success && result.data) {
+      showToast('Agent başarıyla oluşturuldu!', 'success');
+      closeWizard();
+      
+      // Listeyi yeniden yükle
+      await loadAgents();
+    } else {
+      throw new Error(result.message || 'Agent oluşturulamadı');
+    }
+  } catch (error) {
+    console.error('Create agent error:', error);
+    showToast(error.message || 'Agent oluşturulamadı', 'error');
+  }
+}
+
+// ═══ INIT ═══
+document.addEventListener('DOMContentLoaded', initPage);
+</script>
+</body>
+</html>

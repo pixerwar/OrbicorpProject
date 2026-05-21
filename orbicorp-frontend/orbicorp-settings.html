@@ -1,0 +1,2267 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orbicorp — Ayarlar</title>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="orbicorp-dark.css">
+<script src="orbicorp-api.js"></script>
+<style>
+/* ═══ IFRAME MODE ═══ */
+body.in-iframe .topnav{display:none !important}
+body.in-iframe .layout{margin-top:0}
+body.in-iframe .main{max-width:100%}
+
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--primary:#635BFF;--primary-light:#7A73FF;--primary-bg:#F0EEFF;--primary-bg-subtle:#F8F7FF;--navy:#0A2540;--surface:#F6F9FC;--white:#FFFFFF;--border:#E3E8EE;--border-light:#EBEEF2;--text-primary:#0A2540;--text-secondary:#425466;--text-tertiary:#8792A2;--text-muted:#A3ACB9;--green:#0EA371;--green-bg:#EEFBF4;--green-text:#0C7D58;--amber:#D97706;--amber-bg:#FEF7E6;--amber-text:#92510A;--red:#DF1B41;--red-bg:#FDE8EC;--red-text:#A11534;--blue:#0570DE;--blue-bg:#E8F2FD;--blue-text:#0455A9;--radius-sm:6px;--radius-md:8px;--radius-lg:12px;--radius-xl:16px;--font:'Google Sans',-apple-system,BlinkMacSystemFont,sans-serif;--font-mono:'Google Sans Mono','SF Mono',monospace;--transition:0.2s cubic-bezier(0.4,0,0.2,1)}
+body{font-family:var(--font);background:var(--surface);color:var(--text-primary);-webkit-font-smoothing:antialiased}
+
+.topnav{height:56px;background:var(--white);border-bottom:0.5px solid var(--border);display:flex;align-items:center;padding:0 24px;position:sticky;top:0;z-index:100}
+.topnav-brand{display:flex;align-items:center;gap:10px;margin-right:32px;text-decoration:none}
+.topnav-logo{width:32px;height:32px;background:linear-gradient(135deg,var(--primary),var(--navy));border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:14px}
+.topnav-name{font-size:16px;font-weight:700;color:var(--navy);letter-spacing:-0.3px}
+.topnav-tabs{display:flex;gap:4px;flex:1}
+.topnav-tab{padding:8px 14px;font-size:14px;color:var(--text-secondary);border-radius:var(--radius-sm);cursor:pointer;transition:all var(--transition);text-decoration:none}
+.topnav-tab:hover{background:var(--surface);color:var(--text-primary)}
+.topnav-tab.active{background:var(--primary-bg);color:var(--primary);font-weight:500}
+.topnav-right{display:flex;align-items:center;gap:12px;margin-left:auto}
+.topnav-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-light));color:white;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;cursor:pointer}
+
+.layout{display:flex;min-height:calc(100vh - 56px)}
+
+/* Settings sidebar */
+.settings-nav{width:250px;background:var(--white);border-right:0.5px solid var(--border);padding:20px 12px;flex-shrink:0;overflow-y:auto;position:sticky;top:56px;height:calc(100vh - 56px)}
+.settings-nav h2{font-size:16px;font-weight:600;color:var(--navy);padding:0 12px;margin-bottom:16px}
+.nav-group{margin-bottom:20px}
+.nav-group-label{font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;padding:0 12px;margin-bottom:6px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:var(--radius-sm);font-size:13px;color:var(--text-secondary);cursor:pointer;transition:all var(--transition)}
+.nav-item:hover{background:var(--surface);color:var(--text-primary)}
+.nav-item.active{background:var(--primary-bg);color:var(--primary);font-weight:500}
+.nav-item svg{width:16px;height:16px;flex-shrink:0}
+.nav-item .status-dot{margin-left:auto;width:7px;height:7px;border-radius:50%}
+
+.main{flex:1;padding:28px 36px;overflow-y:auto;min-width:0}
+
+/* Section */
+.section{margin-bottom:40px;animation:fadeUp 0.4s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.section-head{margin-bottom:16px}
+.section-head h2{font-size:18px;font-weight:600;color:var(--navy);letter-spacing:-0.2px}
+.section-head p{font-size:13px;color:var(--text-tertiary);margin-top:2px}
+.card{background:var(--white);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:20px 24px;margin-bottom:14px}
+
+/* Form elements */
+.field{margin-bottom:16px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.field label{display:block;font-size:13px;font-weight:500;color:var(--text-primary);margin-bottom:5px}
+.field-hint{font-size:11px;color:var(--text-tertiary);margin-top:3px}
+input.fi,select.fi,textarea.fi{width:100%;padding:9px 14px;border:0.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:var(--font);color:var(--text-primary);transition:border-color var(--transition);background:var(--white);box-sizing:border-box}
+input.fi:focus,select.fi:focus,textarea.fi:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-bg)}
+select.fi{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%238792A2' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+textarea.fi{min-height:70px;resize:vertical;line-height:1.5}
+
+/* Toggle switch */
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:0.5px solid var(--border-light)}
+.toggle-row:last-child{border-bottom:none}
+.toggle-info{flex:1}
+.toggle-label{font-size:13px;font-weight:500;color:var(--text-primary)}
+.toggle-desc{font-size:12px;color:var(--text-tertiary);margin-top:1px}
+.toggle{position:relative;width:40px;height:22px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-track{position:absolute;inset:0;background:var(--border);border-radius:11px;cursor:pointer;transition:background 0.3s}
+.toggle input:checked+.toggle-track{background:var(--primary)}
+.toggle-thumb{position:absolute;top:3px;left:3px;width:16px;height:16px;background:white;border-radius:50%;transition:transform 0.3s;box-shadow:0 1px 3px rgba(0,0,0,0.15)}
+.toggle input:checked~.toggle-thumb{transform:translateX(18px)}
+
+/* Badge */
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:3px 10px;border-radius:999px;font-weight:500}
+.badge-green{background:var(--green-bg);color:var(--green-text)}
+.badge-amber{background:var(--amber-bg);color:var(--amber-text)}
+.badge-red{background:var(--red-bg);color:var(--red-text)}
+.badge-gray{background:#F1EFE8;color:#5F5E5A}
+.badge-blue{background:var(--blue-bg);color:var(--blue-text)}
+
+/* API Key row */
+.api-row{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:0.5px solid var(--border-light)}
+.api-row:last-child{border-bottom:none}
+.api-logo{width:36px;height:36px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0}
+.api-info{flex:1;min-width:0}
+.api-name{font-size:14px;font-weight:500;color:var(--text-primary)}
+.api-key-display{display:flex;align-items:center;gap:8px;margin-top:4px}
+.api-key-value{font-size:12px;font-family:var(--font-mono);color:var(--text-tertiary);background:var(--surface);padding:3px 10px;border-radius:4px;letter-spacing:0.5px}
+.api-key-toggle{font-size:11px;color:var(--primary);cursor:pointer;font-weight:500;background:none;border:none;font-family:var(--font)}
+.api-key-toggle:hover{text-decoration:underline}
+.api-actions{display:flex;gap:6px}
+.btn{padding:7px 16px;border-radius:var(--radius-sm);font-size:12px;font-weight:500;cursor:pointer;transition:all var(--transition);border:0.5px solid var(--border);font-family:var(--font);display:inline-flex;align-items:center;gap:5px}
+.btn-primary{background:var(--primary);color:white;border-color:var(--primary)}
+.btn-primary:hover{background:var(--primary-light)}
+.btn-sm{padding:5px 12px;font-size:11px}
+.btn-secondary{background:var(--white);color:var(--text-secondary)}
+.btn-secondary:hover{background:var(--surface)}
+.btn-danger{background:var(--white);color:var(--red-text);border-color:var(--red-bg)}
+.btn-danger:hover{background:var(--red-bg)}
+.btn svg{width:13px;height:13px}
+
+/* LLM Table */
+.llm-table{width:100%;border-collapse:collapse}
+.llm-table th{padding:10px 14px;font-size:11px;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.04em;text-align:left;background:var(--surface);border-bottom:0.5px solid var(--border)}
+.llm-table td{padding:12px 14px;font-size:13px;color:var(--text-secondary);border-bottom:0.5px solid var(--border-light);vertical-align:middle}
+.llm-table tr:last-child td{border-bottom:none}
+.llm-table tr:hover td{background:var(--primary-bg-subtle)}
+.model-tag{font-size:11px;padding:3px 10px;border-radius:4px;background:var(--surface);color:var(--text-secondary);font-family:var(--font-mono);font-weight:500}
+.agent-cell{display:flex;align-items:center;gap:10px}
+.agent-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* Budget bars */
+.budget-item{margin-bottom:14px}
+.budget-header{display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px}
+.budget-header .name{font-weight:500;color:var(--text-primary)}
+.budget-header .val{color:var(--text-tertiary)}
+.budget-track{height:8px;background:var(--surface);border-radius:999px;overflow:hidden}
+.budget-fill{height:100%;border-radius:999px;transition:width 0.8s ease}
+
+/* Integration cards */
+.int-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.int-grid-installed{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px}
+.int-grid-discover{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.int-hero-row{display:flex;align-items:center;gap:16px;position:relative;z-index:1}
+.int-hero-search{margin-left:auto;display:flex;align-items:center;gap:8px;padding:9px 18px;background:rgba(255,255,255,0.12);border:0.5px solid rgba(255,255,255,0.2);border-radius:8px;min-width:280px}
+.int-hero-search input{border:none;outline:none;background:none;color:white;font-size:13px;font-family:var(--font);width:100%}
+.int-filter-bar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.filter-btn{padding:6px 14px;font-size:12px;border-radius:var(--radius-sm);border:0.5px solid var(--border);background:var(--white);color:var(--text-secondary);cursor:pointer;font-family:var(--font);transition:all var(--transition);font-weight:500}
+.filter-btn:hover{border-color:var(--primary);color:var(--primary)}
+.filter-btn.active{background:var(--primary-bg);border-color:var(--primary);color:var(--primary)}
+@media(max-width:1200px){
+  .int-grid,.int-grid-installed,.int-grid-discover{grid-template-columns:repeat(3,1fr)}
+}
+@media(max-width:860px){
+  .int-grid,.int-grid-installed,.int-grid-discover{grid-template-columns:repeat(2,1fr)}
+  .int-hero-row{flex-direction:column;align-items:flex-start;gap:12px}
+  .int-hero-search{margin-left:0;min-width:0;width:100%}
+  .field-row{grid-template-columns:1fr!important}
+  .channel-grid{grid-template-columns:1fr!important}
+  .vcard-grid{grid-template-columns:1fr!important}
+  .settings-nav{width:180px;padding:16px 8px}
+  .main{padding:20px 20px}
+}
+@media(max-width:640px){
+  .int-grid,.int-grid-installed,.int-grid-discover{grid-template-columns:1fr}
+  .settings-nav{display:none}
+  .main{padding:16px 12px}
+}
+.int-card{display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--white);border:0.5px solid var(--border);border-radius:var(--radius-md);transition:all var(--transition)}
+.int-card:hover{border-color:var(--primary)}
+.int-icon{width:36px;height:36px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0}
+.int-info{flex:1}
+.int-name{font-size:13px;font-weight:500;color:var(--text-primary)}
+.int-status{font-size:11px;color:var(--text-tertiary)}
+
+/* Webhook */
+.webhook-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border-light)}
+.webhook-row:last-child{border-bottom:none}
+.webhook-url{flex:1;font-size:12px;font-family:var(--font-mono);color:var(--text-secondary);background:var(--surface);padding:6px 12px;border-radius:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.webhook-event{font-size:11px;color:var(--text-tertiary);min-width:100px}
+/* Channel cards */
+.channel-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.channel-card{background:var(--white);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:20px;cursor:pointer;transition:all var(--transition)}
+.channel-card:hover{border-color:var(--primary);box-shadow:0 4px 16px rgba(99,91,255,0.06)}
+.channel-card-head{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.channel-logo{width:42px;height:42px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0}
+.channel-card-info{flex:1;min-width:0}
+.channel-card-name{font-size:14px;font-weight:600;color:var(--text-primary)}
+.channel-card-desc{font-size:12px;color:var(--text-tertiary)}
+.channel-card-meta{display:flex;gap:8px;flex-wrap:wrap}
+.channel-meta-item{font-size:11px;color:var(--text-tertiary);display:flex;align-items:center;gap:4px}
+.channel-meta-item svg{width:12px;height:12px}
+.channel-agents{display:flex;gap:-4px;margin-top:10px}
+.channel-agent-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;background:var(--surface);border-radius:999px;font-size:11px;color:var(--text-secondary);margin-right:4px}
+.channel-agent-chip .cdot{width:6px;height:6px;border-radius:50%;display:inline-block}
+.channel-card-add{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;border-style:dashed;min-height:160px;color:var(--primary)}
+.channel-card-add:hover{background:var(--primary-bg-subtle);border-color:var(--primary)}
+.channel-card-add svg{width:24px;height:24px}
+.channel-card-add span{font-size:13px;font-weight:500}
+
+/* Channel modal */
+.ch-modal-overlay{display:none;position:fixed;inset:0;background:rgba(10,37,64,0.45);z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(3px)}
+.ch-modal-overlay.open{display:flex}
+.ch-modal{background:var(--white);border-radius:var(--radius-xl);width:580px;max-width:94vw;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 24px 80px rgba(0,0,0,0.18);animation:modalIn 0.25s ease}
+.ch-modal-header{display:flex;align-items:center;gap:14px;padding:20px 24px;border-bottom:0.5px solid var(--border)}
+.ch-modal-header h2{flex:1;font-size:17px;font-weight:600;color:var(--text-primary)}
+.ch-modal-close{width:32px;height:32px;border-radius:var(--radius-sm);border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-tertiary);transition:all var(--transition)}
+.ch-modal-close:hover{background:var(--surface);color:var(--text-primary)}
+.ch-modal-body{flex:1;overflow-y:auto;padding:20px 24px}
+.ch-modal-footer{padding:16px 24px;border-top:0.5px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.ch-modal-footer-left{display:flex;gap:8px}
+.ch-modal-footer-right{display:flex;gap:8px}
+.ch-section{margin-bottom:20px}
+.ch-section-title{font-size:12px;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px}
+.key-input-row{display:flex;gap:8px;align-items:flex-end}
+.key-input-row .field{flex:1}
+.test-result{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;padding:4px 12px;border-radius:999px;margin-left:8px}
+.test-result.success{background:var(--green-bg);color:var(--green-text)}
+.test-result.fail{background:var(--red-bg);color:var(--red-text)}
+.agent-checkbox-list{display:flex;flex-direction:column;gap:6px}
+.agent-checkbox{display:flex;align-items:center;gap:10px;padding:8px 12px;border:0.5px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:all var(--transition)}
+.agent-checkbox:hover{border-color:var(--primary)}
+.agent-checkbox.checked{background:var(--primary-bg-subtle);border-color:var(--primary)}
+.agent-checkbox input{accent-color:var(--primary);width:16px;height:16px;cursor:pointer}
+.agent-checkbox-name{font-size:13px;font-weight:500;color:var(--text-primary);flex:1}
+.agent-checkbox-dept{font-size:11px;color:var(--text-tertiary)}
+/* Virtual Cards */
+.vcard-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.vcard{width:100%;aspect-ratio:1.586;background:linear-gradient(135deg,#635BFF 0%,#0A2540 100%);border-radius:var(--radius-xl);padding:24px;color:white;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;transition:transform var(--transition)}
+.vcard:hover{transform:translateY(-2px)}
+.vcard::before{content:'';position:absolute;top:-30%;right:-10%;width:200px;height:200px;background:radial-gradient(circle,rgba(255,255,255,0.08) 0%,transparent 70%);pointer-events:none}
+.vcard.frozen{opacity:0.6;filter:grayscale(0.3)}
+.vcard.frozen::after{content:'DONDURULDU';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:14px;font-weight:700;color:white;background:rgba(0,0,0,0.5);padding:6px 18px;border-radius:999px;letter-spacing:1px}
+.vcard-top{display:flex;justify-content:space-between;align-items:flex-start}
+.vcard-brand{font-size:16px;font-weight:700;letter-spacing:0.5px}
+.vcard-chip{width:36px;height:26px;background:linear-gradient(135deg,#d4af37,#f0d060);border-radius:4px}
+.vcard-number{font-size:18px;font-weight:500;letter-spacing:3px;font-family:var(--font-mono)}
+.vcard-bottom{display:flex;justify-content:space-between;align-items:flex-end}
+.vcard-holder{font-size:12px;opacity:0.8;text-transform:uppercase;letter-spacing:0.5px}
+.vcard-exp-label{font-size:9px;opacity:0.6;text-transform:uppercase}
+.vcard-exp{font-size:13px;font-weight:500;font-family:var(--font-mono)}
+.vcard-limit-bar{margin-top:auto;padding-top:12px}
+.vcard-limit-info{display:flex;justify-content:space-between;font-size:10px;opacity:0.7;margin-bottom:4px}
+.vcard-limit-track{height:4px;background:rgba(255,255,255,0.2);border-radius:999px;overflow:hidden}
+.vcard-limit-fill{height:100%;background:rgba(255,255,255,0.8);border-radius:999px}
+.vcard-add{background:var(--white);border:1.5px dashed var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--primary);aspect-ratio:1.586}
+.vcard-add:hover{border-color:var(--primary);background:var(--primary-bg-subtle)}
+.vcard-add::before{display:none}
+.vcard-add svg{width:24px;height:24px}
+.vcard-add span{font-size:13px;font-weight:500}
+.vcard-details{background:var(--white);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:16px 20px;margin-top:12px}
+.vcard-detail-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:0.5px solid var(--border-light);font-size:13px}
+.vcard-detail-row:last-child{border-bottom:none}
+.vcard-detail-row .label{color:var(--text-tertiary)}
+.vcard-detail-row .value{color:var(--text-primary);font-weight:500}
+.category-tags{display:flex;gap:4px;flex-wrap:wrap}
+.category-tag{font-size:10px;padding:2px 8px;border-radius:999px;background:var(--surface);color:var(--text-secondary)}
+.category-tag.active{background:var(--primary-bg);color:var(--primary)}
+
+/* Virtual Phone */
+.vphone-card{background:var(--white);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:18px 20px;display:flex;align-items:center;gap:16px;transition:all var(--transition);cursor:pointer;margin-bottom:12px}
+.vphone-card:hover{border-color:var(--primary)}
+.vphone-icon{width:44px;height:44px;border-radius:50%;background:var(--green-bg);color:var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.vphone-icon svg{width:20px;height:20px}
+.vphone-info{flex:1}
+.vphone-number{font-size:16px;font-weight:600;color:var(--text-primary);font-family:var(--font-mono);letter-spacing:1px}
+.vphone-meta{font-size:12px;color:var(--text-tertiary);margin-top:2px}
+.vphone-agents{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}
+.vphone-agent{font-size:10px;padding:2px 8px;border-radius:999px;background:var(--surface);color:var(--text-secondary)}
+.vphone-actions{display:flex;gap:6px;flex-shrink:0}
+.vphone-add{border:1.5px dashed var(--border);border-radius:var(--radius-lg);padding:18px 20px;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;transition:all var(--transition);color:var(--primary);font-size:13px;font-weight:500}
+.vphone-add:hover{border-color:var(--primary);background:var(--primary-bg-subtle)}
+.vphone-add svg{width:18px;height:18px}
+
+/* Tabs inside section */
+.resource-tabs{display:flex;gap:0;border-bottom:0.5px solid var(--border);margin-bottom:20px}
+.resource-tab{padding:10px 20px;font-size:13px;color:var(--text-tertiary);cursor:pointer;border-bottom:2px solid transparent;transition:all var(--transition);font-family:var(--font);background:none;border-top:none;border-left:none;border-right:none;font-weight:400}
+.resource-tab:hover{color:var(--text-primary)}
+.resource-tab.active{color:var(--primary);border-bottom-color:var(--primary);font-weight:500}
+.resource-panel{display:none}
+.resource-panel.active{display:block}
+</style>
+<link rel="stylesheet" href="orbicorp-dark.css">
+<style>
+.in-iframe .topnav{display:none!important}
+.in-iframe .sidebar{display:none!important}
+.in-iframe .layout{margin-top:0!important;height:100vh!important}
+.in-iframe .settings-nav{top:0!important;height:100vh!important}
+.in-iframe .chat-panel{top:0!important;height:100vh!important}
+</style>
+</head>
+<body>
+<script>
+(function(){
+  // If in iframe, hide own nav/sidebar and sync theme from parent
+  if(window.self!==window.top){
+    document.body.classList.add("in-iframe");
+    try{
+      var pt=window.parent.document.documentElement.getAttribute("data-theme");
+      if(pt)document.documentElement.setAttribute("data-theme",pt);
+    }catch(e){}
+    // Listen for theme/lang changes from parent
+    window.addEventListener("message",function(e){
+      if(e.data&&e.data.type==="theme")document.documentElement.setAttribute("data-theme",e.data.value);
+      if(e.data&&e.data.type==="lang"){
+        window._orbicorpLang=e.data.value;
+        if(typeof applyPageLang==='function')applyPageLang(e.data.value);
+      }
+    });
+  }
+})();
+
+function orbicorpPay(opts) {
+  if (window.parent && window.parent !== window) {
+    window.parent.postMessage({type:'openPayment', opts:opts}, '*');
+  }
+}
+</script>
+
+<nav class="topnav">
+  <a class="topnav-brand" href="#"><div class="topnav-logo">O</div><span class="topnav-name">Orbicorp</span></a>
+  <div class="topnav-tabs">
+    <a class="topnav-tab">Overview</a><a class="topnav-tab">Agents</a><a class="topnav-tab">Company Profile</a><a class="topnav-tab">Chat</a><a class="topnav-tab">Skills</a><a class="topnav-tab">Analytics</a>
+  </div>
+  <div class="topnav-right"><div class="topnav-avatar">AY</div></div>
+</nav>
+
+<div class="layout">
+  <aside class="settings-nav">
+    <h2>Ayarlar</h2>
+    <div class="nav-group">
+      <div class="nav-group-label">Platform</div>
+      <div class="nav-item active" onclick="go('general',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15"/></svg>Genel Ayarlar</div>
+      <div class="nav-item" onclick="go('api',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>API Anahtarları<span class="status-dot" style="background:var(--green)"></span></div>
+      <div class="nav-item" onclick="go('llm',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2"/></svg>LLM Model Yönetimi</div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-label">Sistem</div>
+      <div class="nav-item" onclick="go('notifications',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Bildirimler</div>
+      <div class="nav-item" onclick="go('security',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Güvenlik</div>
+      <div class="nav-item" onclick="go('integrations',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>Entegrasyonlar<span class="status-dot" style="background:var(--amber)"></span></div>
+      <div class="nav-item" onclick="go('channels',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>İletişim Kanalları<span class="status-dot" style="background:var(--green)"></span></div>
+      <div class="nav-item" onclick="go('resources',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Sanal Kaynaklar<span class="status-dot" style="background:var(--green)"></span></div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-label">Finans & Veri</div>
+      <div class="nav-item" onclick="go('budget',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Bütçe & Limitler</div>
+      <div class="nav-item" onclick="go('privacy',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Veri & Gizlilik</div>
+      <div class="nav-item" onclick="go('webhook',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Webhook & API</div>
+    </div>
+  </aside>
+
+  <main class="main" id="mainContent">
+
+    <!-- 1. GENERAL -->
+    <div class="section" id="sec-general">
+      <div class="section-head"><h2>Genel Ayarlar</h2><p>Platform genelinde geçerli temel yapılandırmalar</p></div>
+      <div class="card">
+        <div class="field-row">
+          <div class="field"><label>Platform Adı</label><input class="fi" value="Orbicorp"></div>
+          <div class="field"><label>Şirket</label><input class="fi" value="NovaTech Solutions A.Ş."></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Varsayılan Dil</label><select class="fi"><option selected>Türkçe</option><option>English</option><option>Deutsch</option></select></div>
+          <div class="field"><label>Saat Dilimi</label><select class="fi"><option selected>Europe/Istanbul (UTC+3)</option><option>Europe/London (UTC+0)</option><option>America/New_York (UTC-5)</option></select></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Tarih Formatı</label><select class="fi"><option selected>DD/MM/YYYY</option><option>MM/DD/YYYY</option><option>YYYY-MM-DD</option></select></div>
+          <div class="field"><label>Tema</label><select class="fi"><option selected>Açık (Light)</option><option>Koyu (Dark)</option><option>Sistem Tercihi</option></select></div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:8px"><button class="btn btn-secondary">İptal</button><button class="btn btn-primary">Kaydet</button></div>
+    </div>
+
+    <!-- 2. API KEYS -->
+    <div class="section" id="sec-api" style="display:none">
+      <div class="section-head"><h2>API Anahtarları</h2><p>LLM sağlayıcılarının API key'lerini güvenli şekilde yönetin</p></div>
+      <div class="card" id="apiKeysCard">
+        <div style="text-align:center;padding:24px;color:var(--text-muted)">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spin"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+          <p style="margin-top:8px">Yükleniyor...</p>
+        </div>
+      </div>
+      <div class="card" style="background:var(--primary-bg-subtle);border-color:var(--primary-bg)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+          <div><div style="font-size:13px;font-weight:500;color:var(--primary)">API Güvenliği</div><div style="font-size:12px;color:var(--text-tertiary)">Anahtarlar AES-256 ile şifrelenmiş olarak saklanır. Hiçbir anahtar düz metin olarak depolanmaz.</div></div>
+        </div>
+      </div>
+
+      <!-- RAG BİLGİ TABANI MODEL SEÇİCİ -->
+      <div class="card" id="rag-settings-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,var(--primary),var(--blue));display:flex;align-items:center;justify-content:center">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+            </div>
+            <div>
+              <div style="font-size:14px;font-weight:600;color:var(--text-primary)">RAG Bilgi Tabanı Ayarları</div>
+              <div style="font-size:12px;color:var(--text-tertiary)">Dokümantasyon araması için kullanılacak model</div>
+            </div>
+          </div>
+          <span class="badge badge-blue" id="rag-status-badge">Aktif</span>
+        </div>
+
+        <div class="field-row" style="margin-bottom:12px">
+          <div class="field" style="flex:2">
+            <label>RAG için Kullanılacak Model</label>
+            <select class="fi" id="rag-primary-model" onchange="updateRAGModel()">
+              <optgroup label="Anthropic (Claude)">
+                <option value="anthropic:claude-sonnet-4-6" selected>Claude Sonnet 4.6</option>
+                <option value="anthropic:claude-haiku-4-5">Claude Haiku 4.5 (Hızlı)</option>
+                <option value="anthropic:claude-opus-4-6">Claude Opus 4.6 (Güçlü)</option>
+              </optgroup>
+              <optgroup label="OpenAI (GPT)">
+                <option value="openai:gpt-4o">GPT-4o</option>
+                <option value="openai:gpt-4o-mini">GPT-4o Mini (Ekonomik)</option>
+              </optgroup>
+              <optgroup label="Google (Gemini)">
+                <option value="google:gemini-1.5-pro">Gemini 1.5 Pro</option>
+                <option value="google:gemini-1.5-flash">Gemini 1.5 Flash (Hızlı)</option>
+              </optgroup>
+            </select>
+          </div>
+          <div class="field" style="flex:1">
+            <label>Tahmini Maliyet</label>
+            <div style="padding:9px 12px;background:var(--surface);border-radius:6px;font-size:13px;color:var(--text-secondary)" id="rag-cost-estimate">~$0.003 / sorgu</div>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--surface);border-radius:8px;margin-bottom:12px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <div>
+              <div style="font-size:13px;font-weight:500;color:var(--text-primary)">Failover (Yedek Model)</div>
+              <div style="font-size:11px;color:var(--text-muted)">Birincil model hata verirse otomatik geçiş yap</div>
+            </div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="rag-failover-toggle" onchange="toggleRAGFailover()">
+            <span class="toggle-track"></span>
+            <span class="toggle-thumb"></span>
+          </label>
+        </div>
+
+        <div id="rag-failover-options" style="display:none;padding:12px 16px;background:var(--surface);border-radius:8px;margin-bottom:12px">
+          <div class="field" style="margin-bottom:0">
+            <label>Failover Model</label>
+            <select class="fi" id="rag-failover-model">
+              <option value="openai:gpt-4o-mini">GPT-4o Mini (OpenAI)</option>
+              <option value="google:gemini-1.5-flash">Gemini 1.5 Flash (Google)</option>
+              <option value="anthropic:claude-haiku-4-5">Claude Haiku 4.5 (Anthropic)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Performans Karşılaştırması -->
+        <div style="border-top:0.5px solid var(--border-light);padding-top:12px;margin-top:4px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+            <div style="font-size:12px;font-weight:500;color:var(--text-secondary)">Model Performans Karşılaştırması</div>
+            <button class="btn btn-sm btn-secondary" onclick="runRAGBenchmark()" id="rag-benchmark-btn">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+              Test Et
+            </button>
+          </div>
+          <div id="rag-benchmark-results" style="display:none">
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+              <div class="rag-metric-card" data-provider="anthropic">
+                <div class="rag-metric-icon" style="background:var(--primary-bg);color:var(--primary)">C</div>
+                <div class="rag-metric-name">Claude</div>
+                <div class="rag-metric-value" id="rag-bench-claude">--</div>
+                <div class="rag-metric-label">ms</div>
+              </div>
+              <div class="rag-metric-card" data-provider="openai">
+                <div class="rag-metric-icon" style="background:#E8F5E8;color:#1A7F37">O</div>
+                <div class="rag-metric-name">GPT</div>
+                <div class="rag-metric-value" id="rag-bench-openai">--</div>
+                <div class="rag-metric-label">ms</div>
+              </div>
+              <div class="rag-metric-card" data-provider="google">
+                <div class="rag-metric-icon" style="background:var(--blue-bg);color:var(--blue)">G</div>
+                <div class="rag-metric-name">Gemini</div>
+                <div class="rag-metric-value" id="rag-bench-gemini">--</div>
+                <div class="rag-metric-label">ms</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <style>
+        .rag-metric-card {
+          display:flex;
+          flex-direction:column;
+          align-items:center;
+          padding:12px;
+          background:var(--white);
+          border:0.5px solid var(--border);
+          border-radius:8px;
+          cursor:pointer;
+          transition:all 0.2s;
+        }
+        .rag-metric-card:hover {
+          border-color:var(--primary);
+          box-shadow:0 2px 8px rgba(99,91,255,0.1);
+        }
+        .rag-metric-card.selected {
+          border-color:var(--primary);
+          background:var(--primary-bg-subtle);
+        }
+        .rag-metric-icon {
+          width:28px;
+          height:28px;
+          border-radius:6px;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          font-size:12px;
+          font-weight:700;
+          margin-bottom:6px;
+        }
+        .rag-metric-name {
+          font-size:11px;
+          color:var(--text-tertiary);
+          margin-bottom:2px;
+        }
+        .rag-metric-value {
+          font-size:18px;
+          font-weight:600;
+          color:var(--text-primary);
+        }
+        .rag-metric-label {
+          font-size:10px;
+          color:var(--text-muted);
+        }
+        .rag-metric-card.fastest .rag-metric-value {
+          color:var(--green);
+        }
+        .rag-metric-card.error .rag-metric-value {
+          color:var(--red);
+          font-size:11px;
+        }
+      </style>
+    </div>
+
+    <!-- 3. LLM MODEL -->
+    <div class="section" id="sec-llm" style="display:none">
+      <div class="section-head"><h2>LLM Model Yönetimi</h2><p>Varsayılan model, agent bazlı atama ve failover yapılandırması</p></div>
+      <div class="card">
+        <div style="font-size:13px;font-weight:500;color:var(--text-primary);margin-bottom:12px">Varsayılan Model</div>
+        <div class="field-row">
+          <div class="field"><label>Birincil Model</label><select class="fi"><option>Claude Haiku 4.5</option><option selected>Claude Sonnet 4.6</option><option>Claude Opus 4.6</option><option>GPT-4o</option><option>Gemini Pro</option></select></div>
+          <div class="field"><label>Failover Model</label><select class="fi"><option selected>Claude Haiku 4.5</option><option>GPT-4o</option><option>Gemini Pro</option></select><div class="field-hint">Birincil model yanıt vermezse otomatik geçiş</div></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Varsayılan Temperature</label><input class="fi" type="number" value="0.7" step="0.1" min="0" max="2"></div>
+          <div class="field"><label>Varsayılan Max Tokens</label><input class="fi" type="number" value="4096"></div>
+        </div>
+      </div>
+
+      <div class="card" style="padding:0;overflow:hidden">
+        <div style="padding:16px 24px;border-bottom:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+          <div><div style="font-size:13px;font-weight:500;color:var(--text-primary)">Agent Bazlı Model Ataması</div><div style="font-size:12px;color:var(--text-tertiary)">Her agent için özel model seçimi yapabilirsiniz</div></div>
+        </div>
+        <table class="llm-table">
+          <thead><tr><th>Agent</th><th>Atanan Model</th><th>Temperature</th><th>Max Tokens</th><th></th></tr></thead>
+          <tbody>
+            <tr><td><div class="agent-cell"><span class="agent-dot" style="background:var(--primary)"></span>Sales Copilot</div></td><td><span class="model-tag">Claude Sonnet 4.6</span></td><td>0.7</td><td>4,096</td><td><button class="btn btn-sm btn-secondary" onclick="editModel(this)">Değiştir</button></td></tr>
+            <tr><td><div class="agent-cell"><span class="agent-dot" style="background:var(--green)"></span>HR Assistant</div></td><td><span class="model-tag">Claude Sonnet 4.6</span></td><td>0.5</td><td>4,096</td><td><button class="btn btn-sm btn-secondary" onclick="editModel(this)">Değiştir</button></td></tr>
+            <tr><td><div class="agent-cell"><span class="agent-dot" style="background:var(--blue)"></span>Content Writer</div></td><td><span class="model-tag">Claude Haiku 4.5</span></td><td>0.9</td><td>8,192</td><td><button class="btn btn-sm btn-secondary" onclick="editModel(this)">Değiştir</button></td></tr>
+            <tr><td><div class="agent-cell"><span class="agent-dot" style="background:var(--amber)"></span>Support Agent</div></td><td><span class="model-tag">Claude Sonnet 4.6</span></td><td>0.4</td><td>4,096</td><td><button class="btn btn-sm btn-secondary" onclick="editModel(this)">Değiştir</button></td></tr>
+            <tr><td><div class="agent-cell"><span class="agent-dot" style="background:#0F6E56"></span>Data Analyst</div></td><td><span class="model-tag">GPT-4o</span></td><td>0.3</td><td>4,096</td><td><button class="btn btn-sm btn-secondary" onclick="editModel(this)">Değiştir</button></td></tr>
+            <tr><td><div class="agent-cell"><span class="agent-dot" style="background:#5F5E5A"></span>Legal Advisor</div></td><td><span class="model-tag">Claude Sonnet 4.6</span></td><td>0.2</td><td>8,192</td><td><button class="btn btn-sm btn-secondary" onclick="editModel(this)">Değiştir</button></td></tr>
+            <tr><td><div class="agent-cell"><span class="agent-dot" style="background:#993556"></span>Onboarding Bot</div></td><td><span class="model-tag">Claude Haiku 4.5</span></td><td>0.6</td><td>2,048</td><td><button class="btn btn-sm btn-secondary" onclick="editModel(this)">Değiştir</button></td></tr>
+            <tr><td><div class="agent-cell"><span class="agent-dot" style="background:var(--red)"></span>IT Helpdesk</div></td><td><span class="model-tag">Gemini Pro</span></td><td>0.5</td><td>4,096</td><td><button class="btn btn-sm btn-secondary" onclick="editModel(this)">Değiştir</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 4. NOTIFICATIONS -->
+    <div class="section" id="sec-notifications" style="display:none">
+      <div class="section-head"><h2>Bildirim Ayarları</h2><p>Hangi olaylar için, hangi kanallardan bildirim alacağınızı yapılandırın</p></div>
+      <div class="card">
+        <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Agent durum değişiklikleri</div><div class="toggle-desc">Agent durduğunda, hata aldığında veya başlatıldığında</div></div><label class="toggle"><input type="checkbox" checked><span class="toggle-track"></span><span class="toggle-thumb"></span></label></div>
+        <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Bütçe uyarıları</div><div class="toggle-desc">Token kullanımı belirlenen eşiği aştığında</div></div><label class="toggle"><input type="checkbox" checked><span class="toggle-track"></span><span class="toggle-thumb"></span></label></div>
+        <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Güvenlik uyarıları</div><div class="toggle-desc">Prompt injection, PII sızıntısı veya anormal davranış</div></div><label class="toggle"><input type="checkbox" checked><span class="toggle-track"></span><span class="toggle-thumb"></span></label></div>
+        <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Eskalasyon bildirimleri</div><div class="toggle-desc">Agent bir konuşmayı insana yönlendirdiğinde</div></div><label class="toggle"><input type="checkbox" checked><span class="toggle-track"></span><span class="toggle-thumb"></span></label></div>
+        <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Haftalık performans özeti</div><div class="toggle-desc">Her Pazartesi agent performans raporu</div></div><label class="toggle"><input type="checkbox"><span class="toggle-track"></span><span class="toggle-thumb"></span></label></div>
+      </div>
+      <div class="card">
+        <div style="font-size:13px;font-weight:500;color:var(--text-primary);margin-bottom:12px">Bildirim Kanalları</div>
+        <div class="field-row">
+          <div class="field"><label>E-posta</label><input class="fi" value="admin@novatech.com.tr"></div>
+          <div class="field"><label>Slack Webhook</label><input class="fi" value="https://hooks.slack.com/services/T0X..."></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. SECURITY -->
+    <div class="section" id="sec-security" style="display:none">
+      <div class="section-head"><h2>Güvenlik</h2><p>Platform güvenliğini sağlamak için kimlik doğrulama ve erişim ayarları</p></div>
+      <div class="card">
+        <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">İki Faktörlü Doğrulama (MFA)</div><div class="toggle-desc">Tüm kullanıcılar için zorunlu 2FA</div></div><label class="toggle"><input type="checkbox" checked><span class="toggle-track"></span><span class="toggle-thumb"></span></label></div>
+        <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">SSO Entegrasyonu</div><div class="toggle-desc">Google Workspace / Azure AD ile tek oturum</div></div><label class="toggle"><input type="checkbox" checked><span class="toggle-track"></span><span class="toggle-thumb"></span></label></div>
+        <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">IP Kısıtlama</div><div class="toggle-desc">Belirli IP adreslerinden erişime izin ver</div></div><label class="toggle"><input type="checkbox"><span class="toggle-track"></span><span class="toggle-thumb"></span></label></div>
+      </div>
+      <div class="card">
+        <div class="field-row">
+          <div class="field"><label>Oturum Süresi</label><select class="fi"><option>30 dakika</option><option>1 saat</option><option selected>4 saat</option><option>8 saat</option><option>24 saat</option></select></div>
+          <div class="field"><label>Başarısız Giriş Limiti</label><select class="fi"><option>3 deneme</option><option selected>5 deneme</option><option>10 deneme</option></select></div>
+        </div>
+        <div class="field"><label>İzin Verilen IP Adresleri</label><textarea class="fi" placeholder="Her satıra bir IP (boş bırakılırsa tüm IP'ler kabul edilir)">185.34.52.0/24
+10.0.0.0/8</textarea></div>
+      </div>
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <div><div style="font-size:13px;font-weight:500;color:var(--text-primary)">Audit Log</div><div style="font-size:12px;color:var(--text-tertiary)">Son sistem olayları</div></div>
+          <button class="btn btn-sm btn-secondary">Tümünü Gör</button>
+        </div>
+        <div style="font-size:12px;color:var(--text-secondary)">
+          <div style="padding:8px 0;border-bottom:0.5px solid var(--border-light);display:flex;justify-content:space-between"><span><strong>Ahmet Y.</strong> — API key güncellendi (Anthropic)</span><span style="color:var(--text-muted)">2 saat önce</span></div>
+          <div style="padding:8px 0;border-bottom:0.5px solid var(--border-light);display:flex;justify-content:space-between"><span><strong>Sistem</strong> — Günlük güvenlik taraması tamamlandı</span><span style="color:var(--text-muted)">6 saat önce</span></div>
+          <div style="padding:8px 0;display:flex;justify-content:space-between"><span><strong>Elif D.</strong> — Yeni kullanıcı davet edildi</span><span style="color:var(--text-muted)">1 gün önce</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. INTEGRATIONS -->
+    <div class="section" id="sec-integrations" style="display:none">
+      <div class="section-head"><h2>Entegrasyonlar</h2><p>Üçüncü parti hizmetleri Orbicorp'a bağlayın ve yapılandırın</p></div>
+
+      <!-- INSTALLED -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div style="font-size:14px;font-weight:600;color:var(--text-primary)">Yüklü Entegrasyonlar <span style="font-size:12px;font-weight:400;color:var(--text-muted)" id="installedCount"></span></div>
+      </div>
+      <div id="installedGrid" class="int-grid-installed"></div>
+
+      <!-- DISCOVER -->
+      <div style="background:linear-gradient(135deg,var(--primary) 0%,var(--navy) 100%);border-radius:12px;padding:20px 24px;margin-bottom:16px;position:relative;overflow:hidden">
+        <div style="position:absolute;top:-50%;right:-5%;width:200px;height:200px;background:radial-gradient(circle,rgba(255,255,255,0.06) 0%,transparent 70%)"></div>
+        <div class="int-hero-row">
+          <div><div style="font-size:16px;font-weight:600;color:white;margin-bottom:4px">Entegrasyon Mağazası</div><div style="font-size:12px;color:rgba(255,255,255,0.6)">100+ entegrasyon arasından ihtiyacınıza uygun olanı bulun</div></div>
+          <div class="int-hero-search">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input id="intSearch" oninput="filterIntegrations()" placeholder="Entegrasyon ara...">
+          </div>
+        </div>
+      </div>
+
+      <div class="int-filter-bar" id="intFilters">
+        <button class="filter-btn active" onclick="filterByCat(this,'all')">Tümü</button>
+        <button class="filter-btn" onclick="filterByCat(this,'crm')">CRM</button>
+        <button class="filter-btn" onclick="filterByCat(this,'comm')">İletişim</button>
+        <button class="filter-btn" onclick="filterByCat(this,'project')">Proje Yönetimi</button>
+        <button class="filter-btn" onclick="filterByCat(this,'finance')">Finans</button>
+        <button class="filter-btn" onclick="filterByCat(this,'storage')">Depolama</button>
+        <button class="filter-btn" onclick="filterByCat(this,'ai')">AI / ML</button>
+        <button class="filter-btn" onclick="filterByCat(this,'analytics')">Analitik</button>
+        <select style="margin-left:auto;padding:6px 12px;font-size:12px;border:0.5px solid var(--border);border-radius:6px;font-family:var(--font);color:var(--text-secondary);background:var(--white);cursor:pointer" onchange="filterIntegrations()">
+          <option>Popülerlik</option><option>En Yeni</option><option>Fiyat: Düşükten</option><option>Fiyat: Yüksekten</option>
+        </select>
+      </div>
+      <div id="discoverGrid" class="int-grid-discover"></div>
+    </div>
+
+    <!-- CHANNELS -->
+    <div class="section" id="sec-channels" style="display:none">
+      <div class="section-head">
+        <h2>İletişim Kanalları</h2>
+        <p>Onay bildirimleri ve agent iletişimi için Telegram, WhatsApp gibi kanalları yapılandırın</p>
+      </div>
+      
+      <!-- Varsayılan Bildirim Ayarları -->
+      <div class="card" style="margin-bottom:20px">
+        <div style="font-size:14px;font-weight:600;color:var(--text-primary);margin-bottom:12px">Varsayılan Bildirim Tercihleri</div>
+        <div class="toggle-row">
+          <div class="toggle-info">
+            <div class="toggle-label">Uygulama İçi Bildirimler</div>
+            <div class="toggle-desc">Topbar'da bildirim ikonu ile göster</div>
+          </div>
+          <label class="toggle"><input type="checkbox" checked disabled><span class="toggle-track"></span><span class="toggle-thumb"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info">
+            <div class="toggle-label">Harici Kanal Bildirimleri</div>
+            <div class="toggle-desc">Telegram/WhatsApp üzerinden bildirim gönder</div>
+          </div>
+          <label class="toggle"><input type="checkbox" id="externalNotifToggle" onchange="toggleExternalNotifications(this.checked)"><span class="toggle-track"></span><span class="toggle-thumb"></span></label>
+        </div>
+      </div>
+      
+      <!-- Kanal Listesi -->
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div style="font-size:14px;font-weight:600;color:var(--text-primary)">Tanımlı Kanallar</div>
+        <button class="btn btn-primary btn-sm" onclick="openAddChannelModal()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Kanal Ekle
+        </button>
+      </div>
+      
+      <div class="channel-grid" id="channelGrid">
+        <!-- Channels will be loaded here -->
+        <div class="channel-card channel-card-add" onclick="openAddChannelModal()">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <span style="font-size:13px;font-weight:500">Yeni Kanal Ekle</span>
+        </div>
+      </div>
+      
+      <!-- Bilgi Kartı -->
+      <div class="card" style="margin-top:20px;background:var(--primary-bg-subtle);border-color:var(--primary-bg)">
+        <div style="display:flex;gap:12px">
+          <div style="width:36px;height:36px;border-radius:50%;background:var(--primary-bg);color:var(--primary);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          </div>
+          <div>
+            <div style="font-size:13px;font-weight:600;color:var(--primary);margin-bottom:4px">Nasıl Çalışır?</div>
+            <div style="font-size:12px;color:var(--text-secondary);line-height:1.6">
+              1. Yukarıdan bir kanal ekleyin (örn: Telegram Bot)<br>
+              2. Bot token'ınızı girin ve bağlantıyı test edin<br>
+              3. Agents sayfasında bu kanalı ilgili agent'lara atayın<br>
+              4. Workflow'da onay adımı olduğunda, agent atanmış kanal üzerinden bildirim gönderir
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SANAL KAYNAKLAR -->
+    <div class="section" id="sec-resources" style="display:none">
+      <div class="section-head"><h2>Sanal Kaynaklar</h2><p>Agent'lara atanabilecek sanal kredi kartları ve telefon numaraları</p></div>
+      <div class="resource-tabs">
+        <button class="resource-tab active" onclick="switchResTab(this,'cards')">Sanal Kartlar</button>
+        <button class="resource-tab" onclick="switchResTab(this,'phones')">Sanal Telefonlar</button>
+      </div>
+
+      <!-- CARDS TAB -->
+      <div class="resource-panel active" id="res-cards">
+        <div class="vcard-grid" id="vcardGrid"></div>
+
+        <div class="card" style="margin-top:20px">
+          <div style="font-size:13px;font-weight:500;color:var(--text-primary);margin-bottom:12px">Son Harcamalar</div>
+          <div style="font-size:12px;color:var(--text-secondary)">
+            <div style="padding:8px 0;border-bottom:0.5px solid var(--border-light);display:flex;justify-content:space-between;align-items:center"><span><strong>Sales Copilot</strong> — Google Ads</span><span style="display:flex;align-items:center;gap:8px"><span style="font-weight:600;color:var(--text-primary)">-$124.50</span><span style="color:var(--text-muted);font-size:11px">2 saat önce</span></span></div>
+            <div style="padding:8px 0;border-bottom:0.5px solid var(--border-light);display:flex;justify-content:space-between;align-items:center"><span><strong>Sales Copilot</strong> — LinkedIn Premium</span><span style="display:flex;align-items:center;gap:8px"><span style="font-weight:600;color:var(--text-primary)">-$59.99</span><span style="color:var(--text-muted);font-size:11px">1 gün önce</span></span></div>
+            <div style="padding:8px 0;display:flex;justify-content:space-between;align-items:center"><span><strong>Support Agent</strong> — Zendesk</span><span style="display:flex;align-items:center;gap:8px"><span style="font-weight:600;color:var(--text-primary)">-$89.00</span><span style="color:var(--text-muted);font-size:11px">1 gün önce</span></span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PHONES TAB -->
+      <div class="resource-panel" id="res-phones">
+        <div class="vphone-card">
+          <div class="vphone-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
+          <div class="vphone-info">
+            <div class="vphone-number">+90 850 XXX 47 82</div>
+            <div class="vphone-meta">Twilio VoIP &bull; SMS + PIN doğrulama &bull; <span class="badge badge-green" style="font-size:10px;padding:1px 8px">Aktif</span></div>
+            <div class="vphone-agents">
+              <span class="vphone-agent">Sales Copilot</span>
+              <span class="vphone-agent">Support Agent</span>
+            </div>
+          </div>
+          <div class="vphone-actions">
+            <button class="btn btn-sm btn-secondary">Düzenle</button>
+            <button class="btn btn-sm btn-secondary" style="color:var(--amber)">Devre Dışı</button>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:4px">
+          <div style="font-size:13px;font-weight:500;color:var(--text-primary);margin-bottom:8px">Kullanım Alanları</div>
+          <div style="font-size:12px;color:var(--text-secondary);line-height:1.6">
+            <div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5" style="flex-shrink:0;margin-top:2px"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>PIN doğrulama: Agent işlem yaparken SMS ile gelen doğrulama kodlarını otomatik okur</div>
+            <div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5" style="flex-shrink:0;margin-top:2px"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>Hesap doğrulama: Yeni hesap açarken telefon numarası olarak kullanılır</div>
+            <div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5" style="flex-shrink:0;margin-top:2px"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>SMS bildirimi: Sipariş onayı, kargo takibi gibi SMS bildirimlerini alır</div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+            <div style="font-size:13px;font-weight:500;color:var(--text-primary)">Son SMS Logları</div>
+          </div>
+          <div style="font-size:12px;color:var(--text-secondary)">
+            <div style="padding:8px 0;border-bottom:0.5px solid var(--border-light);display:flex;justify-content:space-between"><span><strong>Gelen:</strong> Google doğrulama kodu: 847291</span><span style="color:var(--text-muted);font-size:11px">34 dk önce</span></div>
+            <div style="padding:8px 0;border-bottom:0.5px solid var(--border-light);display:flex;justify-content:space-between"><span><strong>Gelen:</strong> LinkedIn güvenlik kodu: 5923</span><span style="color:var(--text-muted);font-size:11px">1 gün önce</span></div>
+            <div style="padding:8px 0;display:flex;justify-content:space-between"><span><strong>Gelen:</strong> Stripe doğrulama: 441082</span><span style="color:var(--text-muted);font-size:11px">3 gün önce</span></div>
+          </div>
+        </div>
+
+        <div class="vphone-add" onclick="alert('Yeni sanal telefon numarası ekleme (demo)')" style="margin-top:12px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Yeni Sanal Numara Ekle
+        </div>
+      </div>
+    </div>
+
+    <!-- 7. BUDGET -->
+    <div class="section" id="sec-budget" style="display:none">
+      <div class="section-head"><h2>Bütçe & Limitler</h2><p>Token kullanımını ve maliyetleri kontrol altında tutun</p></div>
+      <div class="card">
+        <div class="field-row">
+          <div class="field"><label>Aylık Token Bütçesi</label><input class="fi" type="number" value="2000000"><div class="field-hint">Tüm agent'lar için toplam token limiti</div></div>
+          <div class="field"><label>Aylık Maliyet Limiti (USD)</label><input class="fi" type="number" value="2000"><div class="field-hint">Bu limit aşılınca agent'lar duraklatılır</div></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Uyarı Eşiği</label><select class="fi"><option>%60</option><option>%70</option><option selected>%80</option><option>%90</option></select><div class="field-hint">Bütçe bu orana ulaşınca bildirim gönderilir</div></div>
+          <div class="field"><label>Limit Aşımı Davranışı</label><select class="fi"><option selected>Agent'ları duraklat</option><option>Sadece uyar, çalışmaya devam et</option><option>Ucuz modele geç</option></select></div>
+        </div>
+      </div>
+      <div class="card">
+        <div style="font-size:13px;font-weight:500;color:var(--text-primary);margin-bottom:14px">Agent Bazlı Bütçe Kullanımı</div>
+        <div class="budget-item"><div class="budget-header"><span class="name">Sales Copilot</span><span class="val">$312 / $400</span></div><div class="budget-track"><div class="budget-fill" style="width:78%;background:var(--primary)"></div></div></div>
+        <div class="budget-item"><div class="budget-header"><span class="name">Support Agent</span><span class="val">$278 / $350</span></div><div class="budget-track"><div class="budget-fill" style="width:79%;background:var(--amber)"></div></div></div>
+        <div class="budget-item"><div class="budget-header"><span class="name">HR Assistant</span><span class="val">$189 / $250</span></div><div class="budget-track"><div class="budget-fill" style="width:76%;background:var(--primary)"></div></div></div>
+        <div class="budget-item"><div class="budget-header"><span class="name">Content Writer</span><span class="val">$156 / $200</span></div><div class="budget-track"><div class="budget-fill" style="width:78%;background:var(--primary)"></div></div></div>
+        <div class="budget-item"><div class="budget-header"><span class="name">Data Analyst</span><span class="val">$124 / $200</span></div><div class="budget-track"><div class="budget-fill" style="width:62%;background:var(--green)"></div></div></div>
+        <div class="budget-item"><div class="budget-header"><span class="name">Diğer (3 agent)</span><span class="val">$189 / $600</span></div><div class="budget-track"><div class="budget-fill" style="width:32%;background:var(--green)"></div></div></div>
+      </div>
+    </div>
+
+    <!-- 8. PRIVACY -->
+    <div class="section" id="sec-privacy" style="display:none">
+      <div class="section-head"><h2>Veri & Gizlilik</h2><p>KVKK/GDPR uyumluluğu ve veri saklama politikaları</p></div>
+      <div class="card">
+        <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">PII Otomatik Maskeleme</div><div class="toggle-desc">TC kimlik, telefon, e-posta gibi kişisel verileri LLM'e göndermeden maskele</div></div><label class="toggle"><input type="checkbox" checked><span class="toggle-track"></span><span class="toggle-thumb"></span></label></div>
+        <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Konuşma Logları</div><div class="toggle-desc">Tüm agent konuşmalarının kaydını tut</div></div><label class="toggle"><input type="checkbox" checked><span class="toggle-track"></span><span class="toggle-thumb"></span></label></div>
+        <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Veri Anonimleştirme</div><div class="toggle-desc">Analitik verilerinde kişisel bilgileri anonim hale getir</div></div><label class="toggle"><input type="checkbox" checked><span class="toggle-track"></span><span class="toggle-thumb"></span></label></div>
+      </div>
+      <div class="card">
+        <div style="font-size:13px;font-weight:500;color:var(--text-primary);margin-bottom:12px">Veri Saklama Süreleri</div>
+        <div class="field-row">
+          <div class="field"><label>Konuşma Logları</label><select class="fi"><option>3 ay</option><option>6 ay</option><option selected>12 ay</option><option>24 ay</option></select></div>
+          <div class="field"><label>Kişisel Veriler</label><select class="fi"><option>6 ay</option><option>12 ay</option><option selected>24 ay</option><option>Süresiz</option></select></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Analitik Verileri</label><select class="fi"><option>6 ay</option><option selected>12 ay</option><option>24 ay</option></select></div>
+          <div class="field"><label>Audit Logları</label><select class="fi"><option>12 ay</option><option>24 ay</option><option selected>5 yıl</option><option>10 yıl</option></select></div>
+        </div>
+      </div>
+      <div class="card" style="background:var(--green-bg);border-color:#A7E4C5">
+        <div style="display:flex;align-items:center;gap:10px">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          <div><div style="font-size:13px;font-weight:500;color:var(--green-text)">KVKK & GDPR Uyumlu</div><div style="font-size:12px;color:var(--text-secondary)">Platform yapılandırmanız mevcut düzenlemelere uygun. Son kontrol: 2 gün önce.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 9. WEBHOOK -->
+    <div class="section" id="sec-webhook" style="display:none">
+      <div class="section-head"><h2>Webhook & API</h2><p>Orbicorp API anahtarlarınız ve webhook yapılandırması</p></div>
+      <div class="card">
+        <div style="font-size:13px;font-weight:500;color:var(--text-primary);margin-bottom:12px">Orbicorp API Anahtarı</div>
+        <div class="api-key-display" style="margin-bottom:8px">
+          <span class="api-key-value" id="key-orbicorp" style="font-size:13px">orbi_live_••••••••••••••••••5mR8</span>
+          <button class="api-key-toggle" onclick="toggleKey('orbicorp','orbi_live_aK3bN7cP2dQ9eR4fS8gT1hU6iV0jW5xY3-5mR8')">Göster</button>
+          <button class="btn btn-sm btn-secondary" onclick="navigator.clipboard.writeText('orbi_live_aK3bN7cP2dQ9eR4fS8gT1hU6iV0jW5xY3-5mR8')">Kopyala</button>
+        </div>
+        <div class="field-hint">Bu anahtarı dış uygulamalardan Orbicorp API'ye erişmek için kullanın.</div>
+      </div>
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div style="font-size:13px;font-weight:500;color:var(--text-primary)">Webhook Endpoint'leri</div>
+          <button class="btn btn-sm btn-primary">+ Webhook Ekle</button>
+        </div>
+        <div class="webhook-row"><span class="webhook-event">agent.status</span><span class="webhook-url">https://novatech.com.tr/webhooks/orbicorp/status</span><span class="badge badge-green">Aktif</span></div>
+        <div class="webhook-row"><span class="webhook-event">conversation.end</span><span class="webhook-url">https://novatech.com.tr/webhooks/orbicorp/conversations</span><span class="badge badge-green">Aktif</span></div>
+        <div class="webhook-row"><span class="webhook-event">budget.alert</span><span class="webhook-url">https://hooks.slack.com/services/T0X.../B0Y.../abc123</span><span class="badge badge-green">Aktif</span></div>
+        <div class="webhook-row"><span class="webhook-event">security.alert</span><span class="webhook-url">https://novatech.com.tr/webhooks/orbicorp/security</span><span class="badge badge-amber">Test</span></div>
+      </div>
+      <div class="card">
+        <div style="font-size:13px;font-weight:500;color:var(--text-primary);margin-bottom:8px">API Dokümantasyonu</div>
+        <div style="font-size:13px;color:var(--text-secondary);line-height:1.6">Orbicorp REST API ile agent'larınızı programatik olarak yönetebilir, konuşma başlatabilir ve analitik verilerine erişebilirsiniz.</div>
+        <button class="btn btn-secondary" style="margin-top:12px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>API Dokümantasyonu</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- INTEGRATION CONFIG MODAL -->
+<div class="ch-modal-overlay" id="intModalOverlay" onclick="if(event.target===this)closeIntModal()">
+  <div class="ch-modal" style="width:580px">
+    <div class="ch-modal-header">
+      <div id="intModalIcon" style="width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0"></div>
+      <h2 id="intModalTitle">Entegrasyon Ayarları</h2>
+      <button class="ch-modal-close" onclick="closeIntModal()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="ch-modal-body" id="intModalBody"></div>
+    <div class="ch-modal-footer">
+      <div><button class="btn btn-danger btn-sm" onclick="closeIntModal()">Bağlantıyı Kaldır</button></div>
+      <div style="display:flex;gap:8px"><button class="btn btn-secondary" onclick="closeIntModal()">İptal</button><button class="btn btn-primary" onclick="closeIntModal()">Kaydet</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- CARD DETAIL MODAL -->
+<div class="ch-modal-overlay" id="cardModalOverlay" onclick="if(event.target===this)closeCardModal()">
+  <div class="ch-modal" style="width:540px">
+    <div class="ch-modal-header">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+      <h2 id="cardModalTitle">Kart Detayı</h2>
+      <button class="ch-modal-close" onclick="closeCardModal()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="ch-modal-body" id="cardModalBody"></div>
+    <div class="ch-modal-footer" id="cardModalFooter"></div>
+  </div>
+</div>
+
+<!-- CHANNEL MODAL -->
+<div class="ch-modal-overlay" id="chModalOverlay" onclick="if(event.target===this)closeChModal()">
+  <div class="ch-modal">
+    <div class="ch-modal-header">
+      <div class="channel-logo" id="chModalLogo"></div>
+      <h2 id="chModalTitle">Kanal Ayarları</h2>
+      <button class="ch-modal-close" onclick="closeChModal()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="ch-modal-body" id="chModalBody"></div>
+    <div class="ch-modal-footer">
+      <div class="ch-modal-footer-left"><button class="btn btn-danger btn-sm" onclick="closeChModal()">Kanalı Kaldır</button></div>
+      <div class="ch-modal-footer-right"><button class="btn btn-secondary" onclick="closeChModal()">İptal</button><button class="btn btn-primary" onclick="saveChannel()">Kaydet</button></div>
+    </div>
+  </div>
+</div>
+
+<script>
+function go(section, el) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
+  document.getElementById('sec-' + section).style.display = '';
+  document.getElementById('mainContent').scrollTop = 0;
+}
+
+const keyStates = {};
+function toggleKey(provider, fullKey) {
+  const el = document.getElementById('key-' + provider);
+  const btn = el.nextElementSibling;
+  if (keyStates[provider]) {
+    el.textContent = el.dataset.masked;
+    btn.textContent = 'Göster';
+    keyStates[provider] = false;
+  } else {
+    el.dataset.masked = el.textContent;
+    el.textContent = fullKey;
+    btn.textContent = 'Gizle';
+    keyStates[provider] = true;
+  }
+}
+
+function editModel(btn) {
+  const row = btn.closest('tr');
+  const modelCell = row.cells[1];
+  const currentModel = modelCell.textContent.trim();
+  const models = ['Claude Sonnet 4.6', 'Claude Haiku 4.5', 'Claude Opus 4.6', 'GPT-4o', 'Gemini Pro'];
+  const sel = document.createElement('select');
+  sel.className = 'fi';
+  sel.style.cssText = 'padding:5px 10px;font-size:12px;width:auto';
+  models.forEach(m => { const o = document.createElement('option'); o.value = m; o.textContent = m; if (m === currentModel) o.selected = true; sel.appendChild(o); });
+  modelCell.innerHTML = '';
+  modelCell.appendChild(sel);
+  btn.textContent = 'Kaydet';
+  btn.onclick = function() {
+    modelCell.innerHTML = `<span class="model-tag">${sel.value}</span>`;
+    btn.textContent = 'Değiştir';
+    btn.onclick = function() { editModel(btn); };
+  };
+}
+
+// ═══ CHANNELS ═══ 
+// (Moved to bottom of file - API-based system)
+
+// ═══ VIRTUAL CARDS ═══
+const vcards = [
+  {id:1,last4:'7841',full:'4532 8921 0047 7841',cvv:'318',exp:'09/28',holder:'Sales Copilot',limit:2000,spent:847,status:'active',gradient:'linear-gradient(135deg,#635BFF 0%,#0A2540 100%)',
+   categories:[{name:'Yazılım',on:true},{name:'Reklam',on:true},{name:'SaaS',on:true},{name:'Seyahat',on:false},{name:'Yemek',on:false}],
+   lastTx:'Google Ads — $124.50 (2 saat önce)'},
+  {id:2,last4:'3156',full:'4532 6710 8834 3156',cvv:'742',exp:'03/27',holder:'Support Agent',limit:500,spent:312,status:'active',gradient:'linear-gradient(135deg,#0F6E56 0%,#04342C 100%)',
+   categories:[{name:'Yazılım',on:true},{name:'SaaS',on:true},{name:'Reklam',on:false},{name:'Seyahat',on:false},{name:'Yemek',on:false}],
+   lastTx:'Zendesk — $89.00 (1 gün önce)'}
+];
+const allCats = ['Yazılım','Reklam','SaaS','Seyahat','Yemek','Eğitim','Donanım'];
+const cardAgents = ['Sales Copilot','HR Assistant','Content Writer','Support Agent','Data Analyst','Legal Advisor','Onboarding Bot','IT Helpdesk'];
+
+function renderVCards() {
+  document.getElementById('vcardGrid').innerHTML = vcards.map(c => `
+    <div><div class="vcard ${c.status==='frozen'?'frozen':''}" style="background:${c.gradient}" onclick="openCardModal(${c.id})">
+      <div class="vcard-top"><div class="vcard-brand">ORBICORP</div><div class="vcard-chip"></div></div>
+      <div class="vcard-number">4532 &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; ${c.last4}</div>
+      <div class="vcard-limit-bar"><div class="vcard-limit-info"><span>Harcanan: $${c.spent}</span><span>Limit: $${c.limit.toLocaleString()}</span></div><div class="vcard-limit-track"><div class="vcard-limit-fill" style="width:${Math.round(c.spent/c.limit*100)}%"></div></div></div>
+      <div class="vcard-bottom"><div><div class="vcard-holder">${c.holder}</div></div><div style="text-align:right"><div class="vcard-exp-label">Son Kullanma</div><div class="vcard-exp">${c.exp}</div></div></div>
+    </div></div>`).join('') + `
+    <div class="vcard vcard-add" onclick="openCardModal('new')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <span>Yeni Sanal Kart Oluştur</span>
+    </div>`;
+}
+
+function openCardModal(id) {
+  const isNew = id === 'new';
+  const c = isNew ? null : vcards.find(x => x.id === id);
+  document.getElementById('cardModalTitle').textContent = isNew ? 'Yeni Sanal Kart Oluştur' : 'Kart Detayı — •••• ' + c.last4;
+
+  const cats = isNew ? allCats.map(n=>({name:n,on:false})) : c.categories;
+  const body = document.getElementById('cardModalBody');
+
+  if (!isNew) {
+    body.innerHTML = `
+      <div style="display:flex;justify-content:center;margin-bottom:20px">
+        <div class="vcard" style="background:${c.gradient};width:320px;aspect-ratio:1.586;font-size:0.85em;pointer-events:none">
+          <div class="vcard-top"><div class="vcard-brand">ORBICORP</div><div class="vcard-chip" style="width:28px;height:20px"></div></div>
+          <div class="vcard-number" style="font-size:15px;letter-spacing:2px">${c.full}</div>
+          <div class="vcard-limit-bar"><div class="vcard-limit-info"><span>$${c.spent} / $${c.limit.toLocaleString()}</span><span>${Math.round(c.spent/c.limit*100)}%</span></div><div class="vcard-limit-track"><div class="vcard-limit-fill" style="width:${Math.round(c.spent/c.limit*100)}%"></div></div></div>
+          <div class="vcard-bottom"><div><div class="vcard-holder">${c.holder}</div></div><div style="text-align:right"><div class="vcard-exp-label">SKT</div><div class="vcard-exp">${c.exp}</div></div></div>
+        </div>
+      </div>
+      <div class="ch-section"><div class="ch-section-title">Kart Bilgileri</div>
+        <div class="field-row"><div class="field"><label>Kart Numarası</label><input class="fi" value="${c.full}" style="font-family:var(--font-mono)"></div><div class="field"><label>CVV</label><input class="fi" type="password" value="${c.cvv}" style="font-family:var(--font-mono);max-width:100px"></div></div>
+        <div class="field-row"><div class="field"><label>Son Kullanma</label><input class="fi" value="${c.exp}"></div><div class="field"><label>Durum</label><select class="fi"><option ${c.status==='active'?'selected':''}>Aktif</option><option ${c.status==='frozen'?'selected':''}>Dondurulmuş</option><option>İptal</option></select></div></div>
+      </div>
+      <div class="ch-section"><div class="ch-section-title">Atama & Limitler</div>
+        <div class="field-row"><div class="field"><label>Atanan Agent</label><select class="fi">${cardAgents.map(a=>`<option ${a===c.holder?'selected':''}>${a}</option>`).join('')}</select></div><div class="field"><label>Aylık Harcama Limiti ($)</label><input class="fi" type="number" value="${c.limit}"></div></div>
+      </div>
+      <div class="ch-section"><div class="ch-section-title">İzin Verilen Harcama Kategorileri</div>
+        <div class="category-tags" style="gap:6px">${allCats.map(cat=>{const on=cats.find(x=>x.name===cat)?.on;return `<span class="category-tag ${on?'active':''}" onclick="this.classList.toggle('active')" style="cursor:pointer;padding:6px 14px;font-size:12px">${cat}</span>`}).join('')}</div>
+      </div>
+      <div class="ch-section"><div class="ch-section-title">Son İşlem</div>
+        <div style="font-size:13px;color:var(--text-secondary);padding:8px 0">${c.lastTx}</div>
+      </div>`;
+    document.getElementById('cardModalFooter').innerHTML = `
+      <div class="ch-modal-footer-left"><button class="btn btn-danger btn-sm" onclick="closeCardModal()">Kartı İptal Et</button></div>
+      <div class="ch-modal-footer-right"><button class="btn btn-secondary" onclick="closeCardModal()">İptal</button><button class="btn btn-primary" onclick="closeCardModal()">Kaydet</button></div>`;
+  } else {
+    body.innerHTML = `
+      <div class="ch-section"><div class="ch-section-title">Kart Bilgileri</div>
+        <div class="field"><label>Kart Adı / Etiketi</label><input class="fi" placeholder="Örn: Pazarlama Harcamaları Kartı"></div>
+      </div>
+      <div class="ch-section"><div class="ch-section-title">Atama & Limitler</div>
+        <div class="field-row"><div class="field"><label>Atanacak Agent</label><select class="fi"><option value="">Agent seçin...</option>${cardAgents.map(a=>`<option>${a}</option>`).join('')}</select></div><div class="field"><label>Aylık Harcama Limiti ($)</label><input class="fi" type="number" placeholder="1000"></div></div>
+      </div>
+      <div class="ch-section"><div class="ch-section-title">İzin Verilen Harcama Kategorileri</div>
+        <div class="category-tags" style="gap:6px">${allCats.map(cat=>`<span class="category-tag" onclick="this.classList.toggle('active')" style="cursor:pointer;padding:6px 14px;font-size:12px">${cat}</span>`).join('')}</div>
+        <div class="field-hint" style="margin-top:8px">Seçilen kategoriler dışındaki harcamalar otomatik reddedilir.</div>
+      </div>
+      <div style="background:var(--primary-bg-subtle);border:0.5px solid var(--primary-bg);border-radius:var(--radius-md);padding:14px;margin-top:8px;display:flex;align-items:center;gap:10px">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        <div style="font-size:12px;color:var(--text-secondary)">Kart numarası, CVV ve son kullanma tarihi otomatik oluşturulacaktır. Oluşturulduktan sonra detay ekranında görüntüleyebilirsiniz.</div>
+      </div>`;
+    document.getElementById('cardModalFooter').innerHTML = `
+      <div class="ch-modal-footer-left"></div>
+      <div class="ch-modal-footer-right"><button class="btn btn-secondary" onclick="closeCardModal()">İptal</button><button class="btn btn-primary" onclick="closeCardModal()">Kart Oluştur</button></div>`;
+  }
+  document.getElementById('cardModalOverlay').classList.add('open');
+}
+
+function closeCardModal() { document.getElementById('cardModalOverlay').classList.remove('open'); }
+
+renderVCards();
+
+function toggleCardDetails(id) {}
+
+function switchResTab(btn, panel) {
+  document.querySelectorAll('.resource-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.resource-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('res-' + panel).classList.add('active');
+}
+
+// ═══ INTEGRATIONS ═══
+const integrations = [
+  {id:'google',name:'Google Workspace',desc:'Gmail, Calendar, Drive entegrasyonu',status:'active',agents:['Sales Copilot','HR Assistant'],lastSync:'5 dk önce',
+    logo:'<svg viewBox="0 0 24 24" width="22" height="22"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>',
+    logoBg:'#fff',fields:[{l:'Client ID',v:'novatech.apps.googleusercontent.com'},{l:'Domain',v:'novatech.com.tr'},{l:'Scope',v:'Gmail, Calendar, Drive (okuma/yazma)'}]},
+  {id:'salesforce',name:'Salesforce CRM',desc:'Lead, contact, opportunity ve pipeline yönetimi',status:'active',agents:['Sales Copilot','Data Analyst'],lastSync:'12 dk önce',
+    logo:'<svg viewBox="0 0 24 24" width="22" height="22"><path d="M10 3.2A5.4 5.4 0 0 1 14.8 1a5.3 5.3 0 0 1 4.7 2.8 6.2 6.2 0 0 1 3.5 5.6 6.2 6.2 0 0 1-6.2 6.2h-.3a4.4 4.4 0 0 1-4.1 2.8 4.5 4.5 0 0 1-2.7-.9A5.5 5.5 0 0 1 4.5 20 5.5 5.5 0 0 1 1 13a5.5 5.5 0 0 1 3-4.9A5.4 5.4 0 0 1 10 3.2z" fill="#00A1E0"/></svg>',
+    logoBg:'#E8F4FD',fields:[{l:'Instance URL',v:'https://novatech.my.salesforce.com'},{l:'API Version',v:'v58.0'},{l:'Sync',v:'Çift yönlü (realtime)'}]},
+  {id:'slack',name:'Slack',desc:'Kanal mesajları, bildirimler ve bot entegrasyonu',status:'active',agents:['Sales Copilot','HR Assistant','Support Agent'],lastSync:'1 dk önce',
+    logo:'<svg viewBox="0 0 24 24" width="22" height="22"><path d="M5.04 15.16a2.28 2.28 0 0 1-2.28 2.28 2.28 2.28 0 0 1-2.28-2.28 2.28 2.28 0 0 1 2.28-2.28h2.28v2.28zm1.14 0a2.28 2.28 0 0 1 2.28-2.28 2.28 2.28 0 0 1 2.28 2.28v5.72a2.28 2.28 0 0 1-2.28 2.28 2.28 2.28 0 0 1-2.28-2.28v-5.72z" fill="#E01E5A"/><path d="M8.46 5.04a2.28 2.28 0 0 1-2.28-2.28A2.28 2.28 0 0 1 8.46.48a2.28 2.28 0 0 1 2.28 2.28v2.28H8.46zm0 1.16a2.28 2.28 0 0 1 2.28 2.28 2.28 2.28 0 0 1-2.28 2.28H2.76a2.28 2.28 0 0 1-2.28-2.28A2.28 2.28 0 0 1 2.76 6.2h5.7z" fill="#36C5F0"/><path d="M18.96 8.48a2.28 2.28 0 0 1 2.28-2.28 2.28 2.28 0 0 1 2.28 2.28 2.28 2.28 0 0 1-2.28 2.28h-2.28V8.48zm-1.14 0a2.28 2.28 0 0 1-2.28 2.28 2.28 2.28 0 0 1-2.28-2.28V2.76a2.28 2.28 0 0 1 2.28-2.28 2.28 2.28 0 0 1 2.28 2.28v5.72z" fill="#2EB67D"/><path d="M15.54 18.96a2.28 2.28 0 0 1 2.28 2.28 2.28 2.28 0 0 1-2.28 2.28 2.28 2.28 0 0 1-2.28-2.28v-2.28h2.28zm0-1.14a2.28 2.28 0 0 1-2.28-2.28 2.28 2.28 0 0 1 2.28-2.28h5.7a2.28 2.28 0 0 1 2.28 2.28 2.28 2.28 0 0 1-2.28 2.28h-5.7z" fill="#ECB22E"/></svg>',
+    logoBg:'#F8F0FF',fields:[{l:'Workspace',v:'NovaTech HQ'},{l:'Bot Name',v:'Orbicorp AI'},{l:'Default Channel',v:'#ai-assistant'}]},
+  {id:'teams',name:'Microsoft Teams',desc:'Teams kanalları ve toplantı entegrasyonu',status:'active',agents:['Support Agent','Onboarding Bot'],lastSync:'8 dk önce',
+    logo:'<svg viewBox="0 0 24 24" width="22" height="22"><path d="M20.7 4.1a2.3 2.3 0 1 1-2.3 2.3A2.3 2.3 0 0 1 20.7 4.1z" fill="#5059C9"/><path d="M20.7 8.8h-3.6a1 1 0 0 0-1 1v4.8a3.8 3.8 0 0 0 3.8 3.8 3.8 3.8 0 0 0 1.8-.5V9.8a1 1 0 0 0-1-1z" fill="#5059C9"/><path d="M14.2 3a3.2 3.2 0 1 1-3.2 3.2A3.2 3.2 0 0 1 14.2 3z" fill="#7B83EB"/><path d="M18.4 9.6H9.6a1 1 0 0 0-1 1v5.6a5.4 5.4 0 0 0 10.8 0v-5.6a1 1 0 0 0-1-1z" fill="#7B83EB"/></svg>',
+    logoBg:'#E8E8F8',fields:[{l:'Tenant ID',v:'f9e8d7c6-b5a4-3210'},{l:'App ID',v:'a1b2c3d4-e5f6-7890'},{l:'Channels',v:'3 kanal bağlı'}]},
+  {id:'hubspot',name:'HubSpot CRM',desc:'Marketing, satış ve müşteri hizmetleri platformu',status:'inactive',agents:[],lastSync:'—',
+    logo:'<svg viewBox="0 0 24 24" width="22" height="22"><path d="M17.5 8.2V5.7a2 2 0 0 0 1.2-1.8 2 2 0 1 0-4 0 2 2 0 0 0 1.2 1.8v2.5a5.5 5.5 0 0 0-3 1.8l-6-4.3a2.3 2.3 0 1 0-1.2 1.6l5.8 4.2a5.5 5.5 0 1 0 6-5.3z" fill="#FF7A59"/></svg>',
+    logoBg:'#FFF0EB',fields:[{l:'API Key',v:'Henüz yapılandırılmadı'},{l:'Portal ID',v:'—'}]},
+  {id:'jira',name:'Jira / Atlassian',desc:'Issue tracking, sprint yönetimi ve proje takibi',status:'configuring',agents:['IT Helpdesk','Data Analyst'],lastSync:'Yapılandırılıyor',
+    logo:'<svg viewBox="0 0 24 24" width="22" height="22"><path d="M11.53 2 2 11.53a.7.7 0 0 0 0 1l4.47 4.47 5.06-5.06L6.47 6.88 11.53 2z" fill="#2684FF"/><path d="M12.47 2l9.53 9.53a.7.7 0 0 1 0 1l-4.47 4.47-5.06-5.06 5.06-5.06L12.47 2z" fill="#2684FF" opacity="0.7"/></svg>',
+    logoBg:'#E4ECFF',fields:[{l:'Site URL',v:'novatech.atlassian.net'},{l:'Project',v:'NOVA (yapılandırılıyor)'},{l:'Sync',v:'Issue oluşturma + okuma'}]},
+  {id:'sap',name:'SAP ERP',desc:'Sipariş, stok, fatura ve müşteri verisi senkronizasyonu',status:'active',agents:['Data Analyst'],lastSync:'30 dk önce',
+    logo:'<svg viewBox="0 0 24 24" width="22" height="22"><rect width="24" height="24" rx="4" fill="#0070C0"/><text x="12" y="16" text-anchor="middle" fill="white" font-size="10" font-weight="bold" font-family="Arial">SAP</text></svg>',
+    logoBg:'#E0F0FF',fields:[{l:'Sistem',v:'S/4HANA Cloud'},{l:'Client',v:'100'},{l:'Modüller',v:'FI, SD, MM'}]},
+  {id:'whatsapp',name:'WhatsApp Business',desc:'Müşteri mesajlaşma ve bildirim kanalı',status:'active',agents:['Support Agent','Sales Copilot'],lastSync:'2 dk önce',
+    logo:'<svg viewBox="0 0 24 24" width="22" height="22"><path d="M17.5 14.4c-.3-.1-1.7-.8-2-1s-.5-.1-.7.2-.8 1-1 1.1-.3.2-.6 0a8 8 0 0 1-2.4-1.5 9 9 0 0 1-1.6-2c-.2-.3 0-.5.1-.6l.4-.5.3-.3.1-.3c.1-.1 0-.3 0-.4s-.7-1.6-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6a1.2 1.2 0 0 0-.9.4A3.6 3.6 0 0 0 6 10a6.3 6.3 0 0 0 1.3 3.3 14.4 14.4 0 0 0 5.6 4.9c.8.3 1.4.5 1.9.7.8.3 1.5.2 2.1.1.6-.1 1.7-.7 2-1.4s.3-1.4.2-1.5-.3-.2-.6-.3z" fill="#25D366"/><path d="M12 1a11 11 0 0 0-9.4 16.8L1 23l5.3-1.4A11 11 0 1 0 12 1z" fill="#25D366" opacity="0.2"/></svg>',
+    logoBg:'#E8F8E8',fields:[{l:'Telefon',v:'+90 532 XXX XX XX'},{l:'Business ID',v:'108234567890123'},{l:'Mesaj/gün',v:'~240'}]},
+  {id:'zoom',name:'Zoom',desc:'Toplantı oluşturma, katılımcı yönetimi ve kayıt',status:'active',agents:['HR Assistant','Onboarding Bot'],lastSync:'1 saat önce',
+    logo:'<svg viewBox="0 0 24 24" width="22" height="22"><rect width="24" height="24" rx="6" fill="#2D8CFF"/><path d="M5 8.5h8a2 2 0 0 1 2 2v5H7a2 2 0 0 1-2-2v-5zm11 1.5l3-2v8l-3-2v-4z" fill="white"/></svg>',
+    logoBg:'#E4F0FF',fields:[{l:'Account',v:'novatech.zoom.us'},{l:'Auto Record',v:'Açık'},{l:'Entegrasyon',v:'Calendar + Slack'}]},
+  {id:'notion',name:'Notion',desc:'Bilgi tabanı, wiki ve proje dokümanları',status:'inactive',agents:[],lastSync:'—',
+    logo:'<svg viewBox="0 0 24 24" width="22" height="22"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3h9.8l4.7 4.7V19.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 19.5v-15z" fill="#fff" stroke="#333" stroke-width="0.8"/><path d="M7 8h6M7 11h10M7 14h8" stroke="#333" stroke-width="0.8" stroke-linecap="round"/></svg>',
+    logoBg:'#F5F5F5',fields:[{l:'Workspace',v:'Henüz bağlanmadı'},{l:'Sync',v:'—'}]},
+  {id:'zendesk',name:'Zendesk',desc:'Ticket yönetimi ve müşteri destek platformu',status:'active',agents:['Support Agent'],lastSync:'3 dk önce',
+    logo:'<svg viewBox="0 0 24 24" width="22" height="22"><path d="M11 3v12L2 21V9z" fill="#03363D"/><path d="M13 21V9l9-6v12z" fill="#03363D"/><circle cx="7" cy="5.5" r="3" fill="#03363D"/><circle cx="17" cy="18.5" r="3" fill="#03363D"/></svg>',
+    logoBg:'#E4F2F2',fields:[{l:'Subdomain',v:'novatech.zendesk.com'},{l:'Aktif Ticket',v:'47'},{l:'Ort. Çözüm',v:'4.2 saat'}]},
+  {id:'stripe',name:'Stripe',desc:'Ödeme işleme, abonelik ve fatura yönetimi',status:'active',agents:['Data Analyst','Sales Copilot'],lastSync:'15 dk önce',
+    logo:'<svg viewBox="0 0 24 24" width="22" height="22"><rect width="24" height="24" rx="4" fill="#635BFF"/><path d="M11 8.2c0-.7.6-1 1.5-1 1.3 0 3 .4 4.3 1.1V4.8A12 12 0 0 0 12.5 4C9.5 4 7.5 5.6 7.5 8.4c0 4.4 6 3.7 6 5.6 0 .8-.7 1.1-1.7 1.1-1.5 0-3.4-.6-4.8-1.4v3.6c1.6.7 3.3 1 4.8 1 3.1 0 5.2-1.5 5.2-4.4C17 9.6 11 10.4 11 8.2z" fill="white"/></svg>',
+    logoBg:'#F0EEFF',fields:[{l:'Mode',v:'Live'},{l:'Aylık İşlem',v:'$142K'},{l:'Webhook',v:'Aktif (5 event)'}]}
+];
+
+// Discover items (not installed)
+const discoverItems = [
+  {id:'dropbox',name:'Dropbox Business',desc:'Bulut depolama ve dosya paylaşımı',cat:'storage',price:0,priceLabel:'Ücretsiz',downloads:8400,rating:4.5,
+    logo:'<svg viewBox="0 0 24 24" width="22" height="22"><path d="M12 2l-6 4 6 4-6 4 6 4 6-4-6-4 6-4z" fill="#0061FF"/></svg>',logoBg:'#E4F0FF',
+    features:['Dosya senkronizasyonu','Paylaşım linkleri','Agent erişimi','Versiyon takibi']},
+  {id:'monday',name:'Monday.com',desc:'Proje ve iş yönetimi platformu',cat:'project',price:15,priceLabel:'$15/ay',downloads:5200,rating:4.4,
+    logo:'<svg viewBox="0 0 24 24" width="22" height="22"><circle cx="6" cy="14" r="3" fill="#FF3D57"/><circle cx="12" cy="8" r="3" fill="#FFCB00"/><circle cx="18" cy="14" r="3" fill="#00CA72"/></svg>',logoBg:'#FFF5F5',
+    features:['Board senkronizasyonu','Otomatik item oluşturma','Status güncelleme','Timeline entegrasyonu']},
+  {id:'airtable',name:'Airtable',desc:'Esnek veritabanı ve spreadsheet platformu',cat:'storage',price:0,priceLabel:'Ücretsiz',downloads:6100,rating:4.6,
+    logo:'<svg viewBox="0 0 24 24" width="22" height="22"><rect width="24" height="24" rx="5" fill="#FCB400"/><rect x="4" y="4" width="7" height="7" rx="1" fill="white"/><rect x="13" y="4" width="7" height="7" rx="1" fill="white" opacity="0.6"/><rect x="4" y="13" width="7" height="7" rx="1" fill="white" opacity="0.6"/><rect x="13" y="13" width="7" height="7" rx="1" fill="white" opacity="0.4"/></svg>',logoBg:'#FFF8E0',
+    features:['Tablo okuma/yazma','Webhook tetikleyici','Formül desteği','Attachment yönetimi']},
+  {id:'intercom',name:'Intercom',desc:'Müşteri mesajlaşma ve destek platformu',cat:'comm',price:29,priceLabel:'$29/ay',downloads:4300,rating:4.3,
+    logo:'<svg viewBox="0 0 24 24" width="22" height="22"><rect width="24" height="24" rx="5" fill="#1F8DED"/><path d="M6 8v5M9 7v7M12 6v8M15 7v7M18 8v5" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>',logoBg:'#E4F2FF',
+    features:['Konuşma senkronizasyonu','Otomatik yanıt','Kullanıcı profili','Inbox yönetimi']},
+  {id:'quickbooks',name:'QuickBooks',desc:'Muhasebe ve finansal yönetim yazılımı',cat:'finance',price:19,priceLabel:'$19/ay',downloads:3800,rating:4.2,
+    logo:'<svg viewBox="0 0 24 24" width="22" height="22"><circle cx="12" cy="12" r="11" fill="#2CA01C"/><path d="M8 8v8M11 10v4M16 8v8" stroke="white" stroke-width="2.5" stroke-linecap="round"/></svg>',logoBg:'#E8F8E4',
+    features:['Fatura okuma/yazma','Gider takibi','Banka senkronizasyonu','Raporlama']},
+  {id:'openai_int',name:'OpenAI Tools',desc:'GPT modelleri, DALL-E ve Whisper API entegrasyonu',cat:'ai',price:0,priceLabel:'Ücretsiz',downloads:12400,rating:4.8,
+    logo:'<svg viewBox="0 0 24 24" width="22" height="22"><circle cx="12" cy="12" r="11" fill="#1A1A1A"/><path d="M12 3C7 3 3 7 3 12s4 9 9 9 9-4 9-9S17 3 12 3zm0 4a2 2 0 110 4 2 2 0 010-4zm-3 7a3 3 0 016 0" fill="none" stroke="white" stroke-width="1.5"/></svg>',logoBg:'#F5F5F5',
+    features:['Multi-model desteği','Function calling','Image generation','Speech-to-text']},
+  {id:'aws',name:'AWS Services',desc:'S3, Lambda, SES ve diğer AWS servisleri',cat:'storage',price:0,priceLabel:'Ücretsiz',downloads:7200,rating:4.5,
+    logo:'<svg viewBox="0 0 24 24" width="22" height="22"><rect width="24" height="24" rx="4" fill="#232F3E"/><path d="M8 14c2 1.5 6 1.5 8 0" stroke="#FF9900" stroke-width="2" stroke-linecap="round"/><path d="M18 13l2 1-2 1" fill="#FF9900"/></svg>',logoBg:'#FFF4E5',
+    features:['S3 dosya depolama','Lambda fonksiyonları','SES email','CloudWatch logları']},
+  {id:'mixpanel',name:'Mixpanel',desc:'Ürün analitik ve kullanıcı davranış izleme',cat:'analytics',price:25,priceLabel:'$25/ay',downloads:3100,rating:4.4,
+    logo:'<svg viewBox="0 0 24 24" width="22" height="22"><rect width="24" height="24" rx="5" fill="#7856FF"/><circle cx="9" cy="12" r="3" fill="white"/><circle cx="17" cy="12" r="2" fill="white" opacity="0.6"/></svg>',logoBg:'#F0EEFF',
+    features:['Event tracking','Funnel analizi','Kohort raporları','A/B test']},
+  {id:'twilio',name:'Twilio',desc:'SMS, sesli arama ve video API entegrasyonu',cat:'comm',price:0,priceLabel:'Kullandıkça öde',downloads:9500,rating:4.6,
+    logo:'<svg viewBox="0 0 24 24" width="22" height="22"><circle cx="12" cy="12" r="11" fill="#F22F46"/><circle cx="9" cy="9" r="2" fill="white"/><circle cx="15" cy="9" r="2" fill="white"/><circle cx="9" cy="15" r="2" fill="white"/><circle cx="15" cy="15" r="2" fill="white"/></svg>',logoBg:'#FDE8EC',
+    features:['SMS gönderme/alma','Sesli arama','Video','Doğrulama kodları']},
+  {id:'github',name:'GitHub',desc:'Kod deposu, CI/CD ve proje yönetimi',cat:'project',price:0,priceLabel:'Ücretsiz',downloads:11200,rating:4.7,
+    logo:'<svg viewBox="0 0 24 24" width="22" height="22"><path d="M12 2C6.48 2 2 6.48 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.8-.22 1.65-.33 2.5-.33.85 0 1.7.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0012 2z" fill="#1A1A1A"/></svg>',logoBg:'#F5F5F5',
+    features:['Repo erişimi','Issue yönetimi','PR bildirimleri','CI/CD tetikleme']}
+];
+
+const statusLabelsInt = {active:{label:'Bağlı',cls:'badge-green'},inactive:{label:'Bağlı Değil',cls:'badge-gray'},configuring:{label:'Yapılandırılıyor',cls:'badge-amber'}};
+const allAgentsInt = ['Sales Copilot','HR Assistant','Content Writer','Support Agent','Data Analyst','Legal Advisor','Onboarding Bot','IT Helpdesk'];
+let currentIntCat = 'all';
+
+function intCard(ig, isInstalled) {
+  const st = isInstalled ? statusLabelsInt[ig.status] : null;
+  return `<div style="background:var(--white);border:0.5px solid var(--border);border-radius:12px;padding:16px 18px;cursor:pointer;transition:all 0.2s" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='var(--border)'" onclick="${isInstalled ? `openIntModal('${ig.id}')` : `openDiscoverModal('${ig.id}')`}">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+      <div style="width:40px;height:40px;border-radius:10px;background:${ig.logoBg};display:flex;align-items:center;justify-content:center;flex-shrink:0;border:0.5px solid var(--border)">${ig.logo}</div>
+      <div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600;color:var(--text-primary)">${ig.name}</div><div style="font-size:11px;color:var(--text-tertiary);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${ig.desc}</div></div>
+      ${isInstalled ? `<span class="badge ${st.cls}">${st.label}</span>` : `<span style="font-size:12px;font-weight:600;color:${ig.price?'var(--primary)':'var(--green-text)'}">${ig.priceLabel}</span>`}
+    </div>
+    ${isInstalled ? `<div style="display:flex;align-items:center;gap:14px;font-size:11px;color:var(--text-muted)">
+      <span style="display:flex;align-items:center;gap:3px"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>${ig.lastSync}</span>
+      <span>${ig.agents.length} agent</span>
+    </div>
+    ${ig.agents.length ? `<div style="display:flex;gap:4px;margin-top:6px;flex-wrap:wrap">${ig.agents.slice(0,3).map(a=>`<span style="font-size:10px;padding:2px 8px;background:var(--surface);border-radius:999px;color:var(--text-secondary)">${a}</span>`).join('')}${ig.agents.length>3?`<span style="font-size:10px;padding:2px 6px;color:var(--text-muted)">+${ig.agents.length-3}</span>`:''}</div>` : ''}` :
+    `<div style="display:flex;align-items:center;gap:12px;font-size:11px;color:var(--text-muted)">
+      <span style="display:flex;align-items:center;gap:3px"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>${ig.rating}</span>
+      <span style="display:flex;align-items:center;gap:3px"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>${(ig.downloads/1000).toFixed(1)}K</span>
+    </div>`}
+  </div>`;
+}
+
+function renderIntegrations() {
+  const installed = integrations.filter(i => i.status !== 'inactive');
+  const notInstalled = integrations.filter(i => i.status === 'inactive');
+  document.getElementById('installedCount').textContent = `(${installed.length} aktif)`;
+  document.getElementById('installedGrid').innerHTML = installed.map(i => intCard(i, true)).join('') + notInstalled.map(i => intCard(i, true)).join('');
+  filterIntegrations();
+}
+
+function filterIntegrations() {
+  const q = (document.getElementById('intSearch').value||'').toLowerCase();
+  let list = discoverItems;
+  if (q) list = list.filter(i => i.name.toLowerCase().includes(q) || i.desc.toLowerCase().includes(q));
+  if (currentIntCat !== 'all') list = list.filter(i => i.cat === currentIntCat);
+  document.getElementById('discoverGrid').innerHTML = list.length ? list.map(i => intCard(i, false)).join('') : '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted)">Aramanızla eşleşen entegrasyon bulunamadı</div>';
+}
+
+function filterByCat(btn, cat) {
+  currentIntCat = cat;
+  document.querySelectorAll('#intFilters .filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  filterIntegrations();
+}
+
+function openDiscoverModal(id) {
+  const ig = discoverItems.find(x => x.id === id);
+  if (!ig) return;
+  document.getElementById('intModalIcon').style.background = ig.logoBg;
+  document.getElementById('intModalIcon').style.border = '0.5px solid var(--border)';
+  document.getElementById('intModalIcon').innerHTML = ig.logo;
+  document.getElementById('intModalTitle').textContent = ig.name;
+  document.getElementById('intModalBody').innerHTML = `
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">
+      <span style="font-size:20px;font-weight:700;color:${ig.price?'var(--primary)':'var(--green-text)'}">${ig.priceLabel}</span>
+      <span style="display:flex;align-items:center;gap:4px;font-size:13px;color:var(--amber)"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>${ig.rating}</span>
+      <span style="font-size:12px;color:var(--text-muted)">${(ig.downloads/1000).toFixed(1)}K yükleme</span>
+    </div>
+    <div class="ch-section"><div class="ch-section-title">Açıklama</div>
+      <div style="font-size:13px;color:var(--text-secondary);line-height:1.6">${ig.desc}. Orbicorp agent'larınızın bu servisle veri alışverişi yapmasını sağlar.</div>
+    </div>
+    <div class="ch-section"><div class="ch-section-title">Özellikler</div>
+      ${ig.features.map(f => `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:13px;color:var(--text-secondary)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>${f}</div>`).join('')}
+    </div>
+    <div class="ch-section"><div class="ch-section-title">Yapılandırma (Kurulum Sonrası)</div>
+      <div class="field"><label>API Key / Token</label><input class="fi" placeholder="Servis API anahtarınızı girin..."></div>
+      <div class="field"><label>Atanacak Agent'lar</label>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">${allAgentsInt.map(a => `<span class="category-tag" onclick="this.classList.toggle('active')" style="cursor:pointer;padding:5px 12px;font-size:12px">${a}</span>`).join('')}</div>
+      </div>
+    </div>`;
+  document.querySelector('#intModalOverlay .ch-modal-footer').innerHTML = `
+    <div></div>
+    <div style="display:flex;gap:8px"><button class="btn btn-secondary" onclick="closeIntModal()">İptal</button><button class="btn btn-primary" onclick="buyOrInstallDiscover('${ig.id}')" style="padding:8px 24px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>${ig.price ? 'Satın Al ve Kur' : 'Ücretsiz Kur'}</button></div>`;
+  document.getElementById('intModalOverlay').classList.add('open');
+}
+
+function openIntModal(id) {
+  const ig = integrations.find(x => x.id === id);
+  if (!ig) return;
+  const st = statusLabelsInt[ig.status];
+  document.getElementById('intModalIcon').style.background = ig.logoBg;
+  document.getElementById('intModalIcon').style.border = '0.5px solid var(--border)';
+  document.getElementById('intModalIcon').innerHTML = ig.logo;
+  document.getElementById('intModalTitle').textContent = ig.name;
+  document.getElementById('intModalBody').innerHTML = `
+    <div class="ch-section">
+      <div class="toggle-row" style="border:none;padding:0"><div class="toggle-info"><div class="toggle-label">Entegrasyon Aktif</div><div class="toggle-desc">Bu servisle veri alışverişi yapılabilir</div></div><label class="toggle"><input type="checkbox" ${ig.status==='active'?'checked':''}><span class="toggle-track"></span><span class="toggle-thumb"></span></label></div>
+    </div>
+    <div class="ch-section"><div class="ch-section-title">Bağlantı Bilgileri</div>
+      ${ig.fields.map(f => `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--border-light);font-size:13px"><span style="color:var(--text-tertiary)">${f.l}</span><span style="color:var(--text-primary);font-weight:500">${f.v}</span></div>`).join('')}
+      <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:13px"><span style="color:var(--text-tertiary)">Durum</span><span class="badge ${st.cls}">${st.label}</span></div>
+      <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:13px"><span style="color:var(--text-tertiary)">Son Senkronizasyon</span><span style="color:var(--text-primary);font-weight:500">${ig.lastSync}</span></div>
+    </div>
+    <div class="ch-section"><div class="ch-section-title">Bağlı Agent'lar</div>
+      <div style="display:flex;flex-direction:column;gap:6px">${allAgentsInt.map(a => {
+        const checked = ig.agents.includes(a);
+        return `<label style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:0.5px solid ${checked?'var(--primary)':'var(--border)'};border-radius:6px;cursor:pointer;background:${checked?'var(--primary-bg-subtle)':'var(--white)'};transition:all 0.2s"><input type="checkbox" ${checked?'checked':''} style="accent-color:var(--primary);width:15px;height:15px"><span style="font-size:13px;font-weight:500;color:var(--text-primary)">${a}</span></label>`;
+      }).join('')}</div>
+    </div>
+    <div class="ch-section"><div class="ch-section-title">Senkronizasyon Ayarları</div>
+      <div class="field"><label>Senkronizasyon Sıklığı</label><select class="fi"><option>Gerçek zamanlı (Webhook)</option><option selected>Her 5 dakika</option><option>Her 15 dakika</option><option>Saatlik</option><option>Manuel</option></select></div>
+      <div class="field"><label>Veri Yönü</label><select class="fi"><option selected>Çift yönlü</option><option>Sadece oku (Orbicorp ← Servis)</option><option>Sadece yaz (Orbicorp → Servis)</option></select></div>
+    </div>`;
+  document.querySelector('#intModalOverlay .ch-modal-footer').innerHTML = `
+    <div><button class="btn btn-danger btn-sm" onclick="closeIntModal()">Bağlantıyı Kaldır</button></div>
+    <div style="display:flex;gap:8px"><button class="btn btn-secondary" onclick="closeIntModal()">İptal</button><button class="btn btn-primary" onclick="closeIntModal()">Kaydet</button></div>`;
+  document.getElementById('intModalOverlay').classList.add('open');
+}
+function closeIntModal() { document.getElementById('intModalOverlay').classList.remove('open'); }
+
+function buyOrInstallDiscover(id) {
+  const ig = discoverItems.find(x => x.id === id);
+  if (!ig) return;
+  closeIntModal();
+  if (ig.price > 0) {
+    orbicorpPay({name:ig.name, desc:ig.desc, price:ig.price, features:ig.features||[]});
+  }
+}
+
+renderIntegrations();
+
+// ═══════════════════════════════════════════════════════════════
+// RAG BİLGİ TABANI AYARLARI
+// ═══════════════════════════════════════════════════════════════
+
+// Model maliyet tahminleri ($ per 1k tokens, ortalama sorgu için)
+const RAG_MODEL_COSTS = {
+  'anthropic:claude-sonnet-4-6': { input: 0.003, output: 0.015, estimate: '~$0.003' },
+  'anthropic:claude-haiku-4-5': { input: 0.00025, output: 0.00125, estimate: '~$0.0005' },
+  'anthropic:claude-opus-4-6': { input: 0.015, output: 0.075, estimate: '~$0.015' },
+  'openai:gpt-4o': { input: 0.005, output: 0.015, estimate: '~$0.004' },
+  'openai:gpt-4o-mini': { input: 0.00015, output: 0.0006, estimate: '~$0.0003' },
+  'google:gemini-1.5-pro': { input: 0.00125, output: 0.005, estimate: '~$0.002' },
+  'google:gemini-1.5-flash': { input: 0.000075, output: 0.0003, estimate: '~$0.0002' }
+};
+
+// RAG tercihlerini yükle
+function loadRAGPreferences() {
+  const stored = localStorage.getItem('orbicorp_rag_preferences');
+  if (stored) {
+    try {
+      const prefs = JSON.parse(stored);
+      document.getElementById('rag-primary-model').value = prefs.primaryModel || 'anthropic:claude-sonnet-4-6';
+      document.getElementById('rag-failover-toggle').checked = prefs.failoverEnabled || false;
+      document.getElementById('rag-failover-model').value = prefs.failoverModel || 'openai:gpt-4o-mini';
+      
+      if (prefs.failoverEnabled) {
+        document.getElementById('rag-failover-options').style.display = 'block';
+      }
+      
+      updateRAGCostEstimate();
+    } catch (e) {
+      console.error('RAG preferences load error:', e);
+    }
+  }
+}
+
+// RAG tercihlerini kaydet
+function saveRAGPreferences() {
+  const prefs = {
+    primaryModel: document.getElementById('rag-primary-model').value,
+    failoverEnabled: document.getElementById('rag-failover-toggle').checked,
+    failoverModel: document.getElementById('rag-failover-model').value,
+    updatedAt: new Date().toISOString()
+  };
+  localStorage.setItem('orbicorp_rag_preferences', JSON.stringify(prefs));
+  
+  // Bildirim göster (opsiyonel)
+  showRAGSaveNotification();
+}
+
+// Model değiştiğinde
+function updateRAGModel() {
+  updateRAGCostEstimate();
+  saveRAGPreferences();
+}
+
+// Maliyet tahminini güncelle
+function updateRAGCostEstimate() {
+  const model = document.getElementById('rag-primary-model').value;
+  const costInfo = RAG_MODEL_COSTS[model];
+  const estimateEl = document.getElementById('rag-cost-estimate');
+  
+  if (costInfo) {
+    estimateEl.textContent = costInfo.estimate + ' / sorgu';
+  } else {
+    estimateEl.textContent = 'Bilinmiyor';
+  }
+}
+
+// Failover toggle
+function toggleRAGFailover() {
+  const enabled = document.getElementById('rag-failover-toggle').checked;
+  document.getElementById('rag-failover-options').style.display = enabled ? 'block' : 'none';
+  saveRAGPreferences();
+}
+
+// Benchmark çalıştır (simülasyon)
+function runRAGBenchmark() {
+  const btn = document.getElementById('rag-benchmark-btn');
+  const resultsDiv = document.getElementById('rag-benchmark-results');
+  
+  // Buton durumu
+  btn.disabled = true;
+  btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spin"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> Test Ediliyor...';
+  
+  resultsDiv.style.display = 'block';
+  
+  // Simüle edilmiş sonuçlar (gerçek API çağrıları ile değiştirilebilir)
+  const results = {
+    claude: { latency: Math.floor(Math.random() * 500) + 300, success: Math.random() > 0.1 },
+    openai: { latency: Math.floor(Math.random() * 400) + 250, success: Math.random() > 0.1 },
+    gemini: { latency: Math.floor(Math.random() * 350) + 200, success: Math.random() > 0.1 }
+  };
+  
+  // Animasyonlu güncelleme
+  setTimeout(() => {
+    Object.keys(results).forEach(provider => {
+      const el = document.getElementById(`rag-bench-${provider}`);
+      const card = el.closest('.rag-metric-card');
+      
+      card.classList.remove('fastest', 'error');
+      
+      if (results[provider].success) {
+        el.textContent = results[provider].latency;
+      } else {
+        el.textContent = 'Hata';
+        card.classList.add('error');
+      }
+    });
+    
+    // En hızlıyı işaretle
+    const successfulResults = Object.entries(results)
+      .filter(([_, r]) => r.success)
+      .sort((a, b) => a[1].latency - b[1].latency);
+    
+    if (successfulResults.length > 0) {
+      const fastest = successfulResults[0][0];
+      document.getElementById(`rag-bench-${fastest}`).closest('.rag-metric-card').classList.add('fastest');
+    }
+    
+    // Buton reset
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> Tekrar Test Et';
+    
+  }, 1500);
+}
+
+// Benchmark kartına tıklayınca model seç
+document.querySelectorAll('.rag-metric-card').forEach(card => {
+  card.addEventListener('click', function() {
+    const provider = this.dataset.provider;
+    const modelSelect = document.getElementById('rag-primary-model');
+    
+    // İlgili provider'ın ilk modelini seç
+    const options = modelSelect.querySelectorAll('option');
+    for (let opt of options) {
+      if (opt.value.startsWith(provider + ':')) {
+        modelSelect.value = opt.value;
+        updateRAGModel();
+        break;
+      }
+    }
+    
+    // Görsel feedback
+    document.querySelectorAll('.rag-metric-card').forEach(c => c.classList.remove('selected'));
+    this.classList.add('selected');
+  });
+});
+
+// Kayıt bildirimi
+function showRAGSaveNotification() {
+  // Basit bir toast notification (opsiyonel)
+  const badge = document.getElementById('rag-status-badge');
+  badge.textContent = 'Kaydedildi';
+  badge.classList.remove('badge-blue');
+  badge.classList.add('badge-green');
+  
+  setTimeout(() => {
+    badge.textContent = 'Aktif';
+    badge.classList.remove('badge-green');
+    badge.classList.add('badge-blue');
+  }, 2000);
+}
+
+// Spin animasyonu için CSS
+const spinStyle = document.createElement('style');
+spinStyle.textContent = `
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  .spin { animation: spin 1s linear infinite; }
+`;
+document.head.appendChild(spinStyle);
+
+// Sayfa yüklendiğinde RAG tercihlerini yükle
+loadRAGPreferences();
+
+// ═══ FORM VALIDATION SYSTEM ═══
+const validators = {
+  required: (value) => value && value.trim() !== '',
+  email: (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),
+  apiKey: (value) => value && value.length >= 20,
+  number: (value) => !isNaN(parseFloat(value)),
+  minLength: (value, min) => value && value.length >= min,
+  maxLength: (value, max) => value && value.length <= max,
+  range: (value, min, max) => {
+    const num = parseFloat(value);
+    return !isNaN(num) && num >= min && num <= max;
+  }
+};
+
+const validationMessages = {
+  required: 'Bu alan zorunludur',
+  email: 'Geçerli bir e-posta adresi girin',
+  apiKey: 'API anahtarı en az 20 karakter olmalıdır',
+  number: 'Geçerli bir sayı girin',
+  minLength: (min) => `En az ${min} karakter gereklidir`,
+  maxLength: (max) => `En fazla ${max} karakter olabilir`,
+  range: (min, max) => `Değer ${min} ile ${max} arasında olmalıdır`
+};
+
+function validateField(input, rules) {
+  const value = input.value;
+  let isValid = true;
+  let message = '';
+  
+  for (const rule of rules) {
+    if (typeof rule === 'string') {
+      if (!validators[rule](value)) {
+        isValid = false;
+        message = validationMessages[rule];
+        break;
+      }
+    } else if (typeof rule === 'object') {
+      const [ruleName, ...params] = Object.entries(rule)[0];
+      if (!validators[ruleName](value, ...params)) {
+        isValid = false;
+        message = typeof validationMessages[ruleName] === 'function' 
+          ? validationMessages[ruleName](...params) 
+          : validationMessages[ruleName];
+        break;
+      }
+    }
+  }
+  
+  // Update UI
+  const field = input.closest('.field') || input.parentElement;
+  let errorEl = field.querySelector('.field-error');
+  
+  if (!isValid) {
+    input.style.borderColor = 'var(--red)';
+    input.style.boxShadow = '0 0 0 3px var(--red-bg)';
+    if (!errorEl) {
+      errorEl = document.createElement('div');
+      errorEl.className = 'field-error';
+      errorEl.style.cssText = 'font-size:11px;color:var(--red-text);margin-top:4px';
+      field.appendChild(errorEl);
+    }
+    errorEl.textContent = message;
+  } else {
+    input.style.borderColor = '';
+    input.style.boxShadow = '';
+    if (errorEl) errorEl.remove();
+  }
+  
+  return isValid;
+}
+
+function validateForm(formId) {
+  const form = document.getElementById(formId);
+  if (!form) return true;
+  
+  const inputs = form.querySelectorAll('input.fi[data-rules], select.fi[data-rules], textarea.fi[data-rules]');
+  let allValid = true;
+  
+  inputs.forEach(input => {
+    const rules = JSON.parse(input.dataset.rules || '[]');
+    if (!validateField(input, rules)) {
+      allValid = false;
+    }
+  });
+  
+  return allValid;
+}
+
+// Real-time validation on blur
+document.addEventListener('blur', (e) => {
+  if (e.target.matches('input.fi[data-rules], select.fi[data-rules], textarea.fi[data-rules]')) {
+    const rules = JSON.parse(e.target.dataset.rules || '[]');
+    validateField(e.target, rules);
+  }
+}, true);
+
+// Clear error on focus
+document.addEventListener('focus', (e) => {
+  if (e.target.matches('input.fi, select.fi, textarea.fi')) {
+    e.target.style.borderColor = 'var(--primary)';
+    e.target.style.boxShadow = '0 0 0 3px var(--primary-bg)';
+    const field = e.target.closest('.field') || e.target.parentElement;
+    const errorEl = field.querySelector('.field-error');
+    if (errorEl) errorEl.remove();
+  }
+}, true);
+
+// Toast notification utilities
+function showValidationError(message) {
+  const existing = document.querySelector('.validation-toast');
+  if (existing) existing.remove();
+  
+  const toast = document.createElement('div');
+  toast.className = 'validation-toast';
+  toast.style.cssText = `position:fixed;bottom:24px;right:24px;background:var(--red);color:white;padding:12px 20px;border-radius:var(--radius-md);font-size:13px;font-weight:500;box-shadow:0 4px 20px rgba(0,0,0,0.2);z-index:9999;animation:slideIn 0.3s ease;display:flex;align-items:center;gap:10px`;
+  toast.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>${message}`;
+  document.body.appendChild(toast);
+  setTimeout(() => { toast.style.animation = 'slideOut 0.3s ease'; setTimeout(() => toast.remove(), 300); }, 3000);
+}
+
+function showSuccessToast(message) {
+  const existing = document.querySelector('.success-toast');
+  if (existing) existing.remove();
+  
+  const toast = document.createElement('div');
+  toast.className = 'success-toast';
+  toast.style.cssText = `position:fixed;bottom:24px;right:24px;background:var(--green);color:white;padding:12px 20px;border-radius:var(--radius-md);font-size:13px;font-weight:500;box-shadow:0 4px 20px rgba(0,0,0,0.2);z-index:9999;animation:slideIn 0.3s ease;display:flex;align-items:center;gap:10px`;
+  toast.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>${message}`;
+  document.body.appendChild(toast);
+  setTimeout(() => { toast.style.animation = 'slideOut 0.3s ease'; setTimeout(() => toast.remove(), 300); }, 3000);
+}
+
+// Animation styles
+const validationStyles = document.createElement('style');
+validationStyles.textContent = `@keyframes slideIn{from{transform:translateX(100px);opacity:0}to{transform:translateX(0);opacity:1}}@keyframes slideOut{from{transform:translateX(0);opacity:1}to{transform:translateX(100px);opacity:0}}.field-error{animation:fadeIn 0.2s ease}@keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}`;
+document.head.appendChild(validationStyles);
+
+// ═══════════════════════════════════════════════════════════
+// API KEYS - BACKEND INTEGRATION
+// ═══════════════════════════════════════════════════════════
+const llmProviders = [
+  { id: 'anthropic', name: 'Anthropic (Claude)', logo: 'C', logoBg: 'var(--primary-bg)', logoColor: 'var(--primary)', placeholder: 'sk-ant-...' },
+  { id: 'openai', name: 'OpenAI (GPT)', logo: 'O', logoBg: '#E8F5E8', logoColor: '#1A7F37', placeholder: 'sk-proj-...' },
+  { id: 'google', name: 'Google (Gemini)', logo: 'G', logoBg: 'var(--blue-bg)', logoColor: 'var(--blue)', placeholder: 'AIza...' },
+  { id: 'openrouter', name: 'OpenRouter', logo: 'R', logoBg: 'var(--amber-bg)', logoColor: 'var(--amber)', placeholder: 'sk-or-...' }
+];
+
+let currentLLMConfig = null;
+
+async function loadAPIKeys() {
+  const container = document.getElementById('apiKeysCard');
+  
+  try {
+    const result = await window.orbicorpAPI.getLLMConfig();
+    if (result.success) {
+      currentLLMConfig = result.data;
+      renderAPIKeys();
+    } else {
+      container.innerHTML = '<div style="padding:16px;text-align:center;color:var(--red)">API anahtarları yüklenemedi</div>';
+    }
+  } catch (error) {
+    console.error('Failed to load API keys:', error);
+    container.innerHTML = '<div style="padding:16px;text-align:center;color:var(--red)">Bağlantı hatası</div>';
+  }
+}
+
+function renderAPIKeys() {
+  const container = document.getElementById('apiKeysCard');
+  
+  let html = '';
+  
+  // Configured providers
+  for (const provider of llmProviders) {
+    const config = currentLLMConfig?.providers?.[provider.id];
+    const isConfigured = config?.configured;
+    
+    if (isConfigured) {
+      html += `
+        <div class="api-row">
+          <div class="api-logo" style="background:${provider.logoBg};color:${provider.logoColor}">${provider.logo}</div>
+          <div class="api-info">
+            <div class="api-name">${provider.name}</div>
+            <div class="api-key-display">
+              <span class="api-key-value">${config.keyPreview || '••••••••'}</span>
+            </div>
+          </div>
+          <span class="badge badge-green">Bağlı</span>
+          <div class="api-actions">
+            <button class="btn btn-sm btn-secondary" onclick="openAPIKeyModal('${provider.id}', true)">Düzenle</button>
+            <button class="btn btn-sm btn-danger" onclick="removeAPIKey('${provider.id}')">Kaldır</button>
+          </div>
+        </div>
+      `;
+    }
+  }
+  
+  // Unconfigured providers
+  for (const provider of llmProviders) {
+    const config = currentLLMConfig?.providers?.[provider.id];
+    if (!config?.configured) {
+      html += `
+        <div class="api-row">
+          <div class="api-logo" style="background:${provider.logoBg};color:${provider.logoColor};opacity:0.5">${provider.logo}</div>
+          <div class="api-info">
+            <div class="api-name" style="color:var(--text-tertiary)">${provider.name}</div>
+            <div style="font-size:12px;color:var(--text-muted)">Yapılandırılmadı</div>
+          </div>
+          <button class="btn btn-sm btn-primary" onclick="openAPIKeyModal('${provider.id}', false)">Ekle</button>
+        </div>
+      `;
+    }
+  }
+  
+  container.innerHTML = html || '<div style="padding:16px;text-align:center;color:var(--text-muted)">Hiç API anahtarı yapılandırılmamış</div>';
+}
+
+function openAPIKeyModal(providerId, isEdit) {
+  const provider = llmProviders.find(p => p.id === providerId);
+  if (!provider) return;
+  
+  const modal = document.getElementById('apiKeyModalOverlay');
+  document.getElementById('apiKeyModalTitle').textContent = isEdit ? `${provider.name} - API Anahtarı Düzenle` : `${provider.name} - API Anahtarı Ekle`;
+  document.getElementById('apiKeyModalIcon').style.background = provider.logoBg;
+  document.getElementById('apiKeyModalIcon').style.color = provider.logoColor;
+  document.getElementById('apiKeyModalIcon').textContent = provider.logo;
+  
+  document.getElementById('apiKeyInput').value = '';
+  document.getElementById('apiKeyInput').placeholder = provider.placeholder;
+  document.getElementById('apiKeyProvider').value = providerId;
+  document.getElementById('apiKeySaveBtn').disabled = true;
+  document.getElementById('apiKeyError').style.display = 'none';
+  
+  modal.classList.add('open');
+  setTimeout(() => document.getElementById('apiKeyInput').focus(), 100);
+}
+
+function closeAPIKeyModal() {
+  document.getElementById('apiKeyModalOverlay').classList.remove('open');
+}
+
+function validateAPIKeyInput() {
+  const input = document.getElementById('apiKeyInput');
+  const btn = document.getElementById('apiKeySaveBtn');
+  btn.disabled = input.value.trim().length < 10;
+}
+
+async function saveAPIKey() {
+  const provider = document.getElementById('apiKeyProvider').value;
+  const apiKey = document.getElementById('apiKeyInput').value.trim();
+  const btn = document.getElementById('apiKeySaveBtn');
+  const errorDiv = document.getElementById('apiKeyError');
+  
+  if (!apiKey || apiKey.length < 10) {
+    errorDiv.textContent = 'Geçerli bir API anahtarı girin';
+    errorDiv.style.display = 'block';
+    return;
+  }
+  
+  btn.disabled = true;
+  btn.textContent = 'Kaydediliyor...';
+  errorDiv.style.display = 'none';
+  
+  try {
+    const result = await window.orbicorpAPI.updateLLMConfig(provider, apiKey);
+    
+    if (result.success) {
+      currentLLMConfig = result.data;
+      renderAPIKeys();
+      closeAPIKeyModal();
+      showSuccessToast('API anahtarı kaydedildi');
+    } else {
+      errorDiv.textContent = result.message || 'Kaydetme başarısız';
+      errorDiv.style.display = 'block';
+    }
+  } catch (error) {
+    console.error('Failed to save API key:', error);
+    errorDiv.textContent = error.message || 'Bağlantı hatası';
+    errorDiv.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Kaydet';
+  }
+}
+
+async function removeAPIKey(providerId) {
+  const provider = llmProviders.find(p => p.id === providerId);
+  if (!confirm(`${provider.name} API anahtarını kaldırmak istediğinize emin misiniz?`)) return;
+  
+  try {
+    const result = await window.orbicorpAPI.removeLLMConfig(providerId);
+    
+    if (result.success) {
+      currentLLMConfig = result.data;
+      renderAPIKeys();
+      showSuccessToast('API anahtarı kaldırıldı');
+    } else {
+      showErrorToast(result.message || 'Kaldırma başarısız');
+    }
+  } catch (error) {
+    console.error('Failed to remove API key:', error);
+    showErrorToast('Bağlantı hatası');
+  }
+}
+
+// Load API keys when the API section is shown
+const originalGo = window.go;
+window.go = function(sec, el) {
+  originalGo(sec, el);
+  if (sec === 'api') {
+    loadAPIKeys();
+  }
+};
+
+// Also load on page load if API section is active
+document.addEventListener('DOMContentLoaded', function() {
+  // Check auth first
+  if (window.orbicorpAPI && !window.orbicorpAPI.isAuthenticated()) {
+    window.location.href = 'orbicorp-login.html';
+    return;
+  }
+  
+  // Load API keys if API section is visible
+  setTimeout(() => {
+    if (document.getElementById('sec-api')?.style.display !== 'none') {
+      loadAPIKeys();
+    }
+  }, 100);
+});
+</script>
+
+<!-- API Key Modal -->
+<div class="ch-modal-overlay" id="apiKeyModalOverlay" onclick="if(event.target===this)closeAPIKeyModal()">
+  <div class="ch-modal" style="width:480px">
+    <div class="ch-modal-header">
+      <div id="apiKeyModalIcon" style="width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:600;font-size:16px"></div>
+      <h2 id="apiKeyModalTitle">API Anahtarı Ekle</h2>
+      <button class="ch-modal-close" onclick="closeAPIKeyModal()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="ch-modal-body">
+      <input type="hidden" id="apiKeyProvider" value="">
+      <div class="form-group" style="margin-bottom:16px">
+        <label style="display:block;font-size:13px;font-weight:500;color:var(--text-primary);margin-bottom:6px">API Anahtarı</label>
+        <input type="password" id="apiKeyInput" class="form-input" style="width:100%;padding:10px 14px;border:0.5px solid var(--border);border-radius:var(--radius-md);font-size:14px;font-family:var(--font-mono)" placeholder="sk-..." oninput="validateAPIKeyInput()">
+        <div id="apiKeyError" style="display:none;margin-top:6px;font-size:12px;color:var(--red)"></div>
+      </div>
+      <div style="background:var(--surface);border-radius:var(--radius-md);padding:12px 14px;font-size:12px;color:var(--text-secondary)">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <span style="font-weight:500;color:var(--text-primary)">Güvenlik</span>
+        </div>
+        API anahtarınız şifrelenmiş olarak saklanır ve hiçbir zaman düz metin olarak görüntülenmez.
+      </div>
+    </div>
+    <div class="ch-modal-footer">
+      <div></div>
+      <div class="ch-modal-footer-right">
+        <button class="btn btn-secondary" onclick="closeAPIKeyModal()">İptal</button>
+        <button class="btn btn-primary" id="apiKeySaveBtn" onclick="saveAPIKey()" disabled>Kaydet</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Channel Modal -->
+<div class="ch-modal-overlay" id="channelModalOverlay" onclick="if(event.target===this)closeChannelModal()">
+  <div class="ch-modal" style="width:520px">
+    <div class="ch-modal-header">
+      <div id="channelModalIcon" style="width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px"></div>
+      <h2 id="channelModalTitle">Kanal Ekle</h2>
+      <button class="ch-modal-close" onclick="closeChannelModal()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="ch-modal-body">
+      <input type="hidden" id="channelId" value="">
+      
+      <!-- Step 1: Choose Type -->
+      <div id="channelStep1">
+        <div style="font-size:13px;font-weight:500;color:var(--text-primary);margin-bottom:12px">Kanal Türü Seçin</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div class="channel-type-option" onclick="selectChannelType('TELEGRAM')">
+            <div style="font-size:24px;margin-bottom:6px">📱</div>
+            <div style="font-size:13px;font-weight:600;color:var(--text-primary)">Telegram</div>
+            <div style="font-size:11px;color:var(--text-tertiary)">Bot ile bildirim</div>
+          </div>
+          <div class="channel-type-option" onclick="selectChannelType('WHATSAPP')">
+            <div style="font-size:24px;margin-bottom:6px">💬</div>
+            <div style="font-size:13px;font-weight:600;color:var(--text-primary)">WhatsApp</div>
+            <div style="font-size:11px;color:var(--text-tertiary)">Business API</div>
+          </div>
+          <div class="channel-type-option disabled" style="opacity:0.5;cursor:not-allowed">
+            <div style="font-size:24px;margin-bottom:6px">💼</div>
+            <div style="font-size:13px;font-weight:600;color:var(--text-primary)">Slack</div>
+            <div style="font-size:11px;color:var(--text-tertiary)">Yakında</div>
+          </div>
+          <div class="channel-type-option disabled" style="opacity:0.5;cursor:not-allowed">
+            <div style="font-size:24px;margin-bottom:6px">✉️</div>
+            <div style="font-size:13px;font-weight:600;color:var(--text-primary)">Email</div>
+            <div style="font-size:11px;color:var(--text-tertiary)">Yakında</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Step 2: Configure -->
+      <div id="channelStep2" style="display:none">
+        <div class="form-group" style="margin-bottom:16px">
+          <label style="display:block;font-size:13px;font-weight:500;color:var(--text-primary);margin-bottom:6px">Kanal Adı</label>
+          <input type="text" id="channelName" class="fi" placeholder="örn: Destek Bildirimleri">
+        </div>
+        
+        <!-- Telegram Config -->
+        <div id="telegramConfig" style="display:none">
+          <div class="form-group" style="margin-bottom:16px">
+            <label style="display:block;font-size:13px;font-weight:500;color:var(--text-primary);margin-bottom:6px">Bot Token</label>
+            <input type="password" id="telegramBotToken" class="fi" placeholder="123456789:ABCdefGHIjklMNOpqrsTUVwxyz">
+            <div style="font-size:11px;color:var(--text-tertiary);margin-top:4px">@BotFather'dan aldığınız token</div>
+          </div>
+          <div class="form-group">
+            <label style="display:block;font-size:13px;font-weight:500;color:var(--text-primary);margin-bottom:6px">Varsayılan Chat ID (opsiyonel)</label>
+            <input type="text" id="telegramChatId" class="fi" placeholder="-1001234567890">
+            <div style="font-size:11px;color:var(--text-tertiary);margin-top:4px">Bildirimlerin gönderileceği grup veya kanal ID'si</div>
+          </div>
+          
+          <div style="background:var(--surface);border-radius:var(--radius-md);padding:14px;margin-top:16px">
+            <div style="font-size:12px;font-weight:600;color:var(--text-primary);margin-bottom:8px">📋 Telegram Bot Kurulum Adımları</div>
+            <ol style="font-size:11px;color:var(--text-secondary);line-height:1.8;margin:0;padding-left:16px">
+              <li>Telegram'da <strong>@BotFather</strong>'a mesaj atın</li>
+              <li><code>/newbot</code> komutu ile yeni bot oluşturun</li>
+              <li>Aldığınız token'ı yukarıya yapıştırın</li>
+              <li>Botu gruba ekleyin veya doğrudan mesaj gönderin</li>
+              <li>Chat ID'yi almak için bota <code>/start</code> yazın</li>
+            </ol>
+          </div>
+        </div>
+        
+        <!-- WhatsApp Config -->
+        <div id="whatsappConfig" style="display:none">
+          <div class="form-group" style="margin-bottom:16px">
+            <label style="display:block;font-size:13px;font-weight:500;color:var(--text-primary);margin-bottom:6px">Phone Number ID</label>
+            <input type="text" id="whatsappPhoneId" class="fi" placeholder="1234567890">
+          </div>
+          <div class="form-group">
+            <label style="display:block;font-size:13px;font-weight:500;color:var(--text-primary);margin-bottom:6px">Access Token</label>
+            <input type="password" id="whatsappAccessToken" class="fi" placeholder="EAAxxxxxxx...">
+          </div>
+          
+          <div style="background:var(--surface);border-radius:var(--radius-md);padding:14px;margin-top:16px">
+            <div style="font-size:12px;font-weight:600;color:var(--text-primary);margin-bottom:8px">📋 WhatsApp Business API Kurulumu</div>
+            <ol style="font-size:11px;color:var(--text-secondary);line-height:1.8;margin:0;padding-left:16px">
+              <li>Meta Business hesabı oluşturun</li>
+              <li>WhatsApp Business API'yi etkinleştirin</li>
+              <li>Phone Number ID ve Access Token alın</li>
+              <li>Webhook URL'ini yapılandırın</li>
+            </ol>
+          </div>
+        </div>
+        
+        <div id="channelTestResult" style="display:none;margin-top:16px"></div>
+      </div>
+    </div>
+    <div class="ch-modal-footer">
+      <div class="ch-modal-footer-left">
+        <button class="btn btn-secondary" id="channelBackBtn" onclick="channelStepBack()" style="display:none">Geri</button>
+      </div>
+      <div class="ch-modal-footer-right">
+        <button class="btn btn-secondary" onclick="closeChannelModal()">İptal</button>
+        <button class="btn btn-secondary" id="channelTestBtn" onclick="testChannel()" style="display:none">Bağlantıyı Test Et</button>
+        <button class="btn btn-primary" id="channelSaveBtn" onclick="saveChannel()" style="display:none">Kaydet</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.channel-type-option{
+  padding:20px;
+  border:0.5px solid var(--border);
+  border-radius:var(--radius-md);
+  text-align:center;
+  cursor:pointer;
+  transition:all var(--transition);
+}
+.channel-type-option:hover:not(.disabled){
+  border-color:var(--primary);
+  background:var(--primary-bg-subtle);
+}
+.channel-type-option.selected{
+  border-color:var(--primary);
+  background:var(--primary-bg);
+}
+</style>
+
+<script>
+// ==========================================
+// CHANNELS MANAGEMENT
+// ==========================================
+
+let channels = [];
+let selectedChannelType = null;
+let editingChannelId = null;
+
+const channelTypes = {
+  TELEGRAM: { name: 'Telegram', icon: '📱', color: '#0088cc' },
+  WHATSAPP: { name: 'WhatsApp', icon: '💬', color: '#25D366' },
+  SLACK: { name: 'Slack', icon: '💼', color: '#4A154B' },
+  EMAIL: { name: 'Email', icon: '✉️', color: '#EA4335' },
+  SMS: { name: 'SMS', icon: '📲', color: '#FF6B00' }
+};
+
+async function loadChannels() {
+  try {
+    const result = await window.orbicorpAPI.getChannels();
+    channels = Array.isArray(result) ? result : [];
+    renderChannels();
+  } catch (error) {
+    console.error('Failed to load channels:', error);
+    channels = [];
+    renderChannels();
+  }
+}
+
+function renderChannels() {
+  const grid = document.getElementById('channelGrid');
+  
+  let html = channels.map(ch => {
+    const type = channelTypes[ch.type] || { name: ch.type, icon: '📡', color: '#666' };
+    const statusClass = ch.status === 'ACTIVE' ? 'badge-green' : ch.status === 'ERROR' ? 'badge-red' : 'badge-amber';
+    const statusText = ch.status === 'ACTIVE' ? 'Aktif' : ch.status === 'ERROR' ? 'Hata' : 'Bekliyor';
+    
+    return `
+      <div class="channel-card" onclick="openEditChannelModal('${ch.id}')">
+        <div class="channel-card-head">
+          <div class="channel-logo" style="background:${type.color}20;color:${type.color}">${type.icon}</div>
+          <div class="channel-card-info">
+            <div class="channel-card-name">${ch.name}</div>
+            <div class="channel-card-desc">${type.name}</div>
+          </div>
+          <span class="badge ${statusClass}">${statusText}</span>
+        </div>
+        <div class="channel-card-meta">
+          <span class="channel-meta-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            ${ch.lastTestedAt ? formatTimeAgo(ch.lastTestedAt) : 'Test edilmedi'}
+          </span>
+        </div>
+      </div>
+    `;
+  }).join('');
+  
+  // Add "Add Channel" card
+  html += `
+    <div class="channel-card channel-card-add" onclick="openAddChannelModal()">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <span style="font-size:13px;font-weight:500">Yeni Kanal Ekle</span>
+    </div>
+  `;
+  
+  grid.innerHTML = html;
+}
+
+function formatTimeAgo(dateStr) {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diff = Math.floor((now - date) / 1000);
+  
+  if (diff < 60) return 'Az önce';
+  if (diff < 3600) return `${Math.floor(diff / 60)} dk önce`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)} saat önce`;
+  return `${Math.floor(diff / 86400)} gün önce`;
+}
+
+function openAddChannelModal() {
+  editingChannelId = null;
+  selectedChannelType = null;
+  
+  document.getElementById('channelModalTitle').textContent = 'Kanal Ekle';
+  document.getElementById('channelModalIcon').innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
+  document.getElementById('channelModalIcon').style.background = 'var(--primary-bg)';
+  document.getElementById('channelModalIcon').style.color = 'var(--primary)';
+  
+  // Reset form
+  document.getElementById('channelName').value = '';
+  document.getElementById('telegramBotToken').value = '';
+  document.getElementById('telegramChatId').value = '';
+  document.getElementById('whatsappPhoneId').value = '';
+  document.getElementById('whatsappAccessToken').value = '';
+  
+  // Show step 1
+  document.getElementById('channelStep1').style.display = 'block';
+  document.getElementById('channelStep2').style.display = 'none';
+  document.getElementById('channelBackBtn').style.display = 'none';
+  document.getElementById('channelTestBtn').style.display = 'none';
+  document.getElementById('channelSaveBtn').style.display = 'none';
+  document.getElementById('channelTestResult').style.display = 'none';
+  
+  // Deselect all type options
+  document.querySelectorAll('.channel-type-option').forEach(el => el.classList.remove('selected'));
+  
+  document.getElementById('channelModalOverlay').classList.add('open');
+}
+
+function openEditChannelModal(id) {
+  const channel = channels.find(c => c.id === id);
+  if (!channel) return;
+  
+  editingChannelId = id;
+  selectedChannelType = channel.type;
+  
+  const type = channelTypes[channel.type];
+  document.getElementById('channelModalTitle').textContent = 'Kanal Düzenle';
+  document.getElementById('channelModalIcon').textContent = type.icon;
+  document.getElementById('channelModalIcon').style.background = type.color + '20';
+  document.getElementById('channelModalIcon').style.color = type.color;
+  
+  // Fill form
+  document.getElementById('channelName').value = channel.name;
+  
+  // Show appropriate config based on type
+  document.getElementById('telegramConfig').style.display = channel.type === 'TELEGRAM' ? 'block' : 'none';
+  document.getElementById('whatsappConfig').style.display = channel.type === 'WHATSAPP' ? 'block' : 'none';
+  
+  // Skip to step 2
+  document.getElementById('channelStep1').style.display = 'none';
+  document.getElementById('channelStep2').style.display = 'block';
+  document.getElementById('channelBackBtn').style.display = 'none'; // Can't go back when editing
+  document.getElementById('channelTestBtn').style.display = 'inline-flex';
+  document.getElementById('channelSaveBtn').style.display = 'inline-flex';
+  document.getElementById('channelTestResult').style.display = 'none';
+  
+  document.getElementById('channelModalOverlay').classList.add('open');
+}
+
+function selectChannelType(type) {
+  if (type === 'SLACK' || type === 'EMAIL') return; // Disabled
+  
+  selectedChannelType = type;
+  const typeInfo = channelTypes[type];
+  
+  // Update modal header
+  document.getElementById('channelModalIcon').textContent = typeInfo.icon;
+  document.getElementById('channelModalIcon').style.background = typeInfo.color + '20';
+  document.getElementById('channelModalIcon').style.color = typeInfo.color;
+  document.getElementById('channelModalTitle').textContent = `${typeInfo.name} Kanalı Ekle`;
+  
+  // Show step 2
+  document.getElementById('channelStep1').style.display = 'none';
+  document.getElementById('channelStep2').style.display = 'block';
+  document.getElementById('channelBackBtn').style.display = 'inline-flex';
+  document.getElementById('channelTestBtn').style.display = 'inline-flex';
+  document.getElementById('channelSaveBtn').style.display = 'inline-flex';
+  
+  // Show appropriate config
+  document.getElementById('telegramConfig').style.display = type === 'TELEGRAM' ? 'block' : 'none';
+  document.getElementById('whatsappConfig').style.display = type === 'WHATSAPP' ? 'block' : 'none';
+}
+
+function channelStepBack() {
+  document.getElementById('channelStep1').style.display = 'block';
+  document.getElementById('channelStep2').style.display = 'none';
+  document.getElementById('channelBackBtn').style.display = 'none';
+  document.getElementById('channelTestBtn').style.display = 'none';
+  document.getElementById('channelSaveBtn').style.display = 'none';
+  document.getElementById('channelTestResult').style.display = 'none';
+  
+  // Reset header
+  document.getElementById('channelModalTitle').textContent = 'Kanal Ekle';
+  document.getElementById('channelModalIcon').innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
+  document.getElementById('channelModalIcon').style.background = 'var(--primary-bg)';
+  document.getElementById('channelModalIcon').style.color = 'var(--primary)';
+}
+
+function closeChannelModal() {
+  document.getElementById('channelModalOverlay').classList.remove('open');
+}
+
+function getChannelConfig() {
+  if (selectedChannelType === 'TELEGRAM') {
+    return {
+      botToken: document.getElementById('telegramBotToken').value.trim(),
+      defaultChatId: document.getElementById('telegramChatId').value.trim() || undefined
+    };
+  } else if (selectedChannelType === 'WHATSAPP') {
+    return {
+      phoneNumberId: document.getElementById('whatsappPhoneId').value.trim(),
+      accessToken: document.getElementById('whatsappAccessToken').value.trim()
+    };
+  }
+  return {};
+}
+
+async function testChannel() {
+  const btn = document.getElementById('channelTestBtn');
+  const resultDiv = document.getElementById('channelTestResult');
+  
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Test ediliyor...';
+  resultDiv.style.display = 'none';
+  
+  try {
+    let result;
+    
+    if (editingChannelId) {
+      // Test existing channel
+      result = await window.orbicorpAPI.testChannel(editingChannelId);
+    } else {
+      // For new channel, we need to save first then test
+      // Or implement a test-before-save endpoint
+      // For now, show a message
+      resultDiv.innerHTML = `
+        <div class="test-result" style="background:var(--amber-bg);color:var(--amber-text)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Önce kanalı kaydedin, sonra test edebilirsiniz
+        </div>
+      `;
+      resultDiv.style.display = 'block';
+      btn.disabled = false;
+      btn.innerHTML = 'Bağlantıyı Test Et';
+      return;
+    }
+    
+    if (result.success) {
+      resultDiv.innerHTML = `
+        <div class="test-result success">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          ${result.message}
+        </div>
+      `;
+      // Reload channels to update status
+      loadChannels();
+    } else {
+      resultDiv.innerHTML = `
+        <div class="test-result fail">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          ${result.message}
+        </div>
+      `;
+    }
+    resultDiv.style.display = 'block';
+  } catch (error) {
+    resultDiv.innerHTML = `
+      <div class="test-result fail">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+        Bağlantı hatası: ${error.message}
+      </div>
+    `;
+    resultDiv.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = 'Bağlantıyı Test Et';
+  }
+}
+
+async function saveChannel() {
+  const name = document.getElementById('channelName').value.trim();
+  const config = getChannelConfig();
+  
+  if (!name) {
+    alert('Lütfen kanal adı girin');
+    return;
+  }
+  
+  const btn = document.getElementById('channelSaveBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Kaydediliyor...';
+  
+  try {
+    let result;
+    
+    if (editingChannelId) {
+      // Update existing
+      result = await window.orbicorpAPI.updateChannel(editingChannelId, { name, config });
+    } else {
+      // Create new
+      result = await window.orbicorpAPI.createChannel({
+        type: selectedChannelType,
+        name,
+        config
+      });
+    }
+    
+    closeChannelModal();
+    loadChannels();
+    showSuccessToast(editingChannelId ? 'Kanal güncellendi' : 'Kanal eklendi');
+  } catch (error) {
+    console.error('Failed to save channel:', error);
+    alert('Kaydetme başarısız: ' + error.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = 'Kaydet';
+  }
+}
+
+async function deleteChannel(id) {
+  if (!confirm('Bu kanalı silmek istediğinize emin misiniz?')) return;
+  
+  try {
+    await window.orbicorpAPI.deleteChannel(id);
+    loadChannels();
+    showSuccessToast('Kanal silindi');
+  } catch (error) {
+    console.error('Failed to delete channel:', error);
+    showErrorToast('Silme başarısız');
+  }
+}
+
+async function toggleExternalNotifications(enabled) {
+  try {
+    // Save to company settings
+    await window.orbicorpAPI.request('/company', {
+      method: 'PUT',
+      body: JSON.stringify({
+        settings: {
+          externalNotificationsEnabled: enabled
+        }
+      })
+    });
+    console.log('External notifications:', enabled ? 'enabled' : 'disabled');
+  } catch (error) {
+    console.error('Failed to save external notification setting:', error);
+    // Revert toggle on error
+    document.getElementById('externalNotifToggle').checked = !enabled;
+  }
+}
+
+// Load external notification setting on page load
+async function loadExternalNotificationSetting() {
+  try {
+    const company = await window.orbicorpAPI.request('/company');
+    const enabled = company?.settings?.externalNotificationsEnabled !== false; // default true
+    document.getElementById('externalNotifToggle').checked = enabled;
+  } catch (error) {
+    console.error('Failed to load external notification setting:', error);
+  }
+}
+
+// Update go function to load channels
+const originalGoForChannels = window.go;
+window.go = function(sec, el) {
+  originalGoForChannels(sec, el);
+  if (sec === 'channels') {
+    loadChannels();
+    loadExternalNotificationSetting();
+  }
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+{
+  "name": "hr-assistant-template",
+  "version": "1.0.0",
+  "type": "agent-template",
+  "displayName": "İK Asistan Şablonu",
+  "description": "İnsan kaynakları departmanı için hazır agent şablonu. İşe alım, izin yönetimi, performans değerlendirme konularında uzman.",
+  
+  "author": {
+    "name": "Orbicorp",
+    "email": "dev@orbicorp.ai"
+  },
+  
+  "icon": "👔",
+  "category": "productivity",
+  "tags": ["hr", "insan kaynakları", "işe alım", "izin", "personel"],
+  
+  "pricing": {
+    "model": "free"
+  },
+  
+  "agentTemplate": {
+    "name": "İK Asistanı",
+    "description": "İnsan kaynakları süreçlerini yöneten uzman agent",
+    "department": "HR",
+    
+    "systemPrompt": "Sen şirketin İnsan Kaynakları Asistanısın.\n\nGÖREVLERİN:\n- İşe alım süreçlerini takip et\n- İzin taleplerini değerlendir\n- Personel sorularını yanıtla\n- Performans değerlendirme süreçlerinde destek ol\n- Bordro ve yan haklar hakkında bilgi ver\n\nDAVRANIŞ KURALLARI:\n- Gizlilik ilkesine uy, kişisel bilgileri paylaşma\n- Yasal düzenlemelere uygun tavsiyelerde bulun\n- Empati ile yaklaş, çalışan memnuniyetini önemse\n- Karmaşık konularda İK yöneticisine yönlendir",
+    
+    "suggestedModel": {
+      "provider": "anthropic",
+      "modelId": "claude-3-5-sonnet-20241022"
+    },
+    
+    "temperature": 0.7,
+    
+    "skills": ["memory-tools"],
+    
+    "avatarUrl": "https://api.dicebear.com/7.x/bottts/svg?seed=hr"
+  },
+  
+  "readme": "# İK Asistan Şablonu\n\nBu şablon, İnsan Kaynakları departmanı için optimize edilmiş bir agent oluşturur.\n\n## Özellikler\n- İşe alım süreci yönetimi\n- İzin talep değerlendirme\n- Personel soru-cevap\n- Performans değerlendirme desteği\n\n## Kurulum\nŞablonu kullanarak yeni bir agent oluşturun. Agent otomatik olarak HR departmanına atanır."
+}

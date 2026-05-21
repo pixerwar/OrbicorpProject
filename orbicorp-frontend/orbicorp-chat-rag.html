@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orbicorp — AI Chat</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--primary:#635BFF;--primary-light:#7A73FF;--primary-bg:#F0EEFF;--primary-bg-subtle:#F8F7FF;--navy:#0A2540;--navy-muted:#425466;--surface:#F6F9FC;--white:#FFFFFF;--border:#E3E8EE;--border-light:#EBEEF2;--text-primary:#0A2540;--text-secondary:#425466;--text-tertiary:#8792A2;--text-muted:#A3ACB9;--green:#0EA371;--green-bg:#EEFBF4;--green-text:#0C7D58;--amber:#D97706;--amber-bg:#FEF7E6;--amber-text:#92510A;--red:#DF1B41;--red-bg:#FDE8EC;--red-text:#A11534;--blue:#0570DE;--blue-bg:#E8F2FD;--blue-text:#0455A9;--radius-sm:6px;--radius-md:8px;--radius-lg:12px;--radius-xl:16px;--font:'Google Sans',-apple-system,BlinkMacSystemFont,sans-serif;--font-mono:'Google Sans Mono','SF Mono',monospace;--transition:0.2s cubic-bezier(0.4,0,0.2,1)}
+body{font-family:var(--font);background:var(--surface);color:var(--text-primary);-webkit-font-smoothing:antialiased;overflow:hidden;height:100vh}
+
+/* TOP NAV */
+.topnav{height:56px;background:var(--white);border-bottom:0.5px solid var(--border);display:flex;align-items:center;padding:0 24px;position:fixed;top:0;left:0;right:0;z-index:100}
+.topnav-brand{display:flex;align-items:center;gap:10px;margin-right:32px;text-decoration:none}
+.topnav-logo{width:32px;height:32px;background:linear-gradient(135deg,var(--primary),var(--navy));border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:14px}
+.topnav-name{font-size:16px;font-weight:700;color:var(--navy);letter-spacing:-0.3px}
+.topnav-tabs{display:flex;gap:4px;flex:1}
+.topnav-tab{padding:8px 14px;font-size:14px;color:var(--text-secondary);border-radius:var(--radius-sm);cursor:pointer;transition:all var(--transition);text-decoration:none}
+.topnav-tab:hover{background:var(--surface);color:var(--text-primary)}
+.topnav-tab.active{background:var(--primary-bg);color:var(--primary);font-weight:500}
+.topnav-right{display:flex;align-items:center;gap:12px;margin-left:auto}
+.topnav-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-light));color:white;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;cursor:pointer}
+
+/* LAYOUT */
+.layout{display:flex;height:calc(100vh - 56px);margin-top:56px}
+
+/* SIDEBAR */
+.sidebar{width:240px;background:var(--white);border-right:0.5px solid var(--border);padding:16px 12px;flex-shrink:0;overflow-y:auto;transition:width 0.3s}
+.sidebar.collapsed{width:56px;padding:16px 8px}
+.sidebar-toggle{display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:var(--radius-sm);border:0.5px solid var(--border);background:var(--white);cursor:pointer;margin-bottom:16px;margin-left:auto;transition:all var(--transition)}
+.sidebar-toggle:hover{background:var(--surface)}
+.sidebar-toggle svg{width:14px;height:14px;color:var(--text-tertiary);transition:transform 0.3s}
+.sidebar.collapsed .sidebar-toggle{margin:0 auto 16px}
+.sidebar.collapsed .sidebar-toggle svg{transform:rotate(180deg)}
+.sidebar-section{margin-bottom:24px}
+.sidebar-label{font-size:11px;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;padding:0 10px;margin-bottom:6px;white-space:nowrap}
+.sidebar.collapsed .sidebar-label{opacity:0;height:0;margin:0}
+.sidebar-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--radius-sm);font-size:14px;color:var(--text-secondary);cursor:pointer;transition:all var(--transition);white-space:nowrap;text-decoration:none}
+.sidebar-item:hover{background:var(--surface);color:var(--text-primary)}
+.sidebar-item.active{background:var(--primary-bg);color:var(--primary);font-weight:500}
+.sidebar-item svg{width:18px;height:18px;flex-shrink:0}
+.sidebar.collapsed .sidebar-item span{opacity:0;width:0}
+.sidebar.collapsed .sidebar-item{justify-content:center;padding:10px}
+.sidebar-badge{margin-left:auto;font-size:11px;background:var(--primary-bg);color:var(--primary);padding:1px 7px;border-radius:999px;font-weight:500}
+.sidebar.collapsed .sidebar-badge{display:none}
+
+/* CHAT AREA */
+.chat-area{flex:1;display:flex;flex-direction:column;min-width:0;position:relative}
+
+/* Agent switcher */
+.chat-top-bar{padding:12px 24px;border-bottom:0.5px solid var(--border);background:var(--white);display:flex;align-items:center;gap:12px;flex-shrink:0}
+.chat-top-bar-title{font-size:15px;font-weight:600;color:var(--text-primary);margin-right:8px}
+.agent-tabs{display:flex;gap:6px;flex:1;overflow-x:auto}
+.agent-tab{padding:6px 14px;border-radius:999px;font-size:12px;font-weight:500;border:0.5px solid var(--border);background:var(--white);color:var(--text-tertiary);cursor:pointer;transition:all var(--transition);white-space:nowrap;font-family:var(--font);display:flex;align-items:center;gap:6px}
+.agent-tab:hover{border-color:var(--primary);color:var(--primary)}
+.agent-tab.active{background:var(--primary-bg);border-color:var(--primary);color:var(--primary)}
+.agent-tab .dot{width:7px;height:7px;border-radius:50%;display:inline-block}
+
+/* Messages */
+.chat-messages{flex:1;overflow-y:auto;padding:24px 0;display:flex;flex-direction:column;gap:16px}
+.chat-messages-inner{max-width:760px;width:100%;margin:0 auto;padding:0 24px;display:flex;flex-direction:column;gap:16px}
+.chat-msg{display:flex;gap:10px;max-width:85%;animation:msgIn 0.3s ease}
+@keyframes msgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.chat-msg.user{align-self:flex-end;flex-direction:row-reverse}
+.chat-msg-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-weight:600}
+.chat-msg-avatar.ai{background:linear-gradient(135deg,var(--primary),var(--navy));color:white}
+.chat-msg-avatar.human{background:var(--surface);color:var(--text-tertiary);border:0.5px solid var(--border)}
+.chat-msg-content{min-width:0}
+.chat-msg-bubble{padding:12px 16px;border-radius:16px;font-size:14px;line-height:1.6;color:var(--text-primary)}
+.chat-msg.user .chat-msg-bubble{background:var(--primary);color:white;border-bottom-right-radius:4px}
+.chat-msg.ai .chat-msg-bubble{background:var(--white);border:0.5px solid var(--border);border-bottom-left-radius:4px}
+.chat-msg-time{font-size:10px;color:var(--text-muted);margin-top:4px;padding:0 4px}
+.chat-msg.user .chat-msg-time{text-align:right}
+
+/* Action cards */
+.chat-action-card{background:var(--white);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px;margin-top:10px}
+
+/* RAG Model Badge */
+.rag-model-badge{display:flex;align-items:center;gap:6px;padding:4px 10px;background:var(--primary-bg-subtle);border:0.5px solid var(--primary-bg);border-radius:999px;font-size:11px;color:var(--primary);margin-left:auto}
+.rag-model-icon{font-size:12px}
+.rag-model-name{font-weight:500}
+
+/* RAG Source Card */
+.rag-sources{margin-top:12px;padding:12px;background:var(--surface);border-radius:var(--radius-md);border:0.5px solid var(--border-light)}
+.rag-sources-title{font-size:11px;font-weight:600;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.rag-sources-title svg{width:12px;height:12px}
+.rag-source-item{display:flex;align-items:center;gap:8px;padding:6px 8px;background:var(--white);border:0.5px solid var(--border);border-radius:var(--radius-sm);margin-bottom:4px;cursor:pointer;transition:all var(--transition)}
+.rag-source-item:hover{border-color:var(--primary);background:var(--primary-bg-subtle)}
+.rag-source-item:last-child{margin-bottom:0}
+.rag-source-icon{width:24px;height:24px;border-radius:4px;background:var(--primary-bg);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0}
+.rag-source-info{flex:1;min-width:0}
+.rag-source-name{font-size:12px;font-weight:500;color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rag-source-section{font-size:10px;color:var(--text-muted)}
+.rag-source-score{font-size:10px;color:var(--green);font-weight:500}
+
+/* RAG Confidence Badge */
+.rag-confidence{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:500;margin-left:8px}
+.rag-confidence.high{background:var(--green-bg);color:var(--green-text)}
+.rag-confidence.medium{background:var(--amber-bg);color:var(--amber-text)}
+.rag-confidence.low{background:var(--red-bg);color:var(--red-text)}
+
+/* RAG Loading */
+.rag-loading{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--primary-bg-subtle);border-radius:var(--radius-md);margin-bottom:8px}
+.rag-loading-spinner{width:16px;height:16px;border:2px solid var(--primary-bg);border-top-color:var(--primary);border-radius:50%;animation:spin 0.8s linear infinite}
+.rag-loading-text{font-size:12px;color:var(--primary)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.chat-action-title{font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.chat-action-title svg{width:16px;height:16px;color:var(--primary)}
+.chat-action-body{font-size:13px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px}
+.chat-action-body code{background:var(--surface);padding:2px 8px;border-radius:4px;font-family:var(--font-mono);font-size:12px}
+.chat-action-btns{display:flex;gap:8px}
+.chat-action-btn{padding:7px 16px;border-radius:var(--radius-sm);font-size:12px;font-weight:500;cursor:pointer;transition:all var(--transition);font-family:var(--font);border:0.5px solid var(--border)}
+.chat-action-btn.approve{background:var(--green-bg);color:var(--green-text);border-color:var(--green-bg)}
+.chat-action-btn.approve:hover{background:var(--green);color:white}
+.chat-action-btn.edit{background:var(--white);color:var(--text-secondary)}
+.chat-action-btn.edit:hover{background:var(--surface)}
+.chat-action-btn.reject{background:var(--white);color:var(--red-text)}
+.chat-action-btn.reject:hover{background:var(--red-bg)}
+
+/* File attachment preview */
+.file-preview-bar{padding:8px 24px;border-top:0.5px solid var(--border);background:var(--white);display:none;flex-shrink:0}
+.file-preview-bar.visible{display:block}
+.file-preview-list{display:flex;gap:8px;overflow-x:auto;max-width:760px;margin:0 auto}
+.file-preview-item{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-md);flex-shrink:0;max-width:220px;position:relative}
+.file-preview-item img{width:36px;height:36px;border-radius:var(--radius-sm);object-fit:cover;flex-shrink:0}
+.file-preview-icon{width:36px;height:36px;border-radius:var(--radius-sm);background:var(--primary-bg);color:var(--primary);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.file-preview-icon svg{width:18px;height:18px}
+.file-preview-info{min-width:0}
+.file-preview-name{font-size:12px;font-weight:500;color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.file-preview-size{font-size:10px;color:var(--text-muted)}
+.file-preview-remove{position:absolute;top:-4px;right:-4px;width:18px;height:18px;border-radius:50%;background:var(--text-tertiary);color:white;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;border:2px solid var(--white);transition:background var(--transition)}
+.file-preview-remove:hover{background:var(--red)}
+
+/* Drop zone overlay */
+.drop-overlay{position:absolute;inset:0;background:rgba(99,91,255,0.06);border:2px dashed var(--primary);border-radius:var(--radius-lg);display:none;align-items:center;justify-content:center;z-index:50;pointer-events:none;margin:8px}
+.drop-overlay.active{display:flex}
+.drop-overlay-content{text-align:center;padding:40px}
+.drop-overlay-content svg{width:48px;height:48px;color:var(--primary);margin-bottom:12px}
+.drop-overlay-content p{font-size:16px;font-weight:500;color:var(--primary)}
+.drop-overlay-content span{font-size:13px;color:var(--text-tertiary);display:block;margin-top:4px}
+
+/* Input area */
+.chat-input-area{padding:16px 24px 20px;background:var(--white);border-top:0.5px solid var(--border);flex-shrink:0}
+.chat-input-container{max-width:760px;margin:0 auto}
+.chat-input-box{display:flex;align-items:flex-end;gap:8px;padding:10px 16px;background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-lg);transition:border-color var(--transition);min-height:48px}
+.chat-input-box:focus-within{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-bg)}
+.chat-input-box.drag-over{border-color:var(--primary);background:var(--primary-bg-subtle)}
+.chat-textarea{flex:1;border:none;outline:none;font-size:14px;color:var(--text-primary);background:none;resize:none;font-family:var(--font);max-height:120px;line-height:1.5;padding:4px 0}
+.chat-textarea::placeholder{color:var(--text-muted)}
+
+.input-actions{display:flex;gap:4px;align-items:center;flex-shrink:0}
+.input-btn{width:34px;height:34px;border-radius:var(--radius-md);border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-muted);transition:all var(--transition)}
+.input-btn:hover{background:var(--white);color:var(--primary)}
+.input-btn svg{width:18px;height:18px}
+.input-btn.recording{background:var(--red-bg);color:var(--red);animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.6}}
+.send-btn{width:38px;height:38px;border-radius:var(--radius-md);border:none;background:var(--primary);color:white;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all var(--transition);flex-shrink:0}
+.send-btn:hover{background:var(--primary-light)}
+.send-btn svg{width:18px;height:18px}
+.input-hint{font-size:11px;color:var(--text-muted);margin-top:8px;text-align:center}
+
+/* Voice recording bar */
+.voice-bar{display:none;align-items:center;gap:12px;padding:12px 16px;background:var(--red-bg);border:0.5px solid #F5A0B0;border-radius:var(--radius-lg)}
+.voice-bar.active{display:flex}
+.voice-dot{width:10px;height:10px;border-radius:50%;background:var(--red);animation:pulse 1s infinite}
+.voice-timer{font-size:14px;font-weight:500;color:var(--red-text);min-width:40px}
+.voice-wave{flex:1;height:32px;display:flex;align-items:center;gap:2px}
+.voice-wave-bar{width:3px;border-radius:999px;background:var(--red);opacity:0.5;transition:height 0.1s}
+.voice-cancel{padding:7px 16px;border-radius:var(--radius-sm);border:0.5px solid var(--border);background:var(--white);color:var(--text-secondary);font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font);transition:all var(--transition)}
+.voice-cancel:hover{background:var(--surface)}
+.voice-send{padding:7px 16px;border-radius:var(--radius-sm);border:none;background:var(--primary);color:white;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font);transition:all var(--transition)}
+.voice-send:hover{background:var(--primary-light)}
+
+/* Voice message bubble */
+.voice-msg{display:flex;align-items:center;gap:10px;padding:4px 0}
+.voice-play-btn{width:32px;height:32px;border-radius:50%;background:var(--primary);color:white;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;border:none;transition:all var(--transition)}
+.voice-play-btn:hover{background:var(--primary-light)}
+.voice-play-btn svg{width:14px;height:14px}
+.voice-wave-display{flex:1;height:28px;display:flex;align-items:center;gap:1.5px}
+.voice-wave-display .bar{width:3px;border-radius:999px;background:var(--primary);opacity:0.4}
+.voice-duration{font-size:12px;color:var(--text-tertiary);min-width:32px}
+
+/* File in message */
+.msg-file{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-md);margin-top:8px}
+.msg-file-icon{width:32px;height:32px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.msg-file-icon.pdf{background:var(--red-bg);color:var(--red)}
+.msg-file-icon.img{background:var(--blue-bg);color:var(--blue)}
+.msg-file-icon.doc{background:var(--primary-bg);color:var(--primary)}
+.msg-file-icon svg{width:16px;height:16px}
+.msg-file-info{min-width:0}
+.msg-file-name{font-size:12px;font-weight:500;color:var(--text-primary)}
+.msg-file-size{font-size:10px;color:var(--text-muted)}
+.msg-img{max-width:280px;border-radius:var(--radius-md);margin-top:8px;border:0.5px solid var(--border)}
+
+/* Typing */
+.typing-indicator{display:flex;gap:4px;padding:8px 0}
+.typing-dot{width:7px;height:7px;border-radius:50%;background:var(--text-muted);animation:bounce 1.2s infinite}
+.typing-dot:nth-child(2){animation-delay:0.2s}
+.typing-dot:nth-child(3){animation-delay:0.4s}
+@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
+</style>
+<link rel="stylesheet" href="orbicorp-dark.css">
+<style>
+.in-iframe .topnav{display:none!important}
+.in-iframe .sidebar{display:none!important}
+.in-iframe .layout{margin-top:0!important;height:100vh!important}
+.in-iframe .settings-nav{top:0!important;height:100vh!important}
+.in-iframe .chat-panel{top:0!important;height:100vh!important}
+</style>
+</head>
+<body>
+<script>
+(function(){
+  // If in iframe, hide own nav/sidebar and sync theme from parent
+  if(window.self!==window.top){
+    document.body.classList.add("in-iframe");
+    try{
+      var pt=window.parent.document.documentElement.getAttribute("data-theme");
+      if(pt)document.documentElement.setAttribute("data-theme",pt);
+    }catch(e){}
+    // Listen for theme changes from parent
+    window.addEventListener("message",function(e){
+      if(e.data&&e.data.type==="theme")document.documentElement.setAttribute("data-theme",e.data.value);
+      if(e.data&&e.data.type==="lang")window._orbicorpLang=e.data.value;
+    });
+  }
+})();
+</script>
+
+<!-- TOP NAV -->
+<nav class="topnav">
+  <a class="topnav-brand" href="#"><div class="topnav-logo">O</div><span class="topnav-name">Orbicorp</span></a>
+  <div class="topnav-tabs">
+    <a class="topnav-tab">Overview</a>
+    <a class="topnav-tab">Agents</a>
+    <a class="topnav-tab">Company Profile</a>
+    <a class="topnav-tab active">Chat</a>
+    <a class="topnav-tab">Skills</a>
+    <a class="topnav-tab">Analytics</a>
+  </div>
+  <div class="topnav-right"><div class="topnav-avatar">AY</div></div>
+</nav>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-toggle" onclick="document.getElementById('sidebar').classList.toggle('collapsed')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Sohbetler</div>
+      <a class="sidebar-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Orbicorp Main</span></a>
+      <a class="sidebar-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Sales Copilot</span></a>
+      <a class="sidebar-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>HR Assistant</span></a>
+      <a class="sidebar-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Support Agent</span></a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Geçmiş</div>
+      <a class="sidebar-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><span>Fatura Otomasyonu</span></a>
+      <a class="sidebar-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><span>Agent Kurulumu</span></a>
+    </div>
+  </aside>
+
+  <!-- CHAT AREA -->
+  <div class="chat-area" id="chatArea">
+    <!-- Drop overlay -->
+    <div class="drop-overlay" id="dropOverlay">
+      <div class="drop-overlay-content">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <p>Dosyalarınızı buraya bırakın</p>
+        <span>Resim, PDF, Word, Excel desteklenir</span>
+      </div>
+    </div>
+
+    <!-- Agent switcher -->
+    <div class="chat-top-bar">
+      <span class="chat-top-bar-title">Orbicorp AI</span>
+      <div class="agent-tabs">
+        <button class="agent-tab active" onclick="switchAgent(this,'main')"><span class="dot" style="background:var(--primary)"></span>Main Agent</button>
+        <button class="agent-tab" onclick="switchAgent(this,'knowledge')"><span class="dot" style="background:linear-gradient(135deg,var(--primary),var(--blue))"></span>📚 Bilgi Tabanı</button>
+        <button class="agent-tab" onclick="switchAgent(this,'sales')"><span class="dot" style="background:var(--green)"></span>Sales Copilot</button>
+        <button class="agent-tab" onclick="switchAgent(this,'hr')"><span class="dot" style="background:var(--blue)"></span>HR Assistant</button>
+        <button class="agent-tab" onclick="switchAgent(this,'support')"><span class="dot" style="background:var(--amber)"></span>Support Agent</button>
+      </div>
+      <!-- RAG Model Info Badge -->
+      <div class="rag-model-badge" id="ragModelBadge" style="display:none">
+        <span class="rag-model-icon">🤖</span>
+        <span class="rag-model-name" id="ragModelName">Claude Sonnet</span>
+      </div>
+    </div>
+
+    <!-- Messages -->
+    <div class="chat-messages" id="chatMessages">
+      <div class="chat-messages-inner" id="chatMessagesInner"></div>
+    </div>
+
+    <!-- File preview bar -->
+    <div class="file-preview-bar" id="filePreviewBar">
+      <div class="file-preview-list" id="filePreviewList"></div>
+    </div>
+
+    <!-- Input area -->
+    <div class="chat-input-area">
+      <div class="chat-input-container">
+        <!-- Voice recording bar (hidden by default) -->
+        <div class="voice-bar" id="voiceBar">
+          <div class="voice-dot"></div>
+          <span class="voice-timer" id="voiceTimer">0:00</span>
+          <div class="voice-wave" id="voiceWave"></div>
+          <button class="voice-cancel" onclick="cancelVoice()">İptal</button>
+          <button class="voice-send" onclick="sendVoice()">Gönder</button>
+        </div>
+        <!-- Normal input -->
+        <div class="chat-input-box" id="chatInputBox">
+          <div class="input-actions">
+            <button class="input-btn" title="Dosya ekle" onclick="document.getElementById('fileInput').click()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+            </button>
+            <button class="input-btn" title="Resim ekle" onclick="document.getElementById('imgInput').click()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            </button>
+          </div>
+          <textarea class="chat-textarea" id="chatInput" rows="1" placeholder="Mesajınızı yazın..." onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+          <div class="input-actions">
+            <button class="input-btn" id="voiceBtn" title="Sesli mesaj" onclick="toggleVoice()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+            </button>
+            <button class="send-btn" onclick="sendChat()" id="sendBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </button>
+          </div>
+        </div>
+        <input type="file" id="fileInput" multiple hidden onchange="handleFiles(this.files)">
+        <input type="file" id="imgInput" accept="image/*" multiple hidden onchange="handleFiles(this.files)">
+        <div class="input-hint">Dosyaları sürükleyip bırakabilirsiniz. Resim, PDF, Word ve Excel desteklenir.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentAgent = 'main';
+const histories = { main:[], sales:[], hr:[], support:[], knowledge:[] };
+const profiles = {
+  main:{name:'Orbicorp Main Agent',avatar:'O'},
+  sales:{name:'Sales Copilot',avatar:'SC'},
+  hr:{name:'HR Assistant',avatar:'HR'},
+  support:{name:'Support Agent',avatar:'SA'},
+  knowledge:{name:'Bilgi Tabanı',avatar:'📚'}
+};
+let pendingFiles = [];
+let isRecording = false;
+let voiceInterval = null;
+let voiceSeconds = 0;
+
+// RAG System State
+let ragInitialized = false;
+let ragChunks = null;
+let ragSearchEngine = null;
+
+// Init
+histories.main.push({role:'ai',text:'Merhaba! Ben Orbicorp Main Agent. Agent\'larınızı yapılandırabilir, görev atayabilir, dosya analiz edebilir veya sesli talimat verebilirsiniz. Nasıl yardımcı olabilirim?'});
+
+// RAG Knowledge Base init message
+histories.knowledge.push({role:'ai',text:'Merhaba! Ben Orbicorp Bilgi Tabanı asistanıyım. 📚\n\nOrbiCorp platformu hakkında her türlü sorunuzu yanıtlayabilirim:\n\n• Dashboard ve KPI\'lar\n• Agent oluşturma ve yönetimi\n• Workflow builder kullanımı\n• Entegrasyonlar ve ayarlar\n• Analitik ve raporlar\n\nSormak istediğiniz bir şey var mı?'});
+
+function switchAgent(btn, agent) {
+  document.querySelectorAll('.agent-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  currentAgent = agent;
+  
+  // RAG model badge göster/gizle
+  const ragBadge = document.getElementById('ragModelBadge');
+  if (agent === 'knowledge') {
+    ragBadge.style.display = 'flex';
+    initRAGIfNeeded();
+  } else {
+    ragBadge.style.display = 'none';
+  }
+  
+  if (!histories[agent].length) {
+    if (agent === 'knowledge') {
+      histories[agent].push({role:'ai',text:'Merhaba! Ben Orbicorp Bilgi Tabanı asistanıyım. 📚 Platform hakkında sorularınızı yanıtlayabilirim.'});
+    } else {
+      histories[agent].push({role:'ai',text:`Merhaba! Ben ${profiles[agent].name}. Size nasıl yardımcı olabilirim?`});
+    }
+  }
+  render();
+}
+
+function render() {
+  const c = document.getElementById('chatMessagesInner');
+  c.innerHTML = histories[currentAgent].map(m => {
+    if (m.role==='typing') return `<div class="chat-msg ai"><div class="chat-msg-avatar ai">${profiles[currentAgent].avatar}</div><div class="chat-msg-content"><div class="chat-msg-bubble"><div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div></div></div>`;
+    if (m.role==='rag-loading') return `<div class="chat-msg ai"><div class="chat-msg-avatar ai">${profiles[currentAgent].avatar}</div><div class="chat-msg-content"><div class="rag-loading"><div class="rag-loading-spinner"></div><span class="rag-loading-text">${m.text || 'Bilgi tabanı aranıyor...'}</span></div></div></div>`;
+    const u = m.role==='user';
+    const av = u ? 'AY' : profiles[currentAgent].avatar;
+    let html = `<div class="chat-msg-bubble">${m.text}</div>`;
+    
+    // RAG Confidence Badge
+    if (m.ragConfidence) {
+      const confClass = m.ragConfidence.level === 'HIGH' ? 'high' : m.ragConfidence.level === 'MEDIUM' ? 'medium' : 'low';
+      html = `<div class="chat-msg-bubble">${m.text}<span class="rag-confidence ${confClass}">${m.ragConfidence.level === 'HIGH' ? '✓ Yüksek' : m.ragConfidence.level === 'MEDIUM' ? '~ Orta' : '? Düşük'}</span></div>`;
+    }
+    
+    if (m.voice) html += `<div class="voice-msg"><button class="voice-play-btn" onclick="this.querySelector('svg').innerHTML=this.dataset.playing?'<polygon points=\\'6 3 20 12 6 21\\'/>':'<rect x=\\'6\\' y=\\'4\\' width=\\'4\\' height=\\'16\\'/><rect x=\\'14\\' y=\\'4\\' width=\\'4\\' height=\\'16\\'/>'; this.dataset.playing=!this.dataset.playing"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21"/></svg></button><div class="voice-wave-display">${Array.from({length:35},()=>`<div class="bar" style="height:${4+Math.random()*20}px"></div>`).join('')}</div><span class="voice-duration">${m.voice}</span></div>`;
+    if (m.files) m.files.forEach(f => {
+      if (f.isImage) html += `<img class="msg-img" src="${f.dataUrl}" alt="${f.name}">`;
+      else { const ext=f.name.split('.').pop().toLowerCase(); const cls=ext==='pdf'?'pdf':['doc','docx'].includes(ext)?'doc':'img';
+        html += `<div class="msg-file"><div class="msg-file-icon ${cls}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div class="msg-file-info"><div class="msg-file-name">${f.name}</div><div class="msg-file-size">${f.size}</div></div></div>`;
+      }
+    });
+    if (m.action) html += `<div class="chat-action-card"><div class="chat-action-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg> ${m.action.title}</div><div class="chat-action-body">${m.action.body}</div><div class="chat-action-btns"><button class="chat-action-btn approve" onclick="approve(this)">Onayla</button><button class="chat-action-btn edit" onclick="editA(this)">Düzenle ve Onayla</button><button class="chat-action-btn reject" onclick="reject(this)">Reddet</button></div></div>`;
+    
+    // RAG Sources
+    if (m.ragSources && m.ragSources.length > 0) {
+      html += `<div class="rag-sources">
+        <div class="rag-sources-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Kaynaklar</div>
+        ${m.ragSources.slice(0, 3).map(s => `
+          <div class="rag-source-item" onclick="showSourceDetail('${s.source}', '${s.section || ''}')">
+            <div class="rag-source-icon">${getSourceIcon(s.source)}</div>
+            <div class="rag-source-info">
+              <div class="rag-source-name">${s.source}</div>
+              <div class="rag-source-section">${s.section || 'Genel'}</div>
+            </div>
+            <div class="rag-source-score">${Math.round(s.score * 10) / 10}</div>
+          </div>
+        `).join('')}
+      </div>`;
+    }
+    
+    const time = m.time||'';
+    return `<div class="chat-msg ${u?'user':'ai'}"><div class="chat-msg-avatar ${u?'human':'ai'}">${av}</div><div class="chat-msg-content">${html}${time?`<div class="chat-msg-time">${time}</div>`:''}</div></div>`;
+  }).join('');
+  document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
+}
+
+function now(){const d=new Date();return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0')}
+
+function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat()}}
+function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,120)+'px'}
+
+function sendChat(){
+  const input=document.getElementById('chatInput');
+  const text=input.value.trim();
+  if(!text&&!pendingFiles.length)return;
+  const msg={role:'user',text:text||'Dosya gönderildi',time:now()};
+  if(pendingFiles.length){msg.files=pendingFiles.map(f=>({name:f.name,size:formatSize(f.size),isImage:f.type.startsWith('image/'),dataUrl:f.dataUrl}));pendingFiles=[];document.getElementById('filePreviewBar').classList.remove('visible');document.getElementById('filePreviewList').innerHTML='';}
+  histories[currentAgent].push(msg);
+  input.value='';input.style.height='auto';
+  render();
+  
+  // RAG Knowledge Base agent için özel işlem
+  if (currentAgent === 'knowledge') {
+    histories[currentAgent].push({role:'typing'});
+    render();
+    handleRAGQuery(text);
+  } else {
+    histories[currentAgent].push({role:'typing'});
+    render();
+    setTimeout(()=>{histories[currentAgent]=histories[currentAgent].filter(m=>m.role!=='typing');histories[currentAgent].push(genResponse(text,currentAgent,msg.files));render()},1000+Math.random()*800);
+  }
+}
+
+function genResponse(text,agent,files){
+  const t=(text||'').toLowerCase();const tm=now();
+  if(files&&files.length){
+    const imgs=files.filter(f=>f.isImage);const docs=files.filter(f=>!f.isImage);
+    if(imgs.length) return {role:'ai',time:tm,text:`${imgs.length} resim aldım. Görselleri analiz ediyorum. Ne yapmamı istersiniz? Resimden metin çıkarma, içerik analizi veya agent eğitim verisi olarak kullanma gibi seçenekler mevcut.`};
+    if(docs.length){const ext=docs[0].name.split('.').pop().toLowerCase();
+      if(ext==='pdf') return {role:'ai',time:tm,text:`"${docs[0].name}" dosyasını aldım. PDF içeriğini analiz ediyorum. Fatura, sözleşme veya rapor olarak işleyebilirim. Ne tür bir işlem yapmamı istersiniz?`};
+      return {role:'ai',time:tm,text:`${docs.length} dosya aldım. İçerikleri inceliyorum. Bu dosyaları bir agent'ın bilgi tabanına ekleyebilir, analiz edebilir veya veri çıkarma işlemi yapabilirim.`};
+    }
+  }
+  if(t.includes('fatura')&&(t.includes('mail')||t.includes('kategorize')||t.includes('çıkar')))return{role:'ai',time:tm,text:'Fatura maillerini otomatik işlemek için bir skill yapılandırması hazırladım:',action:{title:'Yeni Skill: invoice-extractor',body:'<strong>Agent:</strong> Support Agent<br><strong>Tetikleyici:</strong> Konu satırında "fatura" geçen mailler<br><strong>İşlem:</strong> PDF\'den fatura no, tutar, tarih çıkar &rarr; <code>finance_invoices</code> tablosuna kaydet<br><strong>Kategorizasyon:</strong> Tedarikçi, hizmet, lisans olarak otomatik sınıfla'}};
+  if(t.includes('performans')||t.includes('rapor'))return{role:'ai',time:tm,text:'Son 30 günlük agent performans özeti:<br><br><strong>En yüksek başarı:</strong> HR Assistant (%99.1)<br><strong>En hızlı yanıt:</strong> Onboarding Bot (0.6s)<br><strong>En çok etkileşim:</strong> Sales Copilot (3,241)<br><strong>En düşük maliyet:</strong> IT Helpdesk ($33)<br><br>Detaylı rapor veya belirli bir agent hakkında bilgi ister misiniz?'};
+  if(t.includes('yeni')&&(t.includes('agent')||t.includes('muhasebe')||t.includes('oluştur'))){const n=t.includes('muhasebe')?'Muhasebe Agent':'Yeni Agent';return{role:'ai',time:tm,text:`${n} oluşturmak için yapılandırma hazırladım:`,action:{title:`Agent Oluştur: ${n}`,body:`<strong>Ad:</strong> ${n}<br><strong>Departman:</strong> Finans<br><strong>Model:</strong> Claude Sonnet 4.6<br><strong>Skill'ler:</strong> <code>invoice-reader</code>, <code>expense-tracker</code>, <code>report-writer</code><br><strong>Kanallar:</strong> WebChat, E-posta`}};}
+  if(t.includes('email')&&(t.includes('yetki')||t.includes('okuma')))return{role:'ai',time:tm,text:'Email erişim yetkisi tanımlıyorum:',action:{title:'Email Yetkisi: Sales Copilot',body:'<strong>Yetki:</strong> Okuma + Yanıt Taslağı<br><strong>Kapsam:</strong> <code>sales@novatech.com.tr</code><br><strong>Filtre:</strong> "teklif", "sipariş" etiketli mailler<br><strong>Kısıtlama:</strong> Gönderim için onay gerekir'}};
+  return{role:'ai',time:tm,text:'Anladım. Yapmak istediğiniz işlemi biraz daha detaylandırır mısınız? Agent yapılandırma, skill atama, dosya analizi veya rapor gibi konularda yardımcı olabilirim.'};
+}
+
+// ═══ FILE HANDLING ═══
+function handleFiles(fileList){
+  Array.from(fileList).forEach(file=>{
+    const reader=new FileReader();
+    reader.onload=function(e){
+      file.dataUrl=e.target.result;
+      pendingFiles.push(file);
+      renderPreviews();
+    };
+    if(file.type.startsWith('image/'))reader.readAsDataURL(file);
+    else reader.readAsDataURL(file);
+  });
+}
+function renderPreviews(){
+  const bar=document.getElementById('filePreviewBar');
+  const list=document.getElementById('filePreviewList');
+  bar.classList.toggle('visible',pendingFiles.length>0);
+  list.innerHTML=pendingFiles.map((f,i)=>{
+    const isImg=f.type.startsWith('image/');
+    return `<div class="file-preview-item">
+      ${isImg?`<img src="${f.dataUrl}" alt="${f.name}">`:`<div class="file-preview-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>`}
+      <div class="file-preview-info"><div class="file-preview-name">${f.name}</div><div class="file-preview-size">${formatSize(f.size)}</div></div>
+      <div class="file-preview-remove" onclick="removeFile(${i})">&times;</div>
+    </div>`;
+  }).join('');
+}
+function removeFile(i){pendingFiles.splice(i,1);renderPreviews()}
+function formatSize(b){if(b<1024)return b+'B';if(b<1048576)return(b/1024).toFixed(1)+'KB';return(b/1048576).toFixed(1)+'MB'}
+
+// Drag & drop
+const chatArea=document.getElementById('chatArea');
+const dropOverlay=document.getElementById('dropOverlay');
+let dragCounter=0;
+chatArea.addEventListener('dragenter',e=>{e.preventDefault();dragCounter++;dropOverlay.classList.add('active')});
+chatArea.addEventListener('dragleave',e=>{e.preventDefault();dragCounter--;if(dragCounter<=0){dragCounter=0;dropOverlay.classList.remove('active')}});
+chatArea.addEventListener('dragover',e=>{e.preventDefault()});
+chatArea.addEventListener('drop',e=>{e.preventDefault();dragCounter=0;dropOverlay.classList.remove('active');if(e.dataTransfer.files.length)handleFiles(e.dataTransfer.files)});
+
+// ═══ VOICE ═══
+function toggleVoice(){
+  if(isRecording){sendVoice();return}
+  isRecording=true;voiceSeconds=0;
+  document.getElementById('voiceBar').classList.add('active');
+  document.getElementById('chatInputBox').style.display='none';
+  document.getElementById('voiceBtn').classList.add('recording');
+  const wave=document.getElementById('voiceWave');
+  wave.innerHTML=Array.from({length:50},()=>`<div class="voice-wave-bar" style="height:4px"></div>`).join('');
+  voiceInterval=setInterval(()=>{
+    voiceSeconds++;
+    document.getElementById('voiceTimer').textContent=Math.floor(voiceSeconds/60)+':'+(voiceSeconds%60).toString().padStart(2,'0');
+    wave.querySelectorAll('.voice-wave-bar').forEach(b=>{b.style.height=(4+Math.random()*24)+'px'});
+  },200);
+}
+function cancelVoice(){
+  isRecording=false;clearInterval(voiceInterval);
+  document.getElementById('voiceBar').classList.remove('active');
+  document.getElementById('chatInputBox').style.display='';
+  document.getElementById('voiceBtn').classList.remove('recording');
+}
+function sendVoice(){
+  const dur=Math.floor(voiceSeconds/5)+':'+(voiceSeconds%5===0?'00':(voiceSeconds%60).toString().padStart(2,'0'));
+  const duration=Math.floor(voiceSeconds*0.2/60)+':'+(Math.floor(voiceSeconds*0.2)%60).toString().padStart(2,'0');
+  cancelVoice();
+  histories[currentAgent].push({role:'user',text:'Sesli mesaj',time:now(),voice:duration});
+  render();
+  histories[currentAgent].push({role:'typing'});render();
+  setTimeout(()=>{histories[currentAgent]=histories[currentAgent].filter(m=>m.role!=='typing');histories[currentAgent].push({role:'ai',time:now(),text:'Sesli mesajınızı aldım ve metne dönüştürdüm. Talimatınızı işliyorum. Yapılandırma değişikliği veya görev ataması gerekiyorsa size onay kartı göstereceğim.'});render()},1500);
+}
+
+// ═══ ACTION CARDS ═══
+function approve(btn){const c=btn.closest('.chat-action-card');c.innerHTML='<div style="display:flex;align-items:center;gap:8px;padding:4px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg><span style="font-size:13px;font-weight:500;color:var(--green-text)">Onaylandı ve uygulandı</span></div>';setTimeout(()=>{histories[currentAgent].push({role:'ai',time:now(),text:'Değişiklik başarıyla uygulandı!'});render()},600)}
+function editA(btn){const body=btn.closest('.chat-action-card').querySelector('.chat-action-body');body.contentEditable='true';body.style.cssText='border:1px solid var(--primary);border-radius:6px;padding:8px;background:var(--primary-bg-subtle)';body.focus();btn.textContent='Kaydet';btn.onclick=function(){body.contentEditable='false';body.style.cssText='';btn.textContent='Düzenle ve Onayla';btn.onclick=function(){editA(btn)}}}
+function reject(btn){const c=btn.closest('.chat-action-card');c.innerHTML='<div style="display:flex;align-items:center;gap:8px;padding:4px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg><span style="font-size:13px;font-weight:500;color:var(--red-text)">Reddedildi</span></div>';setTimeout(()=>{histories[currentAgent].push({role:'ai',time:now(),text:'Anladım, uygulamayacağım. Farklı bir yapılandırma ister misiniz?'});render()},600)}
+
+render();
+
+// ═══════════════════════════════════════════════════════════════
+// RAG BİLGİ TABANI SİSTEMİ
+// ═══════════════════════════════════════════════════════════════
+
+// Demo chunk verileri (gerçek uygulamada orbicorp_chunks_optimized.json'dan yüklenir)
+const DEMO_RAG_DATA = {
+  chunks: [
+    {
+      id: 'dashboard_overview',
+      content: 'Dashboard modülü 4 KPI kartı içerir: Aktif Agent sayısı, Günlük etkileşim, Başarı oranı ve Aylık maliyet. Agent gallery 3 agent kartı gösterir. Sağ tarafta sabit chat paneli bulunur.',
+      metadata: { source: 'orbicorp-dashboard.html', section: 'Overview', pageTitle: 'Dashboard' },
+      semanticTags: ['dashboard', 'kpi', 'agent'],
+      qualityScore: 85
+    },
+    {
+      id: 'agent_create',
+      content: 'Yeni agent oluşturmak için Agents sayfasında "Yeni Agent" butonuna tıklayın. 4 adımlı wizard açılır: 1) Temel Bilgiler (ad, departman), 2) Model & Skill seçimi, 3) Kanal ataması, 4) Önizleme ve oluşturma.',
+      metadata: { source: 'orbicorp-agents.html', section: 'Agent Wizard', pageTitle: 'Agent Yönetimi' },
+      semanticTags: ['agent', 'wizard', 'create'],
+      qualityScore: 90
+    },
+    {
+      id: 'workflow_blocks',
+      content: 'Workflow Builder 7 blok türü sunar: Tetikleyici, Agent Adımı, Koşul/Karar, İnsan Onayı, Entegrasyon, Bildirim ve Veri Dönüştürme. Blokları sürükleyip bırakarak canvas\'a ekleyebilirsiniz.',
+      metadata: { source: 'orbicorp-workflow.html', section: 'Block Types', pageTitle: 'Workflow Builder' },
+      semanticTags: ['workflow', 'blocks', 'automation'],
+      qualityScore: 88
+    },
+    {
+      id: 'integrations_list',
+      content: 'OrbiCorp 22 entegrasyon destekler. 12 yüklü: Google Workspace, Salesforce, Slack, Teams, HubSpot, Jira, SAP, WhatsApp, Zoom, Zendesk, Stripe, Notion. 10 keşfedilebilir: Dropbox, Monday, Airtable ve diğerleri.',
+      metadata: { source: 'orbicorp-settings.html', section: 'Integrations', pageTitle: 'Entegrasyonlar' },
+      semanticTags: ['integration', 'settings', 'slack', 'salesforce'],
+      qualityScore: 85
+    },
+    {
+      id: 'user_roles',
+      content: 'OrbiCorp 4 kullanıcı rolü tanımlar: Admin (tam yetki), Manager (agent yönetimi), Agent Operator (günlük işlemler), Viewer (sadece okuma). Her rol için 12 farklı izin matrisi bulunur.',
+      metadata: { source: 'orbicorp-settings.html', section: 'Users & Roles', pageTitle: 'Kullanıcı Yönetimi' },
+      semanticTags: ['user', 'role', 'permission', 'settings'],
+      qualityScore: 87
+    },
+    {
+      id: 'analytics_themes',
+      content: 'Analitik sayfası 3 tema sunar: Şirket Performansı (gelir, gider, kar), Agent & Platform Performansı (8 agent mini dashboard), Sistem Performansı (CPU, RAM, Disk gauges, API response time).',
+      metadata: { source: 'orbicorp-analytics.html', section: 'Themes', pageTitle: 'Analitik' },
+      semanticTags: ['analytics', 'dashboard', 'kpi', 'performance'],
+      qualityScore: 86
+    },
+    {
+      id: 'skill_market',
+      content: 'Skill Market 14 ürün ve 7 kategori içerir: Agent Skills, Agent Personas, Language Packs, Automation Connectors, Security, Analytics, Ads & Marketing. Fiyatlar $19-$79/ay arasında değişir.',
+      metadata: { source: 'orbicorp-market.html', section: 'Categories', pageTitle: 'Skill Market' },
+      semanticTags: ['skill', 'market', 'pricing'],
+      qualityScore: 84
+    },
+    {
+      id: 'chat_features',
+      content: 'Chat sayfası drag & drop dosya yükleme, sesli mesaj kaydı, agent switcher (4 agent arası geçiş) ve demo senaryolar içerir. Resim, PDF, Word ve Excel dosyaları desteklenir.',
+      metadata: { source: 'orbicorp-chat.html', section: 'Features', pageTitle: 'Chat' },
+      semanticTags: ['chat', 'file', 'voice'],
+      qualityScore: 82
+    },
+    {
+      id: 'dark_mode',
+      content: 'Dark mode Claude Desktop tonları kullanır: #2B2A27 arka plan, #323130 kartlar, #4A4845 kenarlıklar, #7B73FF primary renk. Tema değişikliği Settings > Genel > Tema ile yapılır.',
+      metadata: { source: 'ORBICORP_CONTEXT.md', section: 'Dark Mode', pageTitle: 'Tema Ayarları' },
+      semanticTags: ['settings', 'theme', 'dark'],
+      qualityScore: 80
+    },
+    {
+      id: 'api_keys',
+      content: 'API anahtarları Settings > API Anahtarları bölümünden yönetilir. Anthropic (Claude), OpenAI (GPT), Google (Gemini) desteklenir. Anahtarlar AES-256 ile şifrelenir.',
+      metadata: { source: 'orbicorp-settings.html', section: 'API Keys', pageTitle: 'API Yönetimi' },
+      semanticTags: ['api', 'settings', 'security'],
+      qualityScore: 88
+    }
+  ]
+};
+
+// RAG sistemi başlatma
+async function initRAGIfNeeded() {
+  if (ragInitialized) return;
+  
+  console.log('RAG sistemi başlatılıyor...');
+  
+  // Demo verilerini yükle
+  ragChunks = DEMO_RAG_DATA.chunks;
+  ragInitialized = true;
+  
+  // RAG model adını ayarla
+  const prefs = JSON.parse(localStorage.getItem('orbicorp_rag_preferences') || '{}');
+  const modelName = prefs.primaryModel ? prefs.primaryModel.split(':')[1] : 'claude-sonnet-4-6';
+  document.getElementById('ragModelName').textContent = formatModelName(modelName);
+  
+  console.log('RAG sistemi hazır:', ragChunks.length, 'chunk yüklendi');
+}
+
+function formatModelName(modelId) {
+  const names = {
+    'claude-sonnet-4-6': 'Claude Sonnet',
+    'claude-haiku-4-5': 'Claude Haiku',
+    'claude-opus-4-6': 'Claude Opus',
+    'gpt-4o': 'GPT-4o',
+    'gpt-4o-mini': 'GPT-4o Mini',
+    'gemini-1.5-pro': 'Gemini Pro',
+    'gemini-1.5-flash': 'Gemini Flash'
+  };
+  return names[modelId] || modelId;
+}
+
+// Basit TF-IDF benzeri arama
+function searchRAG(query, topK = 5) {
+  if (!ragChunks || ragChunks.length === 0) return [];
+  
+  const queryTerms = query.toLowerCase().split(/\s+/).filter(t => t.length > 2);
+  
+  const scored = ragChunks.map(chunk => {
+    let score = 0;
+    const content = chunk.content.toLowerCase();
+    const tags = chunk.semanticTags || [];
+    
+    // Term matching
+    queryTerms.forEach(term => {
+      if (content.includes(term)) score += 2;
+      if (tags.some(t => t.includes(term))) score += 3;
+      if (chunk.metadata?.section?.toLowerCase().includes(term)) score += 2;
+    });
+    
+    // Quality score bonus
+    score += (chunk.qualityScore || 50) / 50;
+    
+    return { ...chunk, score };
+  });
+  
+  return scored
+    .filter(c => c.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, topK);
+}
+
+// RAG sorgusu işleme
+async function handleRAGQuery(query) {
+  await initRAGIfNeeded();
+  
+  // Arama yap
+  const results = searchRAG(query, 5);
+  
+  // Typing'i kaldır ve yanıt oluştur
+  setTimeout(() => {
+    histories['knowledge'] = histories['knowledge'].filter(m => m.role !== 'typing' && m.role !== 'rag-loading');
+    
+    if (results.length === 0) {
+      histories['knowledge'].push({
+        role: 'ai',
+        time: now(),
+        text: 'Üzgünüm, bu konuda bilgi tabanında yeterli bilgi bulamadım. Lütfen sorunuzu farklı şekilde sormayı deneyin veya daha spesifik detaylar verin.',
+        ragConfidence: { level: 'LOW', score: 0 }
+      });
+    } else {
+      const topResult = results[0];
+      const confidence = topResult.score > 5 ? 'HIGH' : topResult.score > 2 ? 'MEDIUM' : 'LOW';
+      
+      // Yanıt oluştur
+      let responseText = generateRAGResponse(query, results);
+      
+      histories['knowledge'].push({
+        role: 'ai',
+        time: now(),
+        text: responseText,
+        ragConfidence: { level: confidence, score: topResult.score },
+        ragSources: results.slice(0, 3).map(r => ({
+          source: r.metadata?.source || 'Bilinmiyor',
+          section: r.metadata?.section || 'Genel',
+          score: r.score
+        }))
+      });
+    }
+    
+    render();
+  }, 800 + Math.random() * 600);
+}
+
+// RAG yanıtı oluşturma
+function generateRAGResponse(query, results) {
+  const q = query.toLowerCase();
+  const topResult = results[0];
+  
+  // Soru türüne göre yanıt şablonu
+  if (q.includes('nasıl') || q.includes('how')) {
+    return `${topResult.metadata?.pageTitle || 'OrbiCorp'} sayfasına göre:\n\n${topResult.content}\n\nDaha fazla detay için ${topResult.metadata?.source || 'ilgili sayfa'}yı inceleyebilirsiniz.`;
+  }
+  
+  if (q.includes('nedir') || q.includes('what')) {
+    return `${topResult.content}\n\n📍 Kaynak: ${topResult.metadata?.source || 'OrbiCorp Dokümantasyonu'}`;
+  }
+  
+  if (q.includes('kaç') || q.includes('liste')) {
+    return `${topResult.metadata?.section || 'İlgili bölüm'}e göre:\n\n${topResult.content}`;
+  }
+  
+  // Genel yanıt
+  return `${topResult.content}\n\nBu bilgi ${topResult.metadata?.source || 'OrbiCorp dokümantasyonu'}ndan alınmıştır.`;
+}
+
+// Kaynak ikonu
+function getSourceIcon(source) {
+  if (source.includes('dashboard')) return 'D';
+  if (source.includes('agent')) return 'A';
+  if (source.includes('settings')) return '⚙';
+  if (source.includes('workflow')) return 'W';
+  if (source.includes('analytics')) return '📊';
+  if (source.includes('chat')) return '💬';
+  if (source.includes('market')) return '🛒';
+  if (source.includes('CONTEXT') || source.includes('Documentation')) return '📄';
+  return '📁';
+}
+
+// Kaynak detayı göster
+function showSourceDetail(source, section) {
+  alert(`Kaynak: ${source}\nBölüm: ${section || 'Genel'}\n\nGerçek uygulamada bu kaynak sayfası açılır.`);
+}
+</script>
+</body>
+</html>

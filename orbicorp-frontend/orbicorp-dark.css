@@ -1,0 +1,718 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   ORBICORP DARK MODE THEME
+   Bu dosya [data-theme="dark"] attribute'u ile aktive edilir.
+   index.html'den iframe'lere propagate edilir.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+[data-theme="dark"] {
+  /* Primary Colors */
+  --primary: #7A73FF;
+  --primary-light: #918AFF;
+  --primary-bg: #2D2B5A;
+  --primary-bg-subtle: #1E1D3A;
+  
+  /* Navy / Base */
+  --navy: #E8E6F2;
+  --navy-light: #B8B5D0;
+  --navy-muted: #9B98B8;
+  
+  /* Surfaces */
+  --surface: #0F0E1A;
+  --surface-warm: #141320;
+  --white: #1A1927;
+  
+  /* Borders */
+  --border: #2E2D42;
+  --border-light: #252438;
+  
+  /* Text */
+  --text-primary: #F0EEF9;
+  --text-secondary: #B8B5D0;
+  --text-tertiary: #8280A0;
+  --text-muted: #5E5C78;
+  
+  /* Semantic Colors - Green */
+  --green: #34D399;
+  --green-bg: #0D3A2D;
+  --green-text: #6EE7B7;
+  
+  /* Semantic Colors - Amber */
+  --amber: #FBBF24;
+  --amber-bg: #3D2E0A;
+  --amber-text: #FCD34D;
+  
+  /* Semantic Colors - Red */
+  --red: #F87171;
+  --red-bg: #3D1519;
+  --red-text: #FCA5A5;
+  
+  /* Semantic Colors - Blue */
+  --blue: #60A5FA;
+  --blue-bg: #0C2D4D;
+  --blue-text: #93C5FD;
+  
+  /* Shadows - darker for dark mode */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 2px 8px rgba(0,0,0,0.4);
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.3), 0 0 0 0.5px var(--border);
+}
+
+/* ═══ GLOBAL OVERRIDES ═══ */
+[data-theme="dark"] body {
+  background: var(--surface);
+  color: var(--text-primary);
+}
+
+/* ═══ TOP NAVIGATION ═══ */
+[data-theme="dark"] .topnav {
+  background: var(--white);
+  border-bottom-color: var(--border);
+}
+
+[data-theme="dark"] .topnav-name {
+  color: var(--navy);
+}
+
+[data-theme="dark"] .topnav-tab {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .topnav-tab:hover {
+  background: var(--surface);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .topnav-tab.active {
+  background: var(--primary-bg);
+  color: var(--primary);
+}
+
+[data-theme="dark"] .topnav-search {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text-muted);
+}
+
+[data-theme="dark"] .topnav-search:hover {
+  border-color: var(--primary);
+}
+
+[data-theme="dark"] .topnav-search kbd {
+  background: var(--white);
+  border-color: var(--border);
+  color: var(--text-tertiary);
+}
+
+/* ═══ SIDEBAR ═══ */
+[data-theme="dark"] .sidebar {
+  background: var(--white);
+  border-right-color: var(--border);
+}
+
+[data-theme="dark"] .sidebar-toggle {
+  border-color: var(--border);
+  background: var(--white);
+}
+
+[data-theme="dark"] .sidebar-toggle:hover {
+  background: var(--surface);
+}
+
+[data-theme="dark"] .sidebar-label,
+[data-theme="dark"] .nav-group-label {
+  color: var(--text-muted);
+}
+
+[data-theme="dark"] .nav-item,
+[data-theme="dark"] .sidebar-item {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .nav-item:hover,
+[data-theme="dark"] .sidebar-item:hover {
+  background: var(--surface);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .nav-item.active,
+[data-theme="dark"] .sidebar-item.active {
+  background: var(--primary-bg);
+  color: var(--primary);
+}
+
+[data-theme="dark"] .nav-badge,
+[data-theme="dark"] .sidebar-badge {
+  background: var(--primary-bg);
+  color: var(--primary);
+}
+
+/* ═══ CARDS & SURFACES ═══ */
+[data-theme="dark"] .card,
+[data-theme="dark"] .info-card,
+[data-theme="dark"] .summary-card,
+[data-theme="dark"] .kpi,
+[data-theme="dark"] .skill-card,
+[data-theme="dark"] .template-card,
+[data-theme="dark"] .agent-perf-card,
+[data-theme="dark"] .gauge-card {
+  background: var(--white);
+  border-color: var(--border);
+}
+
+[data-theme="dark"] .card:hover,
+[data-theme="dark"] .summary-card:hover,
+[data-theme="dark"] .skill-card:hover {
+  border-color: var(--primary);
+}
+
+/* ═══ TABLES ═══ */
+[data-theme="dark"] .table-wrap {
+  background: var(--white);
+  border-color: var(--border);
+}
+
+[data-theme="dark"] thead th {
+  background: var(--surface);
+  border-bottom-color: var(--border);
+  color: var(--text-muted);
+}
+
+[data-theme="dark"] thead th:hover {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] tbody tr {
+  border-bottom-color: var(--border-light);
+}
+
+[data-theme="dark"] tbody tr:hover {
+  background: var(--primary-bg-subtle);
+}
+
+[data-theme="dark"] tbody tr.selected {
+  background: var(--primary-bg);
+}
+
+[data-theme="dark"] td {
+  color: var(--text-secondary);
+}
+
+/* ═══ BUTTONS ═══ */
+[data-theme="dark"] .btn {
+  border-color: var(--border);
+}
+
+[data-theme="dark"] .btn-secondary {
+  background: var(--white);
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .btn-secondary:hover {
+  background: var(--surface);
+}
+
+[data-theme="dark"] .btn-danger {
+  background: var(--white);
+  color: var(--red-text);
+  border-color: var(--red-bg);
+}
+
+[data-theme="dark"] .btn-danger:hover {
+  background: var(--red-bg);
+}
+
+/* ═══ FORM ELEMENTS ═══ */
+[data-theme="dark"] input.fi,
+[data-theme="dark"] select.fi,
+[data-theme="dark"] textarea.fi,
+[data-theme="dark"] .search-box,
+[data-theme="dark"] .edit-input {
+  background: var(--white);
+  border-color: var(--border);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] input.fi:focus,
+[data-theme="dark"] select.fi:focus,
+[data-theme="dark"] textarea.fi:focus,
+[data-theme="dark"] .search-box:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-bg);
+}
+
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder {
+  color: var(--text-muted);
+}
+
+/* ═══ BADGES ═══ */
+[data-theme="dark"] .badge-green {
+  background: var(--green-bg);
+  color: var(--green-text);
+}
+
+[data-theme="dark"] .badge-amber {
+  background: var(--amber-bg);
+  color: var(--amber-text);
+}
+
+[data-theme="dark"] .badge-red {
+  background: var(--red-bg);
+  color: var(--red-text);
+}
+
+[data-theme="dark"] .badge-blue {
+  background: var(--blue-bg);
+  color: var(--blue-text);
+}
+
+[data-theme="dark"] .badge-purple {
+  background: var(--primary-bg);
+  color: var(--primary);
+}
+
+[data-theme="dark"] .badge-gray {
+  background: #2A2938;
+  color: #9B98B8;
+}
+
+/* ═══ MODALS ═══ */
+[data-theme="dark"] .modal,
+[data-theme="dark"] .wizard-modal,
+[data-theme="dark"] .edit-modal,
+[data-theme="dark"] .detail-modal,
+[data-theme="dark"] .ch-modal {
+  background: var(--white);
+  border-color: var(--border);
+}
+
+[data-theme="dark"] .modal-overlay,
+[data-theme="dark"] .wizard-overlay,
+[data-theme="dark"] .edit-overlay {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+/* ═══ TOGGLES ═══ */
+[data-theme="dark"] .toggle-track {
+  background: var(--border);
+}
+
+[data-theme="dark"] .toggle input:checked + .toggle-track {
+  background: var(--primary);
+}
+
+[data-theme="dark"] .toggle-thumb {
+  background: var(--text-primary);
+}
+
+/* ═══ CHARTS & VISUALIZATIONS ═══ */
+[data-theme="dark"] .chart-area {
+  background: var(--white);
+}
+
+[data-theme="dark"] .progress-track,
+[data-theme="dark"] .progress-sm {
+  background: var(--border);
+}
+
+/* ═══ CHAT INTERFACE ═══ */
+[data-theme="dark"] .chat-area {
+  background: var(--surface);
+}
+
+[data-theme="dark"] .chat-top-bar {
+  background: var(--white);
+  border-bottom-color: var(--border);
+}
+
+[data-theme="dark"] .agent-tab {
+  border-color: var(--border);
+  background: var(--white);
+  color: var(--text-tertiary);
+}
+
+[data-theme="dark"] .agent-tab:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+[data-theme="dark"] .agent-tab.active {
+  background: var(--primary-bg);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+[data-theme="dark"] .chat-msg.ai .chat-msg-bubble {
+  background: var(--white);
+  border-color: var(--border);
+}
+
+[data-theme="dark"] .chat-action-card {
+  background: var(--white);
+  border-color: var(--border);
+}
+
+[data-theme="dark"] .chat-input-area {
+  background: var(--white);
+  border-top-color: var(--border);
+}
+
+[data-theme="dark"] .chat-input-box {
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+[data-theme="dark"] .chat-input-box:focus-within {
+  border-color: var(--primary);
+}
+
+[data-theme="dark"] #chatInput {
+  background: transparent;
+  color: var(--text-primary);
+}
+
+/* ═══ WORKFLOW BUILDER ═══ */
+[data-theme="dark"] .palette {
+  background: var(--white);
+  border-right-color: var(--border);
+}
+
+[data-theme="dark"] .canvas-area {
+  background: var(--surface);
+  background-image: radial-gradient(circle, var(--border) 1px, transparent 1px);
+}
+
+[data-theme="dark"] .node {
+  background: var(--white);
+  border-color: var(--border);
+}
+
+[data-theme="dark"] .node.selected {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-bg);
+}
+
+[data-theme="dark"] .canvas-controls {
+  background: var(--white);
+  border-color: var(--border);
+}
+
+[data-theme="dark"] .config-panel {
+  background: var(--white);
+  border-left-color: var(--border);
+}
+
+/* ═══ GANTT / TASKS ═══ */
+[data-theme="dark"] .gantt-wrap {
+  background: var(--white);
+  border-color: var(--border);
+}
+
+[data-theme="dark"] .gantt-header {
+  background: var(--surface);
+}
+
+[data-theme="dark"] .gantt-label-col {
+  border-right-color: var(--border);
+}
+
+[data-theme="dark"] .gantt-time-cell {
+  border-right-color: var(--border-light);
+  color: var(--text-muted);
+}
+
+[data-theme="dark"] .gantt-time-cell.today {
+  background: var(--primary-bg-subtle);
+  color: var(--primary);
+}
+
+[data-theme="dark"] .gantt-row {
+  border-bottom-color: var(--border-light);
+}
+
+[data-theme="dark"] .gantt-row:hover {
+  background: var(--primary-bg-subtle);
+}
+
+[data-theme="dark"] .gantt-row-label {
+  border-right-color: var(--border);
+}
+
+[data-theme="dark"] .gantt-grid-line,
+[data-theme="dark"] .today-line {
+  background: var(--border-light);
+}
+
+/* ═══ MARKET ═══ */
+[data-theme="dark"] .market-hero {
+  background: linear-gradient(135deg, #4840B8 0%, #1A1927 100%);
+}
+
+[data-theme="dark"] .featured-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .featured-card:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .filter-section {
+  border-bottom-color: var(--border);
+}
+
+[data-theme="dark"] .filter-option {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .filter-option:hover {
+  color: var(--primary);
+}
+
+[data-theme="dark"] .filter-option .count {
+  background: var(--surface);
+  color: var(--text-muted);
+}
+
+/* ═══ SETTINGS ═══ */
+[data-theme="dark"] .settings-nav {
+  background: var(--white);
+  border-right-color: var(--border);
+}
+
+[data-theme="dark"] .api-row {
+  border-bottom-color: var(--border-light);
+}
+
+[data-theme="dark"] .api-key-value {
+  background: var(--surface);
+  color: var(--text-tertiary);
+}
+
+[data-theme="dark"] .llm-table {
+  border-color: var(--border);
+}
+
+[data-theme="dark"] .llm-table th {
+  background: var(--surface);
+  border-bottom-color: var(--border);
+}
+
+[data-theme="dark"] .llm-table td {
+  border-bottom-color: var(--border-light);
+}
+
+[data-theme="dark"] .toggle-row {
+  border-bottom-color: var(--border-light);
+}
+
+/* ═══ COMPANY PROFILE ═══ */
+[data-theme="dark"] .company-logo-area {
+  background: var(--surface);
+}
+
+[data-theme="dark"] .progress-area {
+  background: var(--primary-bg-subtle);
+  border-color: var(--primary-bg);
+}
+
+[data-theme="dark"] .section-nav-item {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .section-nav-item:hover {
+  background: var(--surface);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .section-nav-item.active {
+  background: var(--primary-bg);
+  color: var(--primary);
+}
+
+[data-theme="dark"] .info-field {
+  border-bottom-color: var(--border-light);
+}
+
+[data-theme="dark"] .info-label {
+  color: var(--text-tertiary);
+}
+
+[data-theme="dark"] .info-value {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .value-card {
+  background: var(--white);
+  border-color: var(--border);
+}
+
+[data-theme="dark"] .empty-warning {
+  background: var(--amber-bg);
+  border-color: #5C4A1A;
+}
+
+[data-theme="dark"] .tag {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text-secondary);
+}
+
+/* ═══ ANALYTICS ═══ */
+[data-theme="dark"] .date-pills {
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+[data-theme="dark"] .date-pill {
+  color: var(--text-tertiary);
+}
+
+[data-theme="dark"] .date-pill.active {
+  background: var(--white);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .status-row {
+  border-bottom-color: var(--border-light);
+}
+
+[data-theme="dark"] .status-name {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .status-val {
+  color: var(--text-secondary);
+}
+
+/* ═══ PAYMENT MODAL ═══ */
+[data-theme="dark"] .pay-right {
+  background: var(--white);
+}
+
+[data-theme="dark"] .pay-card-option {
+  border-color: var(--border);
+}
+
+[data-theme="dark"] .pay-card-option:hover {
+  border-color: var(--primary);
+}
+
+[data-theme="dark"] .pay-card-option.selected {
+  border-color: var(--primary);
+  background: var(--primary-bg-subtle);
+}
+
+[data-theme="dark"] .pay-card-label {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .pay-card-exp {
+  color: var(--text-muted);
+}
+
+[data-theme="dark"] .pay-field input {
+  background: var(--white);
+  border-color: var(--border);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .pay-field input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-bg);
+}
+
+[data-theme="dark"] .pay-billing-info {
+  background: var(--surface);
+}
+
+/* ═══ SCROLLBARS ═══ */
+[data-theme="dark"] ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-track {
+  background: var(--surface);
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* ═══ MISC ═══ */
+[data-theme="dark"] .divider,
+[data-theme="dark"] hr {
+  border-color: var(--border);
+  background: var(--border);
+}
+
+[data-theme="dark"] code {
+  background: var(--surface);
+  color: var(--primary);
+}
+
+[data-theme="dark"] .skill-tag {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .category-tag {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .category-tag.active {
+  background: var(--primary-bg);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+/* ═══ LIVE INDICATORS ═══ */
+[data-theme="dark"] .live-dot::before {
+  background: var(--green);
+}
+
+/* ═══ ORG CHART ═══ */
+[data-theme="dark"] .org-editor-overlay {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+[data-theme="dark"] .org-editor-modal {
+  background: var(--white);
+  border-color: var(--border);
+}
+
+[data-theme="dark"] .lt-node {
+  background: var(--white);
+  border-color: var(--border);
+}
+
+[data-theme="dark"] .lt-node.selected {
+  border-color: var(--primary);
+  background: var(--primary-bg-subtle);
+}
+
+[data-theme="dark"] .lt-node.root {
+  background: linear-gradient(135deg, var(--primary-bg), var(--primary-bg-subtle));
+  border-color: var(--primary);
+}
+
+[data-theme="dark"] .lt-title {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .lt-name {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .lt-count {
+  color: var(--text-tertiary);
+}

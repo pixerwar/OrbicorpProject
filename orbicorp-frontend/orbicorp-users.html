@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orbicorp — Kullanıcı Yönetimi</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--primary:#635BFF;--primary-light:#7A73FF;--primary-bg:#F0EEFF;--primary-bg-subtle:#F8F7FF;--navy:#0A2540;--surface:#F6F9FC;--white:#FFFFFF;--border:#E3E8EE;--border-light:#EBEEF2;--text-primary:#0A2540;--text-secondary:#425466;--text-tertiary:#8792A2;--text-muted:#A3ACB9;--green:#0EA371;--green-bg:#EEFBF4;--green-text:#0C7D58;--amber:#D97706;--amber-bg:#FEF7E6;--amber-text:#92510A;--red:#DF1B41;--red-bg:#FDE8EC;--red-text:#A11534;--blue:#0570DE;--blue-bg:#E8F2FD;--blue-text:#0455A9;--radius-sm:6px;--radius-md:8px;--radius-lg:12px;--radius-xl:16px;--font:'Google Sans',-apple-system,BlinkMacSystemFont,sans-serif;--font-mono:'Google Sans Mono','SF Mono',monospace;--transition:0.2s cubic-bezier(0.4,0,0.2,1)}
+
+/* DARK MODE */
+[data-theme="dark"]{--primary:#7C75FF;--primary-light:#9590FF;--primary-bg:#2A2654;--primary-bg-subtle:#1E1B3A;--navy:#E8EAED;--surface:#0D0D12;--white:#18181B;--border:#2E2E35;--border-light:#252529;--text-primary:#F4F4F5;--text-secondary:#A1A1AA;--text-tertiary:#71717A;--text-muted:#52525B;--green:#34D399;--green-bg:#064E3B;--green-text:#6EE7B7;--amber:#FBBF24;--amber-bg:#78350F;--amber-text:#FCD34D;--red:#F87171;--red-bg:#7F1D1D;--red-text:#FCA5A5;--blue:#60A5FA;--blue-bg:#1E3A5F;--blue-text:#93C5FD}
+[data-theme="dark"] body{background:#09090B}
+[data-theme="dark"] .modal{background:var(--white);border:1px solid var(--border)}
+[data-theme="dark"] .table tr:hover{background:var(--surface)}
+[data-theme="dark"] .btn-secondary{background:var(--surface);border-color:var(--border)}
+[data-theme="dark"] .filter-select{background:var(--white);color:var(--text-primary)}
+[data-theme="dark"] .search-box{background:var(--white)}
+[data-theme="dark"] .toast{background:var(--navy);color:var(--surface)}
+[data-theme="dark"] .form-input{background:var(--surface);border-color:var(--border)}
+
+body{font-family:var(--font);background:var(--surface);color:var(--text-primary);-webkit-font-smoothing:antialiased}
+
+/* LAYOUT */
+.layout{display:flex;min-height:100vh}
+.main{flex:1;padding:24px 32px;overflow-y:auto;min-width:0}
+
+/* Page header */
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.page-title{font-size:20px;font-weight:600;color:var(--navy);letter-spacing:-0.3px}
+.page-subtitle{font-size:13px;color:var(--text-tertiary);margin-top:2px}
+.header-actions{display:flex;gap:10px}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;cursor:pointer;transition:all var(--transition);border:none;font-family:var(--font)}
+.btn-primary{background:var(--primary);color:white}
+.btn-primary:hover{background:var(--primary-light)}
+.btn-primary:disabled{opacity:0.6;cursor:not-allowed}
+.btn-secondary{background:var(--white);color:var(--text-secondary);border:0.5px solid var(--border)}
+.btn-secondary:hover{background:var(--surface);border-color:var(--text-muted)}
+.btn-danger{background:var(--red-bg);color:var(--red-text);border:0.5px solid var(--red-bg)}
+.btn-danger:hover{background:var(--red);color:white}
+.btn-success{background:var(--green-bg);color:var(--green-text);border:0.5px solid var(--green-bg)}
+.btn-success:hover{background:var(--green);color:white}
+.btn svg{width:14px;height:14px}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-sm svg{width:12px;height:12px}
+.btn-icon{padding:8px;border-radius:var(--radius-sm);background:transparent;border:none;cursor:pointer;color:var(--text-muted);transition:all var(--transition)}
+.btn-icon:hover{background:var(--surface);color:var(--text-primary)}
+
+/* Badge */
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:3px 10px;border-radius:999px;font-weight:500}
+.badge-green{background:var(--green-bg);color:var(--green-text)}
+.badge-amber{background:var(--amber-bg);color:var(--amber-text)}
+.badge-red{background:var(--red-bg);color:var(--red-text)}
+.badge-blue{background:var(--blue-bg);color:var(--blue-text)}
+.badge-gray{background:#F1EFE8;color:#5F5E5A}
+.badge-primary{background:var(--primary-bg);color:var(--primary)}
+
+/* Search & Filter Bar */
+.filter-bar{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+.search-box{display:flex;align-items:center;gap:10px;padding:9px 14px;background:var(--white);border:0.5px solid var(--border);border-radius:var(--radius-md);flex:1;min-width:200px}
+.search-box svg{width:16px;height:16px;color:var(--text-muted);flex-shrink:0}
+.search-box input{flex:1;border:none;outline:none;font-size:13px;font-family:var(--font);color:var(--text-primary);background:transparent}
+.search-box input::placeholder{color:var(--text-muted)}
+.filter-select{padding:9px 32px 9px 12px;border:0.5px solid var(--border);border-radius:var(--radius-md);font-size:13px;font-family:var(--font);color:var(--text-primary);background:var(--white);cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%238792A2' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
+
+/* Table */
+.table-container{background:var(--white);border:0.5px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+.table{width:100%;border-collapse:collapse}
+.table th{text-align:left;padding:12px 16px;font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;background:var(--surface);border-bottom:0.5px solid var(--border)}
+.table td{padding:14px 16px;border-bottom:0.5px solid var(--border-light);font-size:13px;color:var(--text-secondary);vertical-align:middle}
+.table tr:last-child td{border-bottom:none}
+.table tr:hover{background:var(--surface)}
+.table-actions{display:flex;gap:4px}
+
+/* User avatar */
+.user-cell{display:flex;align-items:center;gap:12px}
+.user-avatar{width:36px;height:36px;border-radius:50%;flex-shrink:0;object-fit:cover}
+.user-avatar-initials{display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;background:var(--primary-bg);color:var(--primary)}
+.user-info{min-width:0}
+.user-name{font-size:13px;font-weight:500;color:var(--text-primary)}
+.user-email{font-size:12px;color:var(--text-muted)}
+
+/* Role badge colors */
+.role-admin{background:var(--red-bg);color:var(--red-text)}
+.role-operator{background:var(--blue-bg);color:var(--blue-text)}
+.role-viewer{background:var(--green-bg);color:var(--green-text)}
+
+/* Stats */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.stat-card{background:var(--white);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:16px 20px;text-align:center}
+.stat-value{font-size:28px;font-weight:600;color:var(--navy)}
+.stat-label{font-size:12px;color:var(--text-muted);margin-top:4px}
+
+/* Pagination */
+.pagination{display:flex;align-items:center;justify-content:space-between;margin-top:16px;padding-top:16px;border-top:0.5px solid var(--border-light)}
+.pagination-info{font-size:12px;color:var(--text-muted)}
+.pagination-btns{display:flex;gap:6px}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(10,37,64,0.5);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;visibility:hidden;transition:all 0.3s}
+.modal-overlay.open{opacity:1;visibility:visible}
+.modal{background:var(--white);border-radius:var(--radius-xl);width:100%;max-width:520px;max-height:90vh;overflow:hidden;transform:translateY(20px);transition:transform 0.3s}
+.modal-overlay.open .modal{transform:translateY(0)}
+.modal-header{padding:20px 24px;border-bottom:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-size:16px;font-weight:600;color:var(--navy)}
+.modal-close{width:32px;height:32px;border-radius:var(--radius-sm);border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-muted);transition:all var(--transition)}
+.modal-close:hover{background:var(--surface);color:var(--text-primary)}
+.modal-body{padding:24px;overflow-y:auto;max-height:calc(90vh - 140px)}
+.modal-footer{padding:16px 24px;border-top:0.5px solid var(--border);display:flex;justify-content:flex-end;gap:10px}
+
+/* Form */
+.form-group{margin-bottom:18px}
+.form-label{display:block;font-size:13px;font-weight:500;color:var(--text-primary);margin-bottom:6px}
+.form-input{width:100%;padding:10px 14px;border:0.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:var(--font);color:var(--text-primary);transition:border-color var(--transition);background:var(--white)}
+.form-input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-bg)}
+.form-hint{font-size:11px;color:var(--text-muted);margin-top:4px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.form-error{color:var(--red);font-size:11px;margin-top:4px}
+
+/* Avatar upload */
+.avatar-upload{display:flex;align-items:center;gap:16px;margin-bottom:18px}
+.avatar-preview{width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--primary-bg);color:var(--primary);font-size:24px;font-weight:600;overflow:hidden;flex-shrink:0}
+.avatar-preview img{width:100%;height:100%;object-fit:cover}
+.avatar-actions{display:flex;flex-direction:column;gap:8px}
+.avatar-input{display:none}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;background:var(--navy);color:white;border-radius:var(--radius-md);font-size:13px;display:flex;align-items:center;gap:10px;box-shadow:0 4px 12px rgba(0,0,0,0.15);transform:translateY(100px);opacity:0;transition:all 0.3s;z-index:1001}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{background:var(--green)}
+.toast.error{background:var(--red)}
+
+/* Loading */
+.loading{display:flex;align-items:center;justify-content:center;padding:60px;color:var(--text-muted)}
+.spinner{width:24px;height:24px;border:2px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin 0.8s linear infinite;margin-right:10px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Empty state */
+.empty-state{text-align:center;padding:60px 20px;color:var(--text-muted)}
+.empty-state svg{width:48px;height:48px;margin-bottom:16px;opacity:0.5}
+.empty-state h3{font-size:16px;font-weight:500;color:var(--text-primary);margin-bottom:8px}
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <main class="main">
+    <!-- Header -->
+    <div class="page-header">
+      <div>
+        <div class="page-title">Kullanıcı Yönetimi</div>
+        <div class="page-subtitle">Kullanıcıları, rolleri ve erişim izinlerini yönetin</div>
+      </div>
+      <div class="header-actions" id="headerActions">
+        <!-- Admin için Kullanıcı Ekle butonu dinamik olarak eklenecek -->
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-value" id="statTotal">-</div>
+        <div class="stat-label">Toplam Kullanıcı</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statAdmin" style="color:var(--red)">-</div>
+        <div class="stat-label">Admin</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statOperator" style="color:var(--blue)">-</div>
+        <div class="stat-label">Operatör</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statViewer" style="color:var(--green)">-</div>
+        <div class="stat-label">Görüntüleyici</div>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filter-bar">
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" placeholder="İsim, email veya telefon ara..." id="searchInput">
+      </div>
+      <select class="filter-select" id="roleFilter">
+        <option value="">Tüm Roller</option>
+        <option value="ADMIN">Admin</option>
+        <option value="OPERATOR">Operatör</option>
+        <option value="VIEWER">Görüntüleyici</option>
+      </select>
+      <select class="filter-select" id="departmentFilter">
+        <option value="">Tüm Departmanlar</option>
+      </select>
+    </div>
+
+    <!-- Table -->
+    <div class="table-container">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Kullanıcı</th>
+            <th>Rol</th>
+            <th>Departman</th>
+            <th>Son Giriş</th>
+            <th style="width:120px">İşlemler</th>
+          </tr>
+        </thead>
+        <tbody id="usersTableBody">
+          <tr>
+            <td colspan="5">
+              <div class="loading">
+                <div class="spinner"></div>
+                Kullanıcılar yükleniyor...
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination">
+      <div class="pagination-info" id="paginationInfo">-</div>
+      <div class="pagination-btns">
+        <button class="btn btn-sm btn-secondary" id="prevBtn" onclick="prevPage()" disabled>← Önceki</button>
+        <button class="btn btn-sm btn-secondary" id="nextBtn" onclick="nextPage()" disabled>Sonraki →</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- User Modal -->
+<div class="modal-overlay" id="userModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="userModalTitle">Yeni Kullanıcı Ekle</div>
+      <button class="modal-close" onclick="closeUserModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <!-- Avatar Upload -->
+      <div class="avatar-upload">
+        <div class="avatar-preview" id="avatarPreview">
+          <span id="avatarInitials">?</span>
+        </div>
+        <div class="avatar-actions">
+          <input type="file" id="avatarInput" class="avatar-input" accept="image/*" onchange="handleAvatarUpload(event)">
+          <button class="btn btn-sm btn-secondary" onclick="document.getElementById('avatarInput').click()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:14px;height:14px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Fotoğraf Yükle
+          </button>
+          <button class="btn btn-sm btn-secondary" onclick="removeAvatar()" id="removeAvatarBtn" style="display:none">Fotoğrafı Kaldır</button>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Ad *</label>
+          <input type="text" class="form-input" id="userFirstName" placeholder="Örn: Ahmet">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Soyad *</label>
+          <input type="text" class="form-input" id="userLastName" placeholder="Örn: Yılmaz">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email *</label>
+        <input type="email" class="form-input" id="userEmail" placeholder="ornek@sirket.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Telefon</label>
+        <input type="tel" class="form-input" id="userPhone" placeholder="+90 5XX XXX XX XX">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Rol *</label>
+          <select class="form-input" id="userRole">
+            <option value="VIEWER">Görüntüleyici</option>
+            <option value="OPERATOR">Operatör</option>
+            <option value="ADMIN">Admin</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Departman</label>
+          <select class="form-input" id="userDepartment">
+            <option value="">Seçiniz</option>
+          </select>
+        </div>
+      </div>
+      
+      <!-- Password section (for new users or reset) -->
+      <div id="passwordSection">
+        <div class="form-group">
+          <label class="form-label" id="passwordLabel">Şifre *</label>
+          <input type="password" class="form-input" id="userPassword" placeholder="En az 8 karakter">
+          <div class="form-hint">Minimum 8 karakter olmalı</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeUserModal()">İptal</button>
+      <button class="btn btn-primary" onclick="saveUser()" id="saveUserBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Kaydet
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-header">
+      <div class="modal-title">Kullanıcıyı Sil</div>
+      <button class="modal-close" onclick="closeDeleteModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:14px;color:var(--text-secondary)">
+        <strong id="deleteUserName"></strong> kullanıcısını silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
+      </p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeDeleteModal()">İptal</button>
+      <button class="btn btn-danger" onclick="confirmDelete()" id="confirmDeleteBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        Sil
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Password Reset Modal -->
+<div class="modal-overlay" id="resetPasswordModal">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-header">
+      <div class="modal-title">Şifre Sıfırla</div>
+      <button class="modal-close" onclick="closeResetPasswordModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px">
+        <strong id="resetUserName"></strong> için yeni şifre belirleyin.
+      </p>
+      <div class="form-group">
+        <label class="form-label">Yeni Şifre *</label>
+        <input type="password" class="form-input" id="newPassword" placeholder="En az 8 karakter">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeResetPasswordModal()">İptal</button>
+      <button class="btn btn-primary" onclick="confirmResetPassword()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Şifreyi Sıfırla
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <span id="toastText"></span>
+</div>
+
+<script src="orbicorp-api.js"></script>
+<script>
+// ═══════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════
+
+let users = [];
+let departments = [];
+let currentUser = null;
+let currentPage = 1;
+let totalPages = 1;
+let totalUsers = 0;
+const limit = 20;
+
+let editingUserId = null;
+let deleteUserId = null;
+let resetPasswordUserId = null;
+let uploadedAvatarUrl = null;
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+
+async function init() {
+  initTheme();
+  
+  // Check auth
+  if (!window.orbicorpAPI.isAuthenticated()) {
+    window.location.href = 'orbicorp-login.html';
+    return;
+  }
+  
+  try {
+    // Get current user info
+    const meResponse = await window.orbicorpAPI.getMe();
+    currentUser = meResponse.data;
+    
+    // Show add button only for admins
+    if (currentUser.role === 'ADMIN') {
+      document.getElementById('headerActions').innerHTML = `
+        <button class="btn btn-primary" onclick="openUserModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+          Kullanıcı Ekle
+        </button>
+      `;
+    }
+    
+    // Load departments
+    await loadDepartments();
+    
+    // Load stats
+    await loadStats();
+    
+    // Load users
+    await loadUsers();
+    
+    // Setup event listeners
+    setupEventListeners();
+  } catch (error) {
+    console.error('Init error:', error);
+    showToast('error', 'Sayfa yüklenirken hata oluştu');
+  }
+}
+
+function setupEventListeners() {
+  // Search input debounce
+  let searchTimeout;
+  document.getElementById('searchInput').addEventListener('input', (e) => {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      currentPage = 1;
+      loadUsers();
+    }, 300);
+  });
+  
+  // Filter changes
+  document.getElementById('roleFilter').addEventListener('change', () => {
+    currentPage = 1;
+    loadUsers();
+  });
+  
+  document.getElementById('departmentFilter').addEventListener('change', () => {
+    currentPage = 1;
+    loadUsers();
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DATA LOADING
+// ═══════════════════════════════════════════════════════════════
+
+async function loadDepartments() {
+  try {
+    const response = await window.orbicorpAPI.getDepartments();
+    departments = response.data || [];
+    
+    // Populate dropdown filters
+    const filterSelect = document.getElementById('departmentFilter');
+    const formSelect = document.getElementById('userDepartment');
+    
+    const options = departments.map(d => `<option value="${d}">${d}</option>`).join('');
+    
+    filterSelect.innerHTML = '<option value="">Tüm Departmanlar</option>' + options;
+    formSelect.innerHTML = '<option value="">Seçiniz</option>' + options;
+  } catch (error) {
+    console.error('Error loading departments:', error);
+    // Use default departments
+    departments = ['Yönetim', 'Bilgi Teknolojileri', 'İnsan Kaynakları', 'Finans', 'Satış', 'Pazarlama', 'Operasyon', 'Müşteri Hizmetleri', 'Hukuk', 'Ar-Ge', 'Diğer'];
+    const options = departments.map(d => `<option value="${d}">${d}</option>`).join('');
+    document.getElementById('departmentFilter').innerHTML = '<option value="">Tüm Departmanlar</option>' + options;
+    document.getElementById('userDepartment').innerHTML = '<option value="">Seçiniz</option>' + options;
+  }
+}
+
+async function loadStats() {
+  try {
+    const response = await window.orbicorpAPI.getUserStats();
+    const stats = response.data;
+    
+    document.getElementById('statTotal').textContent = stats.total || 0;
+    document.getElementById('statAdmin').textContent = stats.byRole?.ADMIN || 0;
+    document.getElementById('statOperator').textContent = stats.byRole?.OPERATOR || 0;
+    document.getElementById('statViewer').textContent = stats.byRole?.VIEWER || 0;
+  } catch (error) {
+    console.error('Error loading stats:', error);
+  }
+}
+
+async function loadUsers() {
+  const tbody = document.getElementById('usersTableBody');
+  tbody.innerHTML = `
+    <tr>
+      <td colspan="5">
+        <div class="loading">
+          <div class="spinner"></div>
+          Kullanıcılar yükleniyor...
+        </div>
+      </td>
+    </tr>
+  `;
+  
+  try {
+    const params = {
+      page: currentPage,
+      limit: limit,
+    };
+    
+    const search = document.getElementById('searchInput').value.trim();
+    if (search) params.search = search;
+    
+    const role = document.getElementById('roleFilter').value;
+    if (role) params.role = role;
+    
+    const department = document.getElementById('departmentFilter').value;
+    if (department) params.department = department;
+    
+    const response = await window.orbicorpAPI.getUsers(params);
+    users = response.data || [];
+    
+    const meta = response.meta || { page: 1, totalPages: 1, total: 0 };
+    currentPage = meta.page;
+    totalPages = meta.totalPages;
+    totalUsers = meta.total;
+    
+    renderUsers();
+    renderPagination();
+  } catch (error) {
+    console.error('Error loading users:', error);
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="5">
+          <div class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <h3>Yüklenirken hata oluştu</h3>
+            <p>${error.message}</p>
+          </div>
+        </td>
+      </tr>
+    `;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RENDERING
+// ═══════════════════════════════════════════════════════════════
+
+function renderUsers() {
+  const tbody = document.getElementById('usersTableBody');
+  
+  if (users.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="5">
+          <div class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            <h3>Kullanıcı bulunamadı</h3>
+            <p>Arama kriterlerinizi değiştirmeyi deneyin</p>
+          </div>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+  
+  tbody.innerHTML = users.map(user => {
+    const initials = getInitials(user.firstName, user.lastName);
+    const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'İsimsiz';
+    const roleLabel = getRoleLabel(user.role);
+    const roleClass = `role-${user.role.toLowerCase()}`;
+    const lastLogin = user.lastLoginAt ? formatDate(user.lastLoginAt) : 'Hiç giriş yapmadı';
+    
+    const isCurrentUser = user.id === currentUser?.userId;
+    const canEdit = currentUser?.role === 'ADMIN' || isCurrentUser;
+    const canDelete = currentUser?.role === 'ADMIN' && !isCurrentUser;
+    const canResetPassword = currentUser?.role === 'ADMIN' && !isCurrentUser;
+    
+    return `
+      <tr>
+        <td>
+          <div class="user-cell">
+            ${user.avatarUrl 
+              ? `<img src="${user.avatarUrl}" class="user-avatar" alt="${fullName}">`
+              : `<div class="user-avatar user-avatar-initials">${initials}</div>`
+            }
+            <div class="user-info">
+              <div class="user-name">${fullName}</div>
+              <div class="user-email">${user.email}</div>
+            </div>
+          </div>
+        </td>
+        <td><span class="badge ${roleClass}">${roleLabel}</span></td>
+        <td>${user.department || '-'}</td>
+        <td>${lastLogin}</td>
+        <td>
+          <div class="table-actions">
+            ${canEdit ? `
+              <button class="btn-icon" onclick="editUser('${user.id}')" title="Düzenle">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:16px;height:16px"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              </button>
+            ` : ''}
+            ${canResetPassword ? `
+              <button class="btn-icon" onclick="openResetPasswordModal('${user.id}', '${fullName}')" title="Şifre Sıfırla">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:16px;height:16px"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              </button>
+            ` : ''}
+            ${canDelete ? `
+              <button class="btn-icon" onclick="openDeleteModal('${user.id}', '${fullName}')" title="Sil" style="color:var(--red)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:16px;height:16px"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+              </button>
+            ` : ''}
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function renderPagination() {
+  const start = (currentPage - 1) * limit + 1;
+  const end = Math.min(currentPage * limit, totalUsers);
+  
+  document.getElementById('paginationInfo').textContent = 
+    totalUsers > 0 ? `${start}-${end} / ${totalUsers} kullanıcı` : '0 kullanıcı';
+  
+  document.getElementById('prevBtn').disabled = currentPage <= 1;
+  document.getElementById('nextBtn').disabled = currentPage >= totalPages;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// USER MODAL
+// ═══════════════════════════════════════════════════════════════
+
+function openUserModal(userId = null) {
+  editingUserId = userId;
+  uploadedAvatarUrl = null;
+  
+  // Reset form
+  document.getElementById('userFirstName').value = '';
+  document.getElementById('userLastName').value = '';
+  document.getElementById('userEmail').value = '';
+  document.getElementById('userPhone').value = '';
+  document.getElementById('userRole').value = 'VIEWER';
+  document.getElementById('userDepartment').value = '';
+  document.getElementById('userPassword').value = '';
+  document.getElementById('avatarPreview').innerHTML = '<span id="avatarInitials">?</span>';
+  document.getElementById('removeAvatarBtn').style.display = 'none';
+  
+  if (userId) {
+    // Edit mode
+    document.getElementById('userModalTitle').textContent = 'Kullanıcıyı Düzenle';
+    document.getElementById('passwordSection').style.display = 'none';
+    document.getElementById('userEmail').disabled = true;
+    
+    // Load user data
+    const user = users.find(u => u.id === userId);
+    if (user) {
+      document.getElementById('userFirstName').value = user.firstName || '';
+      document.getElementById('userLastName').value = user.lastName || '';
+      document.getElementById('userEmail').value = user.email || '';
+      document.getElementById('userPhone').value = user.phone || '';
+      document.getElementById('userRole').value = user.role || 'VIEWER';
+      document.getElementById('userDepartment').value = user.department || '';
+      
+      if (user.avatarUrl) {
+        document.getElementById('avatarPreview').innerHTML = `<img src="${user.avatarUrl}" alt="Avatar">`;
+        document.getElementById('removeAvatarBtn').style.display = 'block';
+        uploadedAvatarUrl = user.avatarUrl;
+      } else {
+        const initials = getInitials(user.firstName, user.lastName);
+        document.getElementById('avatarPreview').innerHTML = `<span id="avatarInitials">${initials}</span>`;
+      }
+    }
+  } else {
+    // Create mode
+    document.getElementById('userModalTitle').textContent = 'Yeni Kullanıcı Ekle';
+    document.getElementById('passwordSection').style.display = 'block';
+    document.getElementById('userEmail').disabled = false;
+  }
+  
+  document.getElementById('userModal').classList.add('open');
+}
+
+function closeUserModal() {
+  document.getElementById('userModal').classList.remove('open');
+  editingUserId = null;
+}
+
+async function handleAvatarUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  // Validate file type
+  if (!file.type.startsWith('image/')) {
+    showToast('error', 'Lütfen bir resim dosyası seçin');
+    return;
+  }
+  
+  // Validate file size (max 5MB)
+  if (file.size > 5 * 1024 * 1024) {
+    showToast('error', 'Dosya boyutu 5MB\'dan küçük olmalı');
+    return;
+  }
+  
+  // Show preview immediately with base64
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    document.getElementById('avatarPreview').innerHTML = `<img src="${e.target.result}" alt="Avatar">`;
+    document.getElementById('removeAvatarBtn').style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+  
+  // Upload to server
+  try {
+    const response = await window.orbicorpAPI.uploadFile(file);
+    if (response.success && response.data) {
+      // Build full URL from the returned path
+      const baseUrl = window.orbicorpAPI.baseUrl.replace('/api/v1', '');
+      const uploadPath = response.data.url || `/uploads/${response.data.filename}`;
+      uploadedAvatarUrl = baseUrl + uploadPath;
+      showToast('success', 'Fotoğraf yüklendi');
+    } else {
+      showToast('error', response.message || 'Fotoğraf yüklenemedi');
+      uploadedAvatarUrl = null;
+    }
+  } catch (error) {
+    console.error('Upload error:', error);
+    showToast('error', 'Fotoğraf yüklenirken hata oluştu. Kullanıcı avatar\'sız kaydedilecek.');
+    uploadedAvatarUrl = null;
+  }
+}
+
+function removeAvatar() {
+  uploadedAvatarUrl = null;
+  const firstName = document.getElementById('userFirstName').value;
+  const lastName = document.getElementById('userLastName').value;
+  const initials = getInitials(firstName, lastName);
+  document.getElementById('avatarPreview').innerHTML = `<span id="avatarInitials">${initials || '?'}</span>`;
+  document.getElementById('removeAvatarBtn').style.display = 'none';
+  document.getElementById('avatarInput').value = '';
+}
+
+async function saveUser() {
+  const firstName = document.getElementById('userFirstName').value.trim();
+  const lastName = document.getElementById('userLastName').value.trim();
+  const email = document.getElementById('userEmail').value.trim();
+  const phone = document.getElementById('userPhone').value.trim();
+  const role = document.getElementById('userRole').value;
+  const department = document.getElementById('userDepartment').value;
+  const password = document.getElementById('userPassword').value;
+  
+  // Validation
+  if (!firstName || !lastName) {
+    showToast('error', 'Ad ve soyad zorunludur');
+    return;
+  }
+  
+  if (!editingUserId && !email) {
+    showToast('error', 'Email zorunludur');
+    return;
+  }
+  
+  if (!editingUserId && password.length < 8) {
+    showToast('error', 'Şifre en az 8 karakter olmalı');
+    return;
+  }
+  
+  const btn = document.getElementById('saveUserBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner" style="width:14px;height:14px;margin:0"></div> Kaydediliyor...';
+  
+  try {
+    if (editingUserId) {
+      // Update
+      const data = {
+        firstName,
+        lastName,
+        phone: phone || null,
+        department: department || null,
+        role,
+        avatarUrl: uploadedAvatarUrl,
+      };
+      
+      await window.orbicorpAPI.updateUser(editingUserId, data);
+      showToast('success', 'Kullanıcı güncellendi');
+    } else {
+      // Create
+      const data = {
+        firstName,
+        lastName,
+        email,
+        password,
+        phone: phone || undefined,
+        department: department || undefined,
+        role,
+      };
+      
+      const response = await window.orbicorpAPI.createUser(data);
+      
+      // If avatar was uploaded, update the user
+      if (uploadedAvatarUrl && response.data?.id) {
+        await window.orbicorpAPI.updateUser(response.data.id, { avatarUrl: uploadedAvatarUrl });
+      }
+      
+      showToast('success', 'Kullanıcı oluşturuldu');
+    }
+    
+    closeUserModal();
+    await loadStats();
+    await loadUsers();
+  } catch (error) {
+    console.error('Save error:', error);
+    showToast('error', error.message || 'Kaydetme hatası');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+      Kaydet
+    `;
+  }
+}
+
+function editUser(userId) {
+  openUserModal(userId);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DELETE MODAL
+// ═══════════════════════════════════════════════════════════════
+
+function openDeleteModal(userId, userName) {
+  deleteUserId = userId;
+  document.getElementById('deleteUserName').textContent = userName;
+  document.getElementById('deleteModal').classList.add('open');
+}
+
+function closeDeleteModal() {
+  document.getElementById('deleteModal').classList.remove('open');
+  deleteUserId = null;
+}
+
+async function confirmDelete() {
+  if (!deleteUserId) return;
+  
+  const btn = document.getElementById('confirmDeleteBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner" style="width:14px;height:14px;margin:0"></div> Siliniyor...';
+  
+  try {
+    await window.orbicorpAPI.deleteUser(deleteUserId);
+    showToast('success', 'Kullanıcı silindi');
+    closeDeleteModal();
+    await loadStats();
+    await loadUsers();
+  } catch (error) {
+    console.error('Delete error:', error);
+    showToast('error', error.message || 'Silme hatası');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+      Sil
+    `;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RESET PASSWORD MODAL
+// ═══════════════════════════════════════════════════════════════
+
+function openResetPasswordModal(userId, userName) {
+  resetPasswordUserId = userId;
+  document.getElementById('resetUserName').textContent = userName;
+  document.getElementById('newPassword').value = '';
+  document.getElementById('resetPasswordModal').classList.add('open');
+}
+
+function closeResetPasswordModal() {
+  document.getElementById('resetPasswordModal').classList.remove('open');
+  resetPasswordUserId = null;
+}
+
+async function confirmResetPassword() {
+  if (!resetPasswordUserId) return;
+  
+  const newPassword = document.getElementById('newPassword').value;
+  
+  if (newPassword.length < 8) {
+    showToast('error', 'Şifre en az 8 karakter olmalı');
+    return;
+  }
+  
+  try {
+    await window.orbicorpAPI.resetUserPassword(resetPasswordUserId, newPassword);
+    showToast('success', 'Şifre sıfırlandı');
+    closeResetPasswordModal();
+  } catch (error) {
+    console.error('Reset password error:', error);
+    showToast('error', error.message || 'Şifre sıfırlama hatası');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PAGINATION
+// ═══════════════════════════════════════════════════════════════
+
+function prevPage() {
+  if (currentPage > 1) {
+    currentPage--;
+    loadUsers();
+  }
+}
+
+function nextPage() {
+  if (currentPage < totalPages) {
+    currentPage++;
+    loadUsers();
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════════════════════════
+
+function getInitials(firstName, lastName) {
+  const f = (firstName || '').charAt(0).toUpperCase();
+  const l = (lastName || '').charAt(0).toUpperCase();
+  return f + l || '?';
+}
+
+function getRoleLabel(role) {
+  const labels = {
+    'ADMIN': 'Admin',
+    'OPERATOR': 'Operatör',
+    'VIEWER': 'Görüntüleyici',
+  };
+  return labels[role] || role;
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return '-';
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diff = now - date;
+  
+  // Less than 24 hours
+  if (diff < 24 * 60 * 60 * 1000) {
+    const hours = Math.floor(diff / (60 * 60 * 1000));
+    if (hours < 1) {
+      const minutes = Math.floor(diff / (60 * 1000));
+      return minutes < 1 ? 'Az önce' : `${minutes} dk önce`;
+    }
+    return `${hours} saat önce`;
+  }
+  
+  // Less than 7 days
+  if (diff < 7 * 24 * 60 * 60 * 1000) {
+    const days = Math.floor(diff / (24 * 60 * 60 * 1000));
+    return `${days} gün önce`;
+  }
+  
+  // Format as date
+  return date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function showToast(type, message) {
+  const toast = document.getElementById('toast');
+  toast.className = 'toast ' + type;
+  document.getElementById('toastText').textContent = message;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// THEME
+// ═══════════════════════════════════════════════════════════════
+
+function initTheme() {
+  const savedTheme = localStorage.getItem('orbicorp_theme') || 'light';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

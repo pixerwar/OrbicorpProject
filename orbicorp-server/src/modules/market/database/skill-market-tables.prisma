@@ -1,0 +1,172 @@
+// ==========================================
+// SKILL MARKET - PACKAGES
+// ==========================================
+
+// Skill, Tool, Agent Template, Language Pack, Workflow Template hepsi bu tabloda
+model MarketPackage {
+  id            String        @id @default(uuid())
+  
+  // Manifest bilgileri
+  name          String        @unique  // slug: "memory-tools"
+  version       String        @default("1.0.0")
+  type          PackageType
+  displayName   String        // "Hafıza Araçları"
+  description   String?       @db.Text
+  icon          String?       // emoji veya URL
+  category      String?       // core, productivity, integration, etc.
+  tags          String[]      @default([])
+  
+  // Yazar bilgileri
+  authorName    String?
+  authorEmail   String?
+  authorUrl     String?
+  
+  // Pricing
+  pricingModel  PricingModel  @default(FREE)
+  price         Float?        @default(0)
+  currency      String        @default("USD")
+  
+  // Compatibility
+  minVersion    String?       // Minimum Orbicorp version
+  providers     String[]      @default([])  // ["anthropic", "openai"]
+  
+  // Permissions & Dependencies
+  permissions   String[]      @default([])  // ["database.read", "network.fetch"]
+  dependencies  String[]      @default([])  // ["memory-tools@^1.0.0"]
+  
+  // İçerik - JSON olarak saklanır
+  manifest      Json          // Tam manifest.json içeriği
+  tools         Json          @default("[]")  // Tool tanımları
+  config        Json          @default("{}")  // Paket ayar şeması
+  
+  // İstatistikler
+  installCount  Int           @default(0)
+  rating        Float         @default(0)
+  reviewCount   Int           @default(0)
+  
+  // Durum
+  status        PackageStatus @default(DRAFT)
+  isOfficial    Boolean       @default(false)  // Orbicorp resmi paketi mi?
+  isVerified    Boolean       @default(false)  // Güvenlik kontrolünden geçti mi?
+  publishedAt   DateTime?
+  
+  // Timestamps
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  // Relations
+  installations PackageInstallation[]
+  reviews       PackageReview[]
+
+  @@index([type])
+  @@index([category])
+  @@index([status])
+  @@index([isOfficial])
+}
+
+enum PackageType {
+  SKILL             // Tool koleksiyonu + system prompt
+  TOOL              // Tek tool
+  AGENT_TEMPLATE    // Hazır agent şablonu
+  LANGUAGE_PACK     // Dil/çeviri paketi
+  WORKFLOW_TEMPLATE // İş akışı şablonu
+}
+
+enum PricingModel {
+  FREE
+  ONE_TIME
+  SUBSCRIPTION
+}
+
+enum PackageStatus {
+  DRAFT      // Henüz yayınlanmadı
+  REVIEW     // İnceleme bekliyor
+  PUBLISHED  // Yayında
+  DEPRECATED // Kullanımdan kaldırıldı
+  REMOVED    // Kaldırıldı
+}
+
+// Şirkete kurulu paketler
+model PackageInstallation {
+  id          String                   @id @default(uuid())
+  companyId   String
+  packageId   String
+  
+  // Kurulum bilgileri
+  version     String                   // Kurulu versiyon
+  config      Json                     @default("{}")  // Paket ayarları (API key vs)
+  status      InstallationStatus       @default(ACTIVE)
+  
+  // Timing
+  installedAt DateTime                 @default(now())
+  expiresAt   DateTime?                // Subscription için
+  updatedAt   DateTime                 @updatedAt
+
+  // Relations
+  company     Company                  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  package     MarketPackage            @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  agentPackages AgentPackage[]
+
+  @@unique([companyId, packageId])
+  @@index([companyId])
+  @@index([packageId])
+  @@index([status])
+}
+
+enum InstallationStatus {
+  ACTIVE
+  DISABLED
+  EXPIRED
+  PENDING_CONFIG  // Config gerekli ama henüz girilmedi
+}
+
+// Agent-Package ilişkisi (Hangi agent hangi paketleri kullanıyor)
+model AgentPackage {
+  id              String              @id @default(uuid())
+  agentId         String
+  installationId  String              // PackageInstallation ID
+  
+  // Durumu
+  enabled         Boolean             @default(true)
+  addedAt         DateTime            @default(now())
+
+  // Relations
+  agent           Agent               @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  installation    PackageInstallation @relation(fields: [installationId], references: [id], onDelete: Cascade)
+
+  @@unique([agentId, installationId])
+  @@index([agentId])
+  @@index([installationId])
+}
+
+// Paket değerlendirmeleri
+model PackageReview {
+  id          String        @id @default(uuid())
+  packageId   String
+  companyId   String        // Hangi şirket değerlendirdi
+  userId      String        // Kim değerlendirdi
+  
+  rating      Int           // 1-5
+  title       String?
+  comment     String?       @db.Text
+  
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // Relations
+  package     MarketPackage @relation(fields: [packageId], references: [id], onDelete: Cascade)
+
+  @@unique([packageId, companyId])  // Her şirket bir kez değerlendirebilir
+  @@index([packageId])
+  @@index([rating])
+}
+
+// ==========================================
+// MEVCUT TABLOLARA EKLENECEK RELATION'LAR
+// ==========================================
+
+// Company modeline eklenecek:
+// packageInstallations PackageInstallation[]
+
+// Agent modeline eklenecek:
+// packages AgentPackage[]

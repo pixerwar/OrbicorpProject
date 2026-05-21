@@ -1,0 +1,128 @@
+{
+  "name": "multi-agent",
+  "version": "1.0.0",
+  "type": "skill",
+  "displayName": "Çoklu Agent Yönetimi",
+  "description": "Diğer agent'ları listeleme, soru sorma, görev devretme ve yeni agent oluşturma yetenekleri.",
+  
+  "author": {
+    "name": "Orbicorp",
+    "email": "dev@orbicorp.ai"
+  },
+  
+  "icon": "🤖",
+  "category": "core",
+  "tags": ["multi-agent", "delegation", "orchestration", "agent"],
+  
+  "pricing": {
+    "model": "free"
+  },
+  
+  "compatibility": {
+    "orbicorpVersion": ">=1.0.0",
+    "providers": ["anthropic", "openai", "google"]
+  },
+  
+  "permissions": ["agents.read", "agents.write", "agents.execute"],
+  
+  "restrictions": {
+    "onlyMainAgent": true,
+    "description": "Bu skill sadece Main Agent tarafından kullanılabilir"
+  },
+  
+  "tools": [
+    {
+      "name": "list_agents",
+      "description": "Şirketteki tüm mevcut agent'ları listele. Her agent'ın adı, uzmanlık alanı ve durumunu gösterir.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["ACTIVE", "INACTIVE", "ALL"],
+            "description": "Filtreleme: sadece aktif, pasif veya tümü"
+          }
+        }
+      },
+      "handler": "builtin:agents.list"
+    },
+    {
+      "name": "ask_agent",
+      "description": "Başka bir agent'a soru sor ve cevabını al. Uzmanlık gerektiren konularda ilgili agent'a danış.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "agentId": {
+            "type": "string",
+            "description": "Soru sorulacak agent'ın ID'si"
+          },
+          "question": {
+            "type": "string",
+            "description": "Sorulacak soru"
+          }
+        },
+        "required": ["agentId", "question"]
+      },
+      "handler": "builtin:agents.ask"
+    },
+    {
+      "name": "delegate_task",
+      "description": "Bir görevi başka bir agent'a devret. Uzun süreli veya uzmanlık gerektiren işler için kullan.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "agentId": {
+            "type": "string",
+            "description": "Görevin devredileceği agent'ın ID'si"
+          },
+          "taskName": {
+            "type": "string",
+            "description": "Görev adı"
+          },
+          "taskDescription": {
+            "type": "string",
+            "description": "Detaylı görev açıklaması"
+          },
+          "priority": {
+            "type": "string",
+            "enum": ["LOW", "MEDIUM", "HIGH", "URGENT"],
+            "description": "Görev önceliği"
+          }
+        },
+        "required": ["agentId", "taskName", "taskDescription"]
+      },
+      "handler": "builtin:agents.delegate"
+    },
+    {
+      "name": "create_agent",
+      "description": "Yeni bir uzman agent oluştur. Belirli bir alan için özelleşmiş agent gerektiğinde kullan.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Yeni agent'ın adı"
+          },
+          "description": {
+            "type": "string",
+            "description": "Agent'ın uzmanlık alanı ve görevi"
+          },
+          "systemPrompt": {
+            "type": "string",
+            "description": "Agent'ın davranışını belirleyen sistem promptu"
+          },
+          "department": {
+            "type": "string",
+            "description": "Departman (HR, IT, Sales, vb.)"
+          }
+        },
+        "required": ["name", "description", "systemPrompt"]
+      },
+      "handler": "builtin:agents.create"
+    }
+  ],
+  
+  "systemPromptAddition": "Karmaşık görevlerde diğer agent'lara danış veya görev devret. 'list_agents' ile mevcut uzman agent'ları gör.",
+  
+  "readme": "# Çoklu Agent Yönetimi\n\nBu skill, Main Agent'a diğer agent'ları yönetme ve koordine etme yeteneği kazandırır.\n\n## Özellikler\n- **list_agents**: Tüm agent'ları listele\n- **ask_agent**: Başka agent'a soru sor\n- **delegate_task**: Görev devret\n- **create_agent**: Yeni agent oluştur\n\n## Not\nBu skill sadece Main Agent tarafından kullanılabilir."
+}

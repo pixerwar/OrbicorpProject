@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>i18n Test</title>
+  <style>
+    body { font-family: system-ui; padding: 20px; max-width: 600px; margin: 0 auto; }
+    .test-item { padding: 10px; margin: 8px 0; border: 1px solid #ddd; border-radius: 6px; }
+    .pass { background: #d4edda; border-color: #28a745; }
+    .fail { background: #f8d7da; border-color: #dc3545; }
+    .pending { background: #fff3cd; border-color: #ffc107; }
+    button { padding: 8px 16px; margin: 4px; cursor: pointer; }
+    h1 { color: #333; }
+    #results { margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h1>🧪 i18n Test Sayfası</h1>
+  
+  <div>
+    <button onclick="runTests()">Testleri Çalıştır</button>
+    <button onclick="switchToEn()">English'e Geç</button>
+    <button onclick="switchToTr()">Türkçe'ye Geç</button>
+  </div>
+  
+  <div id="results"></div>
+  
+  <hr>
+  <h3>Çeviri Örnekleri</h3>
+  <p data-i18n="tasks.title">Yükleniyor...</p>
+  <p data-i18n="tasks.today">Yükleniyor...</p>
+  <p data-i18n="tasks.running">Yükleniyor...</p>
+  <p data-i18n="priority.high">Yükleniyor...</p>
+
+  <script src="i18n.js"></script>
+  <script>
+    const results = document.getElementById('results');
+    
+    function log(message, status) {
+      const div = document.createElement('div');
+      div.className = 'test-item ' + status;
+      div.textContent = message;
+      results.appendChild(div);
+    }
+    
+    function clearResults() {
+      results.innerHTML = '';
+    }
+    
+    async function runTests() {
+      clearResults();
+      
+      // Test 1: i18n module exists
+      if (window.i18n) {
+        log('✅ i18n modülü yüklendi', 'pass');
+      } else {
+        log('❌ i18n modülü bulunamadı', 'fail');
+        return;
+      }
+      
+      // Test 2: i18n initialized
+      await new Promise(r => setTimeout(r, 500)); // Wait for init
+      if (window.i18n.isReady) {
+        log('✅ i18n başlatıldı (isReady: true)', 'pass');
+      } else {
+        log('❌ i18n başlatılamadı', 'fail');
+      }
+      
+      // Test 3: Current language
+      const lang = window.i18n.getLang();
+      log(`ℹ️ Mevcut dil: ${lang}`, 'pass');
+      
+      // Test 4: Translation works
+      const title = window.i18n.t('tasks.title');
+      if (title && title !== 'tasks.title') {
+        log(`✅ Çeviri çalışıyor: tasks.title = "${title}"`, 'pass');
+      } else {
+        log(`❌ Çeviri başarısız: tasks.title = "${title}"`, 'fail');
+      }
+      
+      // Test 5: Nested key
+      const priority = window.i18n.t('priority.high');
+      if (priority && priority !== 'priority.high') {
+        log(`✅ Nested key çalışıyor: priority.high = "${priority}"`, 'pass');
+      } else {
+        log(`❌ Nested key başarısız: priority.high = "${priority}"`, 'fail');
+      }
+      
+      // Test 6: DOM update
+      const domElement = document.querySelector('[data-i18n="tasks.title"]');
+      if (domElement && domElement.textContent !== 'Yükleniyor...') {
+        log(`✅ DOM güncellendi: "${domElement.textContent}"`, 'pass');
+      } else {
+        log(`⚠️ DOM güncellenemedi`, 'pending');
+      }
+      
+      // Test 7: Missing key fallback
+      const missing = window.i18n.t('this.key.does.not.exist');
+      if (missing === 'this.key.does.not.exist') {
+        log('✅ Eksik key fallback çalışıyor', 'pass');
+      } else {
+        log('❌ Eksik key fallback çalışmıyor', 'fail');
+      }
+      
+      // Summary
+      log('─────────────────', 'pass');
+      log(`📊 Test tamamlandı. Dil: ${lang}`, 'pass');
+    }
+    
+    async function switchToEn() {
+      await window.i18n.setLang('en');
+      log('🔄 Dil "en" olarak değiştirildi', 'pass');
+      runTests();
+    }
+    
+    async function switchToTr() {
+      await window.i18n.setLang('tr');
+      log('🔄 Dil "tr" olarak değiştirildi', 'pass');
+      runTests();
+    }
+    
+    // Auto-run after load
+    window.addEventListener('load', () => {
+      setTimeout(runTests, 600);
+    });
+  </script>
+</body>
+</html>

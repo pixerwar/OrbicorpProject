@@ -1,0 +1,675 @@
+// Orbicorp Database Schema
+// Run: npx prisma migrate dev
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==========================================
+// COMPANY & USERS
+// ==========================================
+
+model Company {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  logoUrl   String?
+  settings  Json     @default("{}")
+  llmConfig Json     @default("{}")  // LLM provider API keys: { anthropic: "sk-...", openai: "sk-...", google: "...", openrouter: "..." }
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  users                 User[]
+  agents                Agent[]
+  workflows             Workflow[]
+  knowledgeSources      KnowledgeSource[]
+  integrations          Integration[]
+  packageInstallations  PackageInstallation[]
+  auditLogs             AuditLog[]
+  uploads               Upload[]
+  communicationChannels CommunicationChannel[]
+}
+
+model User {
+  id           String    @id @default(uuid())
+  companyId    String
+  email        String    @unique
+  passwordHash String
+  firstName    String?
+  lastName     String?
+  role         UserRole  @default(VIEWER)
+  avatarUrl    String?
+  status       UserStatus @default(ACTIVE)
+  lastLoginAt  DateTime?
+  
+  // Notification preferences
+  notificationPreferences Json @default("{\"inApp\": true, \"channels\": []}")  // { inApp: true, channels: ["channel-id-1"] }
+  telegramChatId          String?  // Telegram chat ID for notifications
+  whatsappNumber          String?  // WhatsApp number for notifications
+  
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  // Relations
+  company       Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  sessions      Session[]
+  auditLogs     AuditLog[]
+  refreshTokens RefreshToken[]
+  notifications Notification[]
+
+  @@index([companyId])
+  @@index([email])
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+}
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  OPERATOR
+  VIEWER
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  PENDING
+}
+
+// ==========================================
+// AGENTS
+// ==========================================
+
+model Agent {
+  id            String      @id @default(uuid())
+  companyId     String
+  name          String
+  description   String?
+  avatarUrl     String?
+  department    String?
+  isMain        Boolean     @default(false)  // Her şirkette bir tane Main Agent olmalı
+  modelProvider String?     // anthropic, openai, google, openrouter (null = yapılandırılmamış)
+  modelId       String?     // claude-sonnet-4-6, gpt-4o, etc.
+  systemPrompt  String?     @db.Text
+  temperature   Float       @default(0.7)
+  maxTokens     Int         @default(2000)
+  skills        String[]    @default([])
+  tools         Json        @default("[]")
+  channels      String[]    @default([])
+  status        AgentStatus @default(ACTIVE)
+  stats         Json        @default("{\"totalChats\": 0, \"successRate\": 0, \"avgResponseTime\": 0}")
+  
+  // Notification channel for approvals and alerts
+  notificationChannelId String?
+  
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  // Relations
+  company             Company               @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  sessions            Session[]
+  notificationChannel CommunicationChannel? @relation(fields: [notificationChannelId], references: [id], onDelete: SetNull)
+  memories            AgentMemory[]
+  packages            AgentPackage[]
+
+  @@index([companyId])
+  @@index([status])
+}
+
+// ==========================================
+// AGENT MEMORY
+// ==========================================
+
+model AgentMemory {
+  id        String     @id @default(uuid())
+  agentId   String
+  type      MemoryType
+  content   String     @db.Text
+  metadata  Json       @default("{}")
+  createdAt DateTime   @default(now())
+  expiresAt DateTime?
+  
+  agent     Agent      @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  
+  @@index([agentId])
+  @@index([agentId, type])
+}
+
+enum MemoryType {
+  FACT        // Somut bilgi: "Müşteri X'in bütçesi 100K"
+  PREFERENCE  // Tercih: "Kullanıcı kısa cevaplar sever"
+  LEARNING    // Öğrenilen: "Bu tür sorularda şu yaklaşım işe yarıyor"
+}
+
+enum AgentStatus {
+  ACTIVE
+  PAUSED
+  ARCHIVED
+}
+
+// ==========================================
+// SESSIONS & MESSAGES
+// ==========================================
+
+model Session {
+  id         String        @id @default(uuid())
+  agentId    String
+  userId     String
+  channel    String?       // webchat, slack, whatsapp, etc.
+  externalId String?       // channel-specific ID
+  metadata   Json          @default("{}")
+  status     SessionStatus @default(ACTIVE)
+  startedAt  DateTime      @default(now())
+  endedAt    DateTime?
+
+  // Relations
+  agent    Agent     @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages Message[]
+
+  @@index([agentId])
+  @@index([userId])
+  @@index([status])
+}
+
+model Message {
+  id          String      @id @default(uuid())
+  sessionId   String
+  role        MessageRole
+  content     String      @db.Text
+  attachments Json        @default("[]") // [{id, filename, mimeType, size, url}]
+  tokensUsed  Int?
+  costUsd     Float?
+  metadata    Json        @default("{}")
+  createdAt   DateTime    @default(now())
+
+  // Relations
+  session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@index([createdAt])
+}
+
+enum SessionStatus {
+  ACTIVE
+  ENDED
+  ARCHIVED
+}
+
+enum MessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
+  TOOL
+}
+
+// ==========================================
+// UPLOADS
+// ==========================================
+
+model Upload {
+  id           String   @id @default(uuid())
+  companyId    String
+  filename     String   // stored filename (uuid + ext)
+  originalName String   // original uploaded filename
+  mimeType     String
+  size         Int      // bytes
+  path         String   // full path on disk
+  createdAt    DateTime @default(now())
+
+  // Relations
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([createdAt])
+}
+
+// ==========================================
+// WORKFLOWS
+// ==========================================
+
+model Workflow {
+  id          String         @id @default(uuid())
+  companyId   String
+  name        String
+  description String?
+  icon        String?        @default("⚡")
+  definition  Json           // { nodes: [...], connections: [...] }
+  status      WorkflowStatus @default(DRAFT)
+  schedule    String?        // cron expression
+  lastRunAt   DateTime?
+  runCount    Int            @default(0)
+  stats       Json           @default("{}")
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  // Relations
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  tasks   Task[]
+
+  @@index([companyId])
+  @@index([status])
+}
+
+enum WorkflowStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  ARCHIVED
+}
+
+// ==========================================
+// TASKS (Workflow Executions)
+// ==========================================
+
+model Task {
+  id          String       @id @default(uuid())
+  companyId   String
+  workflowId  String?      // Hangi workflow'dan oluşturuldu (null = manuel)
+  agentId     String?      // Hangi agent çalıştırıyor
+  name        String
+  description String?
+  priority    TaskPriority @default(MEDIUM)
+  status      TaskStatus   @default(PENDING)
+  progress    Int          @default(0)  // 0-100
+  
+  // Execution details
+  steps       Json         @default("[]")  // [{id, name, status, startedAt, completedAt, output}]
+  logs        Json         @default("[]")  // [{timestamp, level, message}]
+  input       Json?        // Trigger data
+  output      Json?        // Final result
+  error       String?
+  
+  // Timing
+  scheduledAt DateTime?
+  startedAt   DateTime?
+  completedAt DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  // Relations
+  workflow Workflow? @relation(fields: [workflowId], references: [id], onDelete: SetNull)
+
+  @@index([companyId])
+  @@index([workflowId])
+  @@index([agentId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+enum TaskStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+  APPROVAL  // Waiting for human approval
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+// ==========================================
+// KNOWLEDGE BASE (RAG)
+// ==========================================
+
+model KnowledgeSource {
+  id            String              @id @default(uuid())
+  companyId     String
+  name          String
+  type          KnowledgeSourceType
+  config        Json
+  status        SourceStatus        @default(PENDING)
+  stats         Json                @default("{\"chunks\": 0, \"tokens\": 0}")
+  lastIndexedAt DateTime?
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+
+  // Relations
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([status])
+}
+
+enum KnowledgeSourceType {
+  DOCUMENT
+  WEBPAGE
+  API
+  DATABASE
+}
+
+enum SourceStatus {
+  PENDING
+  PROCESSING
+  READY
+  ERROR
+}
+
+// ==========================================
+// SKILL MARKET - PACKAGES
+// ==========================================
+
+// Skill, Tool, Agent Template, Language Pack, Workflow Template hepsi bu tabloda
+model MarketPackage {
+  id            String        @id @default(uuid())
+  
+  // Manifest bilgileri
+  name          String        @unique  // slug: "memory-tools"
+  version       String        @default("1.0.0")
+  type          PackageType
+  displayName   String        // "Hafıza Araçları"
+  description   String?       @db.Text
+  icon          String?       // emoji veya URL
+  category      String?       // core, productivity, integration, etc.
+  tags          String[]      @default([])
+  
+  // Yazar bilgileri
+  authorName    String?
+  authorEmail   String?
+  authorUrl     String?
+  
+  // Pricing
+  pricingModel  PricingModel  @default(FREE)
+  price         Float?        @default(0)
+  currency      String        @default("USD")
+  
+  // Compatibility
+  minVersion    String?       // Minimum Orbicorp version
+  providers     String[]      @default([])  // ["anthropic", "openai"]
+  
+  // Permissions & Dependencies
+  permissions   String[]      @default([])  // ["database.read", "network.fetch"]
+  dependencies  String[]      @default([])  // ["memory-tools@^1.0.0"]
+  
+  // İçerik - JSON olarak saklanır
+  manifest      Json          // Tam manifest.json içeriği
+  tools         Json          @default("[]")  // Tool tanımları
+  configSchema  Json          @default("{}")  // Paket ayar şeması
+  
+  // İstatistikler
+  installCount  Int           @default(0)
+  rating        Float         @default(0)
+  reviewCount   Int           @default(0)
+  
+  // Durum
+  status        PackageStatus @default(DRAFT)
+  isOfficial    Boolean       @default(false)  // Orbicorp resmi paketi mi?
+  isVerified    Boolean       @default(false)  // Güvenlik kontrolünden geçti mi?
+  publishedAt   DateTime?
+  
+  // Timestamps
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  // Relations
+  installations PackageInstallation[]
+  reviews       PackageReview[]
+
+  @@index([type])
+  @@index([category])
+  @@index([status])
+  @@index([isOfficial])
+}
+
+enum PackageType {
+  SKILL             // Tool koleksiyonu + system prompt
+  TOOL              // Tek tool
+  AGENT_TEMPLATE    // Hazır agent şablonu
+  LANGUAGE_PACK     // Dil/çeviri paketi
+  WORKFLOW_TEMPLATE // İş akışı şablonu
+}
+
+enum PricingModel {
+  FREE
+  ONE_TIME
+  SUBSCRIPTION
+}
+
+enum PackageStatus {
+  DRAFT      // Henüz yayınlanmadı
+  REVIEW     // İnceleme bekliyor
+  PUBLISHED  // Yayında
+  DEPRECATED // Kullanımdan kaldırıldı
+  REMOVED    // Kaldırıldı
+}
+
+// Şirkete kurulu paketler
+model PackageInstallation {
+  id          String                   @id @default(uuid())
+  companyId   String
+  packageId   String
+  
+  // Kurulum bilgileri
+  version     String                   // Kurulu versiyon
+  config      Json                     @default("{}")  // Paket ayarları (API key vs)
+  status      InstallationStatus       @default(ACTIVE)
+  
+  // Timing
+  installedAt DateTime                 @default(now())
+  expiresAt   DateTime?                // Subscription için
+  updatedAt   DateTime                 @updatedAt
+
+  // Relations
+  company     Company                  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  package     MarketPackage            @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  agentPackages AgentPackage[]
+
+  @@unique([companyId, packageId])
+  @@index([companyId])
+  @@index([packageId])
+  @@index([status])
+}
+
+enum InstallationStatus {
+  ACTIVE
+  DISABLED
+  EXPIRED
+  PENDING_CONFIG  // Config gerekli ama henüz girilmedi
+}
+
+// Agent-Package ilişkisi (Hangi agent hangi paketleri kullanıyor)
+model AgentPackage {
+  id              String              @id @default(uuid())
+  agentId         String
+  installationId  String              // PackageInstallation ID
+  
+  // Durumu
+  enabled         Boolean             @default(true)
+  addedAt         DateTime            @default(now())
+
+  // Relations
+  agent           Agent               @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  installation    PackageInstallation @relation(fields: [installationId], references: [id], onDelete: Cascade)
+
+  @@unique([agentId, installationId])
+  @@index([agentId])
+  @@index([installationId])
+}
+
+// Paket değerlendirmeleri
+model PackageReview {
+  id          String        @id @default(uuid())
+  packageId   String
+  companyId   String        // Hangi şirket değerlendirdi
+  userId      String        // Kim değerlendirdi
+  
+  rating      Int           // 1-5
+  title       String?
+  comment     String?       @db.Text
+  
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // Relations
+  package     MarketPackage @relation(fields: [packageId], references: [id], onDelete: Cascade)
+
+  @@unique([packageId, companyId])  // Her şirket bir kez değerlendirebilir
+  @@index([packageId])
+  @@index([rating])
+}
+
+// ==========================================
+// INTEGRATIONS
+// ==========================================
+
+model Integration {
+  id         String            @id @default(uuid())
+  companyId  String
+  provider   String            // slack, salesforce, sap, etc.
+  name       String?
+  config     Json              // encrypted credentials
+  status     IntegrationStatus @default(ACTIVE)
+  lastSyncAt DateTime?
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+
+  // Relations
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([provider])
+}
+
+enum IntegrationStatus {
+  ACTIVE
+  INACTIVE
+  ERROR
+  CONFIGURING
+}
+
+// ==========================================
+// AUDIT LOG
+// ==========================================
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  companyId  String
+  userId     String?
+  action     String
+  entityType String?
+  entityId   String?
+  oldValue   Json?
+  newValue   Json?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  // Relations
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user    User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([companyId])
+  @@index([userId])
+  @@index([createdAt])
+  @@index([action])
+}
+
+// ==========================================
+// COMMUNICATION CHANNELS
+// ==========================================
+
+model CommunicationChannel {
+  id        String        @id @default(uuid())
+  companyId String
+  type      ChannelType
+  name      String        // "Destek Telegram", "Finans WhatsApp"
+  config    Json          // { botToken, chatId, phoneNumber, etc. }
+  status    ChannelStatus @default(PENDING)
+  lastTestedAt DateTime?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  // Relations
+  company       Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  agents        Agent[]
+  notifications Notification[]
+
+  @@index([companyId])
+  @@index([type])
+  @@index([status])
+}
+
+enum ChannelType {
+  TELEGRAM
+  WHATSAPP
+  SLACK
+  EMAIL
+  SMS
+}
+
+enum ChannelStatus {
+  PENDING     // Not yet configured
+  ACTIVE      // Working
+  INACTIVE    // Disabled by user
+  ERROR       // Connection failed
+}
+
+// ==========================================
+// NOTIFICATIONS (Approvals & Alerts)
+// ==========================================
+
+model Notification {
+  id          String             @id @default(uuid())
+  companyId   String
+  userId      String             // Who should receive this
+  taskId      String?            // Related task (for approvals)
+  channelId   String?            // Which channel was used to send
+  type        NotificationType
+  title       String
+  message     String             @db.Text
+  data        Json               @default("{}")  // Extra data (approval buttons, etc.)
+  status      NotificationStatus @default(PENDING)
+  sentAt      DateTime?
+  readAt      DateTime?
+  respondedAt DateTime?
+  response    String?            // APPROVED, REJECTED, etc.
+  createdAt   DateTime           @default(now())
+
+  // Relations
+  user    User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  channel CommunicationChannel? @relation(fields: [channelId], references: [id], onDelete: SetNull)
+
+  @@index([companyId])
+  @@index([userId])
+  @@index([taskId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+enum NotificationType {
+  APPROVAL      // Requires user action (approve/reject)
+  INFO          // Informational only
+  ALERT         // Important notification
+  TASK_COMPLETE // Task/workflow completed
+}
+
+enum NotificationStatus {
+  PENDING   // Not yet sent
+  SENT      // Sent to channel
+  DELIVERED // Confirmed delivered
+  READ      // User saw it
+  RESPONDED // User took action
+  FAILED    // Failed to send
+}

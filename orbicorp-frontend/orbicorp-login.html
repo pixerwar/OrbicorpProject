@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Giriş Yap - Orbicorp</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #f8fafc;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #f1f5f9;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --border-color: #e2e8f0;
+      --accent-color: #6366f1;
+      --accent-hover: #4f46e5;
+      --accent-light: #e0e7ff;
+      --error-color: #ef4444;
+      --error-bg: #fef2f2;
+      --success-color: #22c55e;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1);
+      --radius: 12px;
+    }
+
+    [data-theme="dark"] {
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --bg-tertiary: #334155;
+      --text-primary: #f1f5f9;
+      --text-secondary: #cbd5e1;
+      --text-muted: #64748b;
+      --border-color: #334155;
+      --accent-light: #312e81;
+      --error-bg: #450a0a;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.4), 0 2px 4px -2px rgba(0,0,0,0.3);
+      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.4), 0 4px 6px -4px rgba(0,0,0,0.3);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    .login-container {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    /* Logo & Header */
+    .login-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .logo-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--accent-color), #8b5cf6);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-md);
+    }
+
+    .logo-icon svg {
+      width: 28px;
+      height: 28px;
+      color: white;
+    }
+
+    .logo-text {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .login-header h1 {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .login-header p {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .company-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: var(--accent-light);
+      color: var(--accent-color);
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      margin-top: 16px;
+    }
+
+    /* Login Card */
+    .login-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 32px;
+      box-shadow: var(--shadow-lg);
+    }
+
+    /* Form Elements */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 12px 16px;
+      font-size: 14px;
+      font-family: inherit;
+      color: var(--text-primary);
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .form-input:focus {
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 3px var(--accent-light);
+    }
+
+    .form-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .form-input.error {
+      border-color: var(--error-color);
+      background: var(--error-bg);
+    }
+
+    /* Password Input with Toggle */
+    .password-wrapper {
+      position: relative;
+    }
+
+    .password-wrapper .form-input {
+      padding-right: 48px;
+    }
+
+    .password-toggle {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .password-toggle:hover {
+      color: var(--text-secondary);
+    }
+
+    /* Checkbox */
+    .form-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: var(--text-secondary);
+      cursor: pointer;
+    }
+
+    .checkbox-label input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--accent-color);
+      cursor: pointer;
+    }
+
+    .forgot-link {
+      font-size: 14px;
+      color: var(--accent-color);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .forgot-link:hover {
+      text-decoration: underline;
+    }
+
+    /* Error Message */
+    .error-message {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      background: var(--error-bg);
+      border: 1px solid var(--error-color);
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      color: var(--error-color);
+    }
+
+    .error-message.show {
+      display: flex;
+    }
+
+    .error-message svg {
+      flex-shrink: 0;
+    }
+
+    /* Submit Button */
+    .submit-btn {
+      width: 100%;
+      padding: 14px 24px;
+      font-size: 15px;
+      font-weight: 600;
+      font-family: inherit;
+      color: white;
+      background: linear-gradient(135deg, var(--accent-color), #8b5cf6);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .submit-btn:active {
+      transform: translateY(0);
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .submit-btn .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      display: none;
+    }
+
+    .submit-btn.loading .spinner {
+      display: block;
+    }
+
+    .submit-btn.loading .btn-text {
+      display: none;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Footer */
+    .login-footer {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    /* Theme & Language Toggle */
+    .toolbar {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      gap: 8px;
+    }
+
+    .toolbar-btn {
+      width: 40px;
+      height: 40px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-secondary);
+      transition: all 0.2s;
+    }
+
+    .toolbar-btn:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+
+    .toolbar-btn svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      .login-card {
+        padding: 24px;
+      }
+
+      .logo-text {
+        font-size: 24px;
+      }
+
+      .toolbar {
+        top: 10px;
+        right: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Theme & Language Toggle -->
+  <div class="toolbar">
+    <button class="toolbar-btn" id="langToggle" title="Dil Değiştir">
+      <span style="font-size: 14px; font-weight: 600;">TR</span>
+    </button>
+    <button class="toolbar-btn" id="themeToggle" title="Tema Değiştir">
+      <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="5"></circle>
+        <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path>
+      </svg>
+      <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+      </svg>
+    </button>
+  </div>
+
+  <div class="login-container">
+    <!-- Header -->
+    <div class="login-header">
+      <div class="logo">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M12 6v6l4 2"></path>
+          </svg>
+        </div>
+        <span class="logo-text">Orbicorp</span>
+      </div>
+      <h1 data-i18n="login.title">Hesabınıza Giriş Yapın</h1>
+      <p data-i18n="login.subtitle">AI agent platformunuza erişmek için giriş yapın</p>
+      <div class="company-badge">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+        <span>NovaTech Solutions A.Ş.</span>
+      </div>
+    </div>
+
+    <!-- Login Card -->
+    <div class="login-card">
+      <form id="loginForm">
+        <!-- Error Message -->
+        <div class="error-message" id="errorMessage">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          <span id="errorText">Geçersiz email veya şifre</span>
+        </div>
+
+        <!-- Email -->
+        <div class="form-group">
+          <label class="form-label" for="email" data-i18n="login.email">Email Adresi</label>
+          <input 
+            type="email" 
+            id="email" 
+            class="form-input" 
+            placeholder="ornek@sirket.com"
+            autocomplete="email"
+            required
+          >
+        </div>
+
+        <!-- Password -->
+        <div class="form-group">
+          <label class="form-label" for="password" data-i18n="login.password">Şifre</label>
+          <div class="password-wrapper">
+            <input 
+              type="password" 
+              id="password" 
+              class="form-input" 
+              placeholder="••••••••"
+              autocomplete="current-password"
+              required
+            >
+            <button type="button" class="password-toggle" id="passwordToggle">
+              <svg class="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+              <svg class="eye-off-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                <line x1="1" y1="1" x2="23" y2="23"></line>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Remember & Forgot -->
+        <div class="form-row">
+          <label class="checkbox-label">
+            <input type="checkbox" id="rememberMe">
+            <span data-i18n="login.remember">Beni hatırla</span>
+          </label>
+          <a href="orbicorp-forgot-password.html" class="forgot-link" data-i18n="login.forgot">Şifremi unuttum</a>
+        </div>
+
+        <!-- Submit -->
+        <button type="submit" class="submit-btn" id="submitBtn">
+          <span class="spinner"></span>
+          <span class="btn-text" data-i18n="login.submit">Giriş Yap</span>
+        </button>
+      </form>
+    </div>
+
+    <!-- Footer -->
+    <div class="login-footer">
+      <p>© 2026 Orbicorp. <span data-i18n="login.rights">Tüm hakları saklıdır.</span></p>
+    </div>
+  </div>
+
+  <script src="orbicorp-api.js"></script>
+  <script>
+    // =====================
+    // i18n Translations
+    // =====================
+    const translations = {
+      tr: {
+        'login.title': 'Hesabınıza Giriş Yapın',
+        'login.subtitle': 'AI agent platformunuza erişmek için giriş yapın',
+        'login.email': 'Email Adresi',
+        'login.password': 'Şifre',
+        'login.remember': 'Beni hatırla',
+        'login.forgot': 'Şifremi unuttum',
+        'login.submit': 'Giriş Yap',
+        'login.rights': 'Tüm hakları saklıdır.',
+        'login.error.invalid': 'Geçersiz email veya şifre',
+        'login.error.network': 'Bağlantı hatası. Lütfen tekrar deneyin.',
+        'login.error.required': 'Lütfen tüm alanları doldurun',
+      },
+      en: {
+        'login.title': 'Sign in to your account',
+        'login.subtitle': 'Access your AI agent platform',
+        'login.email': 'Email Address',
+        'login.password': 'Password',
+        'login.remember': 'Remember me',
+        'login.forgot': 'Forgot password?',
+        'login.submit': 'Sign In',
+        'login.rights': 'All rights reserved.',
+        'login.error.invalid': 'Invalid email or password',
+        'login.error.network': 'Connection error. Please try again.',
+        'login.error.required': 'Please fill in all fields',
+      }
+    };
+
+    let currentLang = localStorage.getItem('orbicorp_lang') || 'tr';
+
+    function applyTranslations() {
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (translations[currentLang][key]) {
+          el.textContent = translations[currentLang][key];
+        }
+      });
+      // Update placeholders
+      document.getElementById('email').placeholder = currentLang === 'tr' ? 'ornek@sirket.com' : 'example@company.com';
+      document.getElementById('password').placeholder = '••••••••';
+      // Update lang button
+      document.getElementById('langToggle').querySelector('span').textContent = currentLang.toUpperCase();
+    }
+
+    // =====================
+    // Theme Management
+    // =====================
+    function getSystemTheme() {
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    function applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      const sunIcon = document.querySelector('.sun-icon');
+      const moonIcon = document.querySelector('.moon-icon');
+      if (theme === 'dark') {
+        sunIcon.style.display = 'none';
+        moonIcon.style.display = 'block';
+      } else {
+        sunIcon.style.display = 'block';
+        moonIcon.style.display = 'none';
+      }
+    }
+
+    let currentTheme = localStorage.getItem('orbicorp_theme') || getSystemTheme();
+    applyTheme(currentTheme);
+
+    // Listen for system theme changes
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+      if (!localStorage.getItem('orbicorp_theme')) {
+        applyTheme(e.matches ? 'dark' : 'light');
+      }
+    });
+
+    // =====================
+    // Event Listeners
+    // =====================
+
+    // Theme Toggle
+    document.getElementById('themeToggle').addEventListener('click', () => {
+      currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      localStorage.setItem('orbicorp_theme', currentTheme);
+      applyTheme(currentTheme);
+    });
+
+    // Language Toggle
+    document.getElementById('langToggle').addEventListener('click', () => {
+      currentLang = currentLang === 'tr' ? 'en' : 'tr';
+      localStorage.setItem('orbicorp_lang', currentLang);
+      applyTranslations();
+    });
+
+    // Password Toggle
+    document.getElementById('passwordToggle').addEventListener('click', () => {
+      const input = document.getElementById('password');
+      const eyeIcon = document.querySelector('.eye-icon');
+      const eyeOffIcon = document.querySelector('.eye-off-icon');
+      
+      if (input.type === 'password') {
+        input.type = 'text';
+        eyeIcon.style.display = 'none';
+        eyeOffIcon.style.display = 'block';
+      } else {
+        input.type = 'password';
+        eyeIcon.style.display = 'block';
+        eyeOffIcon.style.display = 'none';
+      }
+    });
+
+    // Form Submit
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const rememberMe = document.getElementById('rememberMe').checked;
+      const submitBtn = document.getElementById('submitBtn');
+      const errorMessage = document.getElementById('errorMessage');
+      const errorText = document.getElementById('errorText');
+
+      // Reset error state
+      errorMessage.classList.remove('show');
+      document.getElementById('email').classList.remove('error');
+      document.getElementById('password').classList.remove('error');
+
+      // Validate
+      if (!email || !password) {
+        errorText.textContent = translations[currentLang]['login.error.required'];
+        errorMessage.classList.add('show');
+        if (!email) document.getElementById('email').classList.add('error');
+        if (!password) document.getElementById('password').classList.add('error');
+        return;
+      }
+
+      // Show loading
+      submitBtn.classList.add('loading');
+      submitBtn.disabled = true;
+
+      try {
+        const result = await window.orbicorpAPI.login(email, password);
+
+        if (result.success) {
+          // Save remember me preference
+          if (rememberMe) {
+            localStorage.setItem('orbicorp_remember_email', email);
+          } else {
+            localStorage.removeItem('orbicorp_remember_email');
+          }
+
+          // Redirect to last page or dashboard
+          const lastPage = sessionStorage.getItem('orbicorp_last_page') || 'index.html';
+          window.location.href = lastPage;
+        } else {
+          throw new Error(result.message || 'Login failed');
+        }
+      } catch (error) {
+        console.error('Login error:', error);
+        
+        // Show error
+        if (error.message.includes('network') || error.message.includes('fetch')) {
+          errorText.textContent = translations[currentLang]['login.error.network'];
+        } else {
+          errorText.textContent = translations[currentLang]['login.error.invalid'];
+        }
+        errorMessage.classList.add('show');
+        document.getElementById('email').classList.add('error');
+        document.getElementById('password').classList.add('error');
+      } finally {
+        submitBtn.classList.remove('loading');
+        submitBtn.disabled = false;
+      }
+    });
+
+    // =====================
+    // Initialize
+    // =====================
+    document.addEventListener('DOMContentLoaded', () => {
+      applyTranslations();
+      
+      // Restore remembered email
+      const rememberedEmail = localStorage.getItem('orbicorp_remember_email');
+      if (rememberedEmail) {
+        document.getElementById('email').value = rememberedEmail;
+        document.getElementById('rememberMe').checked = true;
+      }
+
+      // Check if already logged in
+      if (window.orbicorpAPI.isAuthenticated()) {
+        window.location.href = 'index.html';
+      }
+    });
+  </script>
+</body>
+</html>

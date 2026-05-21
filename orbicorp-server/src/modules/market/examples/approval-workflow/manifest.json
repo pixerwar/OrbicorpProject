@@ -1,0 +1,119 @@
+{
+  "name": "approval-workflow",
+  "version": "1.0.0",
+  "type": "workflow-template",
+  "displayName": "Onay Süreci",
+  "description": "Genel amaçlı onay iş akışı şablonu. İzin talepleri, satın alma onayları vb. için kullanılabilir.",
+  
+  "author": {
+    "name": "Orbicorp",
+    "email": "dev@orbicorp.ai"
+  },
+  
+  "icon": "✅",
+  "category": "automation",
+  "tags": ["workflow", "approval", "onay", "süreç", "otomasyon"],
+  
+  "pricing": {
+    "model": "free"
+  },
+  
+  "workflow": {
+    "name": "Onay Süreci",
+    "description": "Çok aşamalı onay iş akışı",
+    
+    "trigger": {
+      "type": "manual",
+      "config": {
+        "form": {
+          "title": { "type": "string", "label": "Başlık", "required": true },
+          "description": { "type": "string", "label": "Açıklama", "required": true },
+          "priority": { "type": "select", "label": "Öncelik", "options": ["LOW", "MEDIUM", "HIGH"] },
+          "approver": { "type": "user", "label": "Onaylayıcı", "required": true }
+        }
+      }
+    },
+    
+    "variables": {
+      "requestTitle": { "type": "string", "source": "trigger.title" },
+      "requestDescription": { "type": "string", "source": "trigger.description" },
+      "approverUserId": { "type": "string", "source": "trigger.approver" },
+      "approved": { "type": "boolean", "default": false }
+    },
+    
+    "steps": [
+      {
+        "id": "notify_approver",
+        "type": "action",
+        "config": {
+          "action": "notification.send",
+          "params": {
+            "userId": "{{approverUserId}}",
+            "title": "Yeni Onay Talebi: {{requestTitle}}",
+            "message": "{{requestDescription}}",
+            "type": "APPROVAL",
+            "actions": ["approve", "reject"]
+          }
+        },
+        "next": "wait_response"
+      },
+      {
+        "id": "wait_response",
+        "type": "action",
+        "config": {
+          "action": "notification.waitResponse",
+          "timeout": "72h"
+        },
+        "next": "check_response"
+      },
+      {
+        "id": "check_response",
+        "type": "condition",
+        "config": {
+          "condition": "{{response}} == 'approved'"
+        },
+        "branches": {
+          "true": "approved_action",
+          "false": "rejected_action"
+        }
+      },
+      {
+        "id": "approved_action",
+        "type": "action",
+        "config": {
+          "action": "notification.send",
+          "params": {
+            "userId": "{{requesterId}}",
+            "title": "Talebiniz Onaylandı",
+            "message": "{{requestTitle}} talebi onaylandı.",
+            "type": "INFO"
+          }
+        },
+        "next": "end"
+      },
+      {
+        "id": "rejected_action",
+        "type": "action",
+        "config": {
+          "action": "notification.send",
+          "params": {
+            "userId": "{{requesterId}}",
+            "title": "Talebiniz Reddedildi",
+            "message": "{{requestTitle}} talebi reddedildi.",
+            "type": "WARNING"
+          }
+        },
+        "next": "end"
+      },
+      {
+        "id": "end",
+        "type": "action",
+        "config": {
+          "action": "workflow.complete"
+        }
+      }
+    ]
+  },
+  
+  "readme": "# Onay Süreci Şablonu\n\nBu şablon, genel amaçlı bir onay iş akışı oluşturur.\n\n## Kullanım Alanları\n- İzin talepleri\n- Satın alma onayları\n- Belge onayları\n- Proje onayları\n\n## Özelleştirme\nŞablonu klonlayarak kendi ihtiyaçlarınıza göre düzenleyebilirsiniz."
+}

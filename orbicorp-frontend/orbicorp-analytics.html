@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orbicorp — Analitik</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--primary:#635BFF;--primary-light:#7A73FF;--primary-bg:#F0EEFF;--primary-bg-subtle:#F8F7FF;--navy:#0A2540;--surface:#F6F9FC;--white:#FFFFFF;--border:#E3E8EE;--border-light:#EBEEF2;--text-primary:#0A2540;--text-secondary:#425466;--text-tertiary:#8792A2;--text-muted:#A3ACB9;--green:#0EA371;--green-bg:#EEFBF4;--green-text:#0C7D58;--amber:#D97706;--amber-bg:#FEF7E6;--amber-text:#92510A;--red:#DF1B41;--red-bg:#FDE8EC;--red-text:#A11534;--blue:#0570DE;--blue-bg:#E8F2FD;--blue-text:#0455A9;--radius-sm:6px;--radius-md:8px;--radius-lg:12px;--radius-xl:16px;--font:'Google Sans',-apple-system,BlinkMacSystemFont,sans-serif;--font-mono:'Google Sans Mono','SF Mono',monospace;--transition:0.2s cubic-bezier(0.4,0,0.2,1)}
+body{font-family:var(--font);background:var(--surface);color:var(--text-primary);-webkit-font-smoothing:antialiased}
+.topnav{height:56px;background:var(--white);border-bottom:0.5px solid var(--border);display:flex;align-items:center;padding:0 24px;position:sticky;top:0;z-index:100}
+.topnav-brand{display:flex;align-items:center;gap:10px;margin-right:32px;text-decoration:none}
+.topnav-logo{width:32px;height:32px;background:linear-gradient(135deg,var(--primary),var(--navy));border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:14px}
+.topnav-name{font-size:16px;font-weight:700;color:var(--navy);letter-spacing:-0.3px}
+.topnav-tabs{display:flex;gap:4px;flex:1}
+.topnav-tab{padding:8px 14px;font-size:14px;color:var(--text-secondary);border-radius:var(--radius-sm);cursor:pointer;transition:all var(--transition);text-decoration:none}
+.topnav-tab:hover{background:var(--surface);color:var(--text-primary)}
+.topnav-tab.active{background:var(--primary-bg);color:var(--primary);font-weight:500}
+.topnav-right{display:flex;align-items:center;gap:12px;margin-left:auto}
+.topnav-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-light));color:white;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center}
+.layout{display:flex;min-height:calc(100vh - 56px)}
+.sidebar{width:240px;background:var(--white);border-right:0.5px solid var(--border);padding:16px 12px;flex-shrink:0;overflow-y:auto}
+.sidebar-label{font-size:11px;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;padding:0 10px;margin-bottom:6px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--radius-sm);font-size:13px;color:var(--text-secondary);cursor:pointer;transition:all var(--transition)}
+.nav-item:hover{background:var(--surface);color:var(--text-primary)}
+.nav-item.active{background:var(--primary-bg);color:var(--primary);font-weight:500}
+.nav-item svg{width:16px;height:16px;flex-shrink:0}
+.nav-section{margin-bottom:20px}
+.main{flex:1;padding:24px 32px;overflow-y:auto;max-width:1100px}
+.section{display:none;animation:fadeUp 0.4s ease}
+.section.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.page-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.page-head h2{font-size:18px;font-weight:600;color:var(--navy)}
+.page-head p{font-size:13px;color:var(--text-tertiary);margin-top:2px}
+.date-pills{display:flex;gap:3px;background:var(--surface);padding:3px;border-radius:var(--radius-sm);border:0.5px solid var(--border)}
+.date-pill{padding:5px 12px;font-size:11px;border-radius:4px;cursor:pointer;border:none;background:none;color:var(--text-tertiary);font-family:var(--font);font-weight:500;transition:all var(--transition)}
+.date-pill.active{background:var(--white);color:var(--text-primary);box-shadow:0 1px 2px rgba(0,0,0,0.04)}
+
+/* KPI */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.kpi{background:var(--white);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:16px 18px}
+.kpi-label{font-size:12px;color:var(--text-tertiary);margin-bottom:4px;display:flex;align-items:center;gap:6px}
+.kpi-label svg{width:14px;height:14px}
+.kpi-value{font-size:24px;font-weight:700;color:var(--text-primary);letter-spacing:-0.5px}
+.kpi-change{font-size:11px;font-weight:500;margin-top:4px;display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:999px}
+.kpi-change.up{background:var(--green-bg);color:var(--green-text)}
+.kpi-change.down{background:var(--red-bg);color:var(--red-text)}
+.kpi-change.neutral{background:var(--surface);color:var(--text-tertiary)}
+
+/* Cards */
+.card{background:var(--white);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:18px 20px;margin-bottom:14px}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.card-title{font-size:14px;font-weight:500;color:var(--text-primary)}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+
+/* SVG Charts */
+.chart-area{height:200px;position:relative}
+.chart-svg{width:100%;height:100%}
+.bar-group{display:flex;align-items:flex-end;gap:6px;height:160px;padding-top:10px}
+.bar-pair{display:flex;gap:3px;flex:1;align-items:flex-end}
+.bar{border-radius:3px 3px 0 0;min-width:8px;transition:height 0.6s ease}
+.bar-label{text-align:center;font-size:9px;color:var(--text-muted);margin-top:4px}
+
+/* Donut */
+.donut-wrap{display:flex;align-items:center;gap:20px}
+.donut-svg{width:120px;height:120px}
+.donut-legend{display:flex;flex-direction:column;gap:6px}
+.donut-item{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-secondary)}
+.donut-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+
+/* Gauge */
+.gauge-card{background:var(--white);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:18px;text-align:center}
+.gauge-svg{width:100px;height:60px;margin:0 auto 8px}
+.gauge-value{font-size:22px;font-weight:700;color:var(--text-primary)}
+.gauge-label{font-size:12px;color:var(--text-tertiary);margin-top:2px}
+.gauge-sub{font-size:11px;color:var(--text-muted);margin-top:4px}
+
+/* Status row */
+.status-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:0.5px solid var(--border-light);font-size:13px}
+.status-row:last-child{border-bottom:none}
+.status-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.status-dot.ok{background:var(--green)}
+.status-dot.warn{background:var(--amber)}
+.status-dot.err{background:var(--red)}
+.status-name{flex:1;color:var(--text-primary);font-weight:500}
+.status-val{color:var(--text-secondary);font-family:var(--font-mono);font-size:12px}
+.status-badge{font-size:10px;padding:2px 8px;border-radius:999px;font-weight:500}
+
+/* Agent mini card */
+.agent-perf-card{background:var(--white);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:16px;transition:all var(--transition)}
+.agent-perf-card:hover{border-color:var(--primary);box-shadow:0 2px 12px rgba(99,91,255,0.06)}
+.agent-perf-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.agent-perf-icon{width:32px;height:32px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0}
+.agent-perf-name{font-size:13px;font-weight:600;color:var(--text-primary)}
+.agent-perf-dept{font-size:11px;color:var(--text-tertiary)}
+.agent-perf-status{margin-left:auto}
+.agent-perf-metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.apm{padding:8px;background:var(--surface);border-radius:var(--radius-sm);text-align:center}
+.apm-val{font-size:16px;font-weight:700;color:var(--text-primary)}
+.apm-label{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.03em}
+.spark-row{height:32px;display:flex;align-items:flex-end;gap:2px}
+.spark-bar{flex:1;border-radius:2px 2px 0 0;background:var(--primary);opacity:0.5;min-height:3px;transition:height 0.4s ease}
+.spark-bar:last-child{opacity:1}
+
+/* Progress bar small */
+.progress-sm{height:6px;background:var(--surface);border-radius:999px;overflow:hidden;margin-top:6px}
+.progress-sm-fill{height:100%;border-radius:999px;transition:width 0.8s ease}
+
+/* Badge */
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;padding:2px 8px;border-radius:999px;font-weight:500}
+.badge-green{background:var(--green-bg);color:var(--green-text)}
+.badge-amber{background:var(--amber-bg);color:var(--amber-text)}
+.badge-red{background:var(--red-bg);color:var(--red-text)}
+.badge-blue{background:var(--blue-bg);color:var(--blue-text)}
+
+/* Animated pulse for live */
+.live-dot{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;animation:livePulse 2s infinite}
+@keyframes livePulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(14,163,113,0.4)}50%{opacity:0.8;box-shadow:0 0 0 6px rgba(14,163,113,0)}}
+
+@media(max-width:1024px){.kpi-row,.grid-4{grid-template-columns:repeat(2,1fr)}.grid-2,.grid-3{grid-template-columns:1fr}}
+</style>
+<link rel="stylesheet" href="orbicorp-dark.css">
+<style>
+.in-iframe .topnav{display:none!important}
+.in-iframe .sidebar{display:none!important}
+.in-iframe .layout{margin-top:0!important;height:100vh!important}
+.in-iframe .settings-nav{top:0!important;height:100vh!important}
+.in-iframe .chat-panel{top:0!important;height:100vh!important}
+</style>
+</head>
+<body>
+<script>
+(function(){
+  // If in iframe, hide own nav/sidebar and sync theme from parent
+  if(window.self!==window.top){
+    document.body.classList.add("in-iframe");
+    try{
+      var pt=window.parent.document.documentElement.getAttribute("data-theme");
+      if(pt)document.documentElement.setAttribute("data-theme",pt);
+    }catch(e){}
+    // Listen for theme changes from parent
+    window.addEventListener("message",function(e){
+      if(e.data&&e.data.type==="theme")document.documentElement.setAttribute("data-theme",e.data.value);
+      if(e.data&&e.data.type==="lang")window._orbicorpLang=e.data.value;
+    });
+  }
+})();
+</script>
+<nav class="topnav">
+  <a class="topnav-brand" href="#"><div class="topnav-logo">O</div><span class="topnav-name">Orbicorp</span></a>
+  <div class="topnav-tabs"><a class="topnav-tab">Overview</a><a class="topnav-tab">Agents</a><a class="topnav-tab">Company Profile</a><a class="topnav-tab">Chat</a><a class="topnav-tab">Skills</a><a class="topnav-tab active">Analytics</a></div>
+  <div class="topnav-right"><div class="topnav-avatar">AY</div></div>
+</nav>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="nav-section">
+      <div class="sidebar-label">Analitik</div>
+      <div class="nav-item active" onclick="goTab('company',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>Şirket Performansı</div>
+      <div class="nav-item" onclick="goTab('agent',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42"/></svg>Agent & Platform</div>
+      <div class="nav-item" onclick="goTab('system',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>Sistem Performansı</div>
+    </div>
+    <div class="nav-section">
+      <div class="sidebar-label">Diğer</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82"/></svg>Ayarlar</div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <!-- ═══ 1. ŞİRKET PERFORMANSI ═══ -->
+    <div class="section active" id="tab-company">
+      <div class="page-head"><div><h2>Şirket Performansı</h2><p>Gelir, gider ve AI otomasyon metrikleri</p></div></div>
+
+      <div class="kpi-row">
+        <div class="kpi"><div class="kpi-label"><svg viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>Aylık Gelir</div><div class="kpi-value">$682K</div><div class="kpi-change up">+12.4%</div></div>
+        <div class="kpi"><div class="kpi-label"><svg viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>Aylık Gider</div><div class="kpi-value">$471K</div><div class="kpi-change down">+3.8%</div></div>
+        <div class="kpi"><div class="kpi-label"><svg viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Net Kar</div><div class="kpi-value">$211K</div><div class="kpi-change up">+28.1%</div></div>
+        <div class="kpi"><div class="kpi-label"><svg viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>İşlenen Fatura</div><div class="kpi-value">1,247</div><div class="kpi-change up">+340 AI ile</div></div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-head"><span class="card-title">Aylık Gelir Trendi</span><div class="date-pills"><button class="date-pill">6A</button><button class="date-pill active">12A</button></div></div>
+          <div class="chart-area"><svg class="chart-svg" viewBox="0 0 500 180" preserveAspectRatio="none"><defs><linearGradient id="gFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#635BFF" stop-opacity="0.12"/><stop offset="100%" stop-color="#635BFF" stop-opacity="0"/></linearGradient></defs><line x1="0" y1="45" x2="500" y2="45" stroke="#E3E8EE" stroke-width="0.5" stroke-dasharray="4"/><line x1="0" y1="90" x2="500" y2="90" stroke="#E3E8EE" stroke-width="0.5" stroke-dasharray="4"/><line x1="0" y1="135" x2="500" y2="135" stroke="#E3E8EE" stroke-width="0.5" stroke-dasharray="4"/><path d="M0 180 L0 140 L42 130 L83 125 L125 115 L167 120 L208 105 L250 95 L292 80 L333 85 L375 65 L417 50 L458 45 L500 30 L500 180Z" fill="url(#gFill)"/><path d="M0 140 L42 130 L83 125 L125 115 L167 120 L208 105 L250 95 L292 80 L333 85 L375 65 L417 50 L458 45 L500 30" fill="none" stroke="#635BFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><g font-size="9" fill="#A3ACB9" text-anchor="middle"><text x="0" y="178">Nis</text><text x="42" y="178">May</text><text x="83" y="178">Haz</text><text x="125" y="178">Tem</text><text x="167" y="178">Ağu</text><text x="208" y="178">Eyl</text><text x="250" y="178">Eki</text><text x="292" y="178">Kas</text><text x="333" y="178">Ara</text><text x="375" y="178">Oca</text><text x="417" y="178">Şub</text><text x="458" y="178">Mar</text></g></svg></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><span class="card-title">Gelir vs Gider</span><div class="date-pills"><button class="date-pill active">6A</button><button class="date-pill">12A</button></div></div>
+          <div class="bar-group" id="barChart"></div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-head"><span class="card-title">Gider Kategori Dağılımı</span><div class="date-pills"><button class="date-pill active">Bu Ay</button><button class="date-pill">3A</button></div></div>
+          <div class="donut-wrap">
+            <svg class="donut-svg" viewBox="0 0 42 42"><circle cx="21" cy="21" r="16" fill="none" stroke="#E3E8EE" stroke-width="5"/><circle cx="21" cy="21" r="16" fill="none" stroke="#635BFF" stroke-width="5" stroke-dasharray="35 65" stroke-dashoffset="25" stroke-linecap="round"/><circle cx="21" cy="21" r="16" fill="none" stroke="#0EA371" stroke-width="5" stroke-dasharray="22 78" stroke-dashoffset="90" stroke-linecap="round"/><circle cx="21" cy="21" r="16" fill="none" stroke="#D97706" stroke-width="5" stroke-dasharray="18 82" stroke-dashoffset="112" stroke-linecap="round"/><circle cx="21" cy="21" r="16" fill="none" stroke="#0570DE" stroke-width="5" stroke-dasharray="15 85" stroke-dashoffset="130" stroke-linecap="round"/><circle cx="21" cy="21" r="16" fill="none" stroke="#8792A2" stroke-width="5" stroke-dasharray="10 90" stroke-dashoffset="145" stroke-linecap="round"/></svg>
+            <div class="donut-legend">
+              <div class="donut-item"><div class="donut-dot" style="background:#635BFF"></div>Personel — %35 ($165K)</div>
+              <div class="donut-item"><div class="donut-dot" style="background:#0EA371"></div>Yazılım & Lisans — %22 ($104K)</div>
+              <div class="donut-item"><div class="donut-dot" style="background:#D97706"></div>Reklam & Pazarlama — %18 ($85K)</div>
+              <div class="donut-item"><div class="donut-dot" style="background:#0570DE"></div>Altyapı & Hosting — %15 ($71K)</div>
+              <div class="donut-item"><div class="donut-dot" style="background:#8792A2"></div>Diğer — %10 ($46K)</div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><span class="card-title">AI Fatura Otomasyonu</span><div class="date-pills"><button class="date-pill active">Bu Ay</button><button class="date-pill">3A</button></div></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+            <div style="padding:12px;background:var(--primary-bg-subtle);border-radius:var(--radius-md);text-align:center"><div style="font-size:22px;font-weight:700;color:var(--primary)">340</div><div style="font-size:11px;color:var(--text-tertiary)">AI ile İşlenen</div></div>
+            <div style="padding:12px;background:var(--surface);border-radius:var(--radius-md);text-align:center"><div style="font-size:22px;font-weight:700;color:var(--text-primary)">907</div><div style="font-size:11px;color:var(--text-tertiary)">Manuel İşlenen</div></div>
+          </div>
+          <div style="font-size:12px;color:var(--text-secondary);margin-bottom:6px">Otomasyon Oranı: <strong>27.3%</strong></div>
+          <div class="progress-sm"><div class="progress-sm-fill" style="width:27%;background:var(--primary)"></div></div>
+          <div style="margin-top:14px;font-size:12px;color:var(--text-tertiary)">Tahmini Tasarruf: <strong style="color:var(--green-text)">$4,200/ay</strong> (42 saat/ay)</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-head"><span class="card-title">Nakit Akışı</span><div class="date-pills"><button class="date-pill active">6A</button></div></div>
+          <div class="status-row"><span class="status-name">Nakit Giriş</span><span class="status-val" style="color:var(--green)">+$682,400</span></div>
+          <div class="status-row"><span class="status-name">Nakit Çıkış</span><span class="status-val" style="color:var(--red)">-$471,200</span></div>
+          <div class="status-row"><span class="status-name" style="font-weight:600">Net Nakit Akışı</span><span class="status-val" style="color:var(--primary);font-weight:700">+$211,200</span></div>
+          <div class="status-row"><span class="status-name">Banka Bakiyesi</span><span class="status-val" style="font-weight:600">$1,847,300</span></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><span class="card-title">Departman Maliyet Dağılımı</span><div class="date-pills"><button class="date-pill active">Bu Ay</button></div></div>
+          <div id="deptBars"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ 2. AGENT & PLATFORM ═══ -->
+    <div class="section" id="tab-agent">
+      <div class="page-head"><div><h2>Agent & Platform Performansı</h2><p>Her agent'ın detaylı performans metrikleri</p></div></div>
+
+      <div class="kpi-row">
+        <div class="kpi"><div class="kpi-label">Toplam Etkileşim</div><div class="kpi-value">24.8K</div><div class="kpi-change up">+18%</div></div>
+        <div class="kpi"><div class="kpi-label">Ort. Başarı Oranı</div><div class="kpi-value">95.1%</div><div class="kpi-change up">+2.3%</div></div>
+        <div class="kpi"><div class="kpi-label">Ort. Yanıt Süresi</div><div class="kpi-value">1.4s</div><div class="kpi-change up">-0.3s</div></div>
+        <div class="kpi"><div class="kpi-label">Toplam Token</div><div class="kpi-value">1.2M</div><div class="kpi-change neutral">%62 bütçe</div></div>
+      </div>
+
+      <div class="grid-2" id="agentPerfGrid"></div>
+    </div>
+
+    <!-- ═══ 3. SİSTEM PERFORMANSI ═══ -->
+    <div class="section" id="tab-system">
+      <div class="page-head"><div><h2>Sistem Performansı</h2><p>Altyapı, API ve donanım durumu — <span class="live-dot"></span> Canlı</p></div></div>
+
+      <div class="grid-4" id="gaugeGrid"></div>
+
+      <div class="grid-2" style="margin-top:14px">
+        <div class="card">
+          <div class="card-head"><span class="card-title">LLM Sağlayıcı Durumu</span><span class="live-dot"></span></div>
+          <div class="status-row"><div class="status-dot ok"></div><span class="status-name">Anthropic (Claude)</span><span class="status-val">45ms</span><span class="badge badge-green">Çalışıyor</span></div>
+          <div class="status-row"><div class="status-dot ok"></div><span class="status-name">OpenAI (GPT)</span><span class="status-val">82ms</span><span class="badge badge-green">Çalışıyor</span></div>
+          <div class="status-row"><div class="status-dot warn"></div><span class="status-name">Google (Gemini)</span><span class="status-val">156ms</span><span class="badge badge-amber">Yavaş</span></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><span class="card-title">API Yanıt Süreleri</span><div class="date-pills"><button class="date-pill active">1S</button><button class="date-pill">24S</button></div></div>
+          <div class="chart-area" style="height:140px"><svg class="chart-svg" viewBox="0 0 500 120" preserveAspectRatio="none"><defs><linearGradient id="apiFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0EA371" stop-opacity="0.1"/><stop offset="100%" stop-color="#0EA371" stop-opacity="0"/></linearGradient></defs><path d="M0 120 L0 80 L25 75 L50 78 L75 72 L100 85 L125 70 L150 68 L175 72 L200 65 L225 60 L250 62 L275 58 L300 55 L325 60 L350 52 L375 48 L400 55 L425 45 L450 50 L475 42 L500 40 L500 120Z" fill="url(#apiFill)"/><path d="M0 80 L25 75 L50 78 L75 72 L100 85 L125 70 L150 68 L175 72 L200 65 L225 60 L250 62 L275 58 L300 55 L325 60 L350 52 L375 48 L400 55 L425 45 L450 50 L475 42 L500 40" fill="none" stroke="#0EA371" stroke-width="2" stroke-linecap="round"/></svg></div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);margin-top:4px"><span>Ort: 52ms</span><span>P95: 124ms</span><span>P99: 287ms</span></div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-head"><span class="card-title">Hata Oranı & Log Özeti</span><div class="date-pills"><button class="date-pill active">24S</button><button class="date-pill">7G</button></div></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px">
+            <div style="padding:10px;background:var(--green-bg);border-radius:var(--radius-md);text-align:center"><div style="font-size:18px;font-weight:700;color:var(--green-text)">99.97%</div><div style="font-size:10px;color:var(--green-text)">Uptime</div></div>
+            <div style="padding:10px;background:var(--amber-bg);border-radius:var(--radius-md);text-align:center"><div style="font-size:18px;font-weight:700;color:var(--amber-text)">23</div><div style="font-size:10px;color:var(--amber-text)">Warning</div></div>
+            <div style="padding:10px;background:var(--red-bg);border-radius:var(--radius-md);text-align:center"><div style="font-size:18px;font-weight:700;color:var(--red-text)">2</div><div style="font-size:10px;color:var(--red-text)">Error</div></div>
+          </div>
+          <div style="font-size:12px;color:var(--text-secondary)">
+            <div style="padding:6px 0;border-bottom:0.5px solid var(--border-light);display:flex;align-items:center;gap:6px"><span class="badge badge-red">ERR</span>Timeout: Gemini API 3x ardışık — 14:23</div>
+            <div style="padding:6px 0;border-bottom:0.5px solid var(--border-light);display:flex;align-items:center;gap:6px"><span class="badge badge-amber">WARN</span>Rate limit yaklaşıyor: OpenAI %87 — 13:45</div>
+            <div style="padding:6px 0;display:flex;align-items:center;gap:6px"><span class="badge badge-amber">WARN</span>Disk kullanımı %78 eşiğini geçti — 12:10</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><span class="card-title">Ağ & Veritabanı</span><span class="live-dot"></span></div>
+          <div class="status-row"><div class="status-dot ok"></div><span class="status-name">Ağ Trafiği (gelen)</span><span class="status-val">2.4 GB/s</span><span class="badge badge-green">Normal</span></div>
+          <div class="status-row"><div class="status-dot ok"></div><span class="status-name">Ağ Trafiği (giden)</span><span class="status-val">1.8 GB/s</span><span class="badge badge-green">Normal</span></div>
+          <div class="status-row"><div class="status-dot ok"></div><span class="status-name">PostgreSQL Sorgu Ort.</span><span class="status-val">12ms</span><span class="badge badge-green">Hızlı</span></div>
+          <div class="status-row"><div class="status-dot ok"></div><span class="status-name">Redis Latency</span><span class="status-val">0.8ms</span><span class="badge badge-green">Hızlı</span></div>
+          <div class="status-row"><div class="status-dot warn"></div><span class="status-name">Qdrant (Vector DB)</span><span class="status-val">34ms</span><span class="badge badge-amber">Orta</span></div>
+          <div class="status-row"><div class="status-dot ok"></div><span class="status-name">Bant Genişliği Kalan</span><span class="status-val">74%</span><span class="badge badge-green">Yeterli</span></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+function goTab(id, el) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+}
+
+// Bar chart
+const months = ['Eki','Kas','Ara','Oca','Şub','Mar'];
+const revenues = [520,548,590,612,645,682];
+const expenses = [410,425,440,448,460,471];
+const maxVal = 700;
+document.getElementById('barChart').innerHTML = months.map((m,i) => `
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center">
+    <div style="display:flex;gap:3px;align-items:flex-end;height:140px">
+      <div class="bar" style="width:14px;height:${revenues[i]/maxVal*130}px;background:var(--primary);opacity:0.8;border-radius:3px 3px 0 0"></div>
+      <div class="bar" style="width:14px;height:${expenses[i]/maxVal*130}px;background:var(--red);opacity:0.5;border-radius:3px 3px 0 0"></div>
+    </div>
+    <div class="bar-label">${m}</div>
+  </div>`).join('') + '<div style="display:flex;gap:12px;font-size:10px;color:var(--text-muted);padding-top:8px;position:absolute;bottom:0;right:0"><span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:2px;background:var(--primary);opacity:0.8"></span>Gelir</span><span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:2px;background:var(--red);opacity:0.5"></span>Gider</span></div>';
+
+// Dept bars
+const depts = [{name:'Mühendislik',val:142,max:200,color:'var(--primary)'},{name:'Satış',val:98,max:150,color:'var(--green)'},{name:'Pazarlama',val:85,max:120,color:'var(--amber)'},{name:'Müşteri Başarısı',val:62,max:100,color:'var(--blue)'},{name:'İK & Yönetim',val:54,max:80,color:'#993556'},{name:'BT Altyapı',val:30,max:60,color:'var(--text-tertiary)'}];
+document.getElementById('deptBars').innerHTML = depts.map(d => `
+  <div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span style="color:var(--text-secondary)">${d.name}</span><span style="font-weight:600;color:var(--text-primary)">$${d.val}K</span></div><div class="progress-sm"><div class="progress-sm-fill" style="width:${d.val/depts[0].max*100}%;background:${d.color}"></div></div></div>`).join('');
+
+// Agent perf cards
+const agentPerfs = [
+  {name:'Sales Copilot',dept:'Satış',color:'var(--primary-bg)',textColor:'var(--primary)',success:96.4,response:'1.2s',convos:3241,cost:312,trend:[40,55,48,62,70,58,75,82,68,90,85,95]},
+  {name:'HR Assistant',dept:'İnsan Kaynakları',color:'var(--green-bg)',textColor:'var(--green-text)',success:99.1,response:'0.8s',convos:1872,cost:189,trend:[30,35,42,38,45,50,48,55,52,60,58,62]},
+  {name:'Support Agent',dept:'Müşteri Hizmetleri',color:'var(--amber-bg)',textColor:'var(--amber-text)',success:94.8,response:'0.9s',convos:2890,cost:278,trend:[50,45,60,55,70,65,75,80,72,88,82,92]},
+  {name:'Content Writer',dept:'Pazarlama',color:'var(--blue-bg)',textColor:'var(--blue-text)',success:87.3,response:'2.4s',convos:567,cost:156,trend:[10,15,12,18,22,20,25,28,30,35,32,38]},
+  {name:'Data Analyst',dept:'Veri & Analitik',color:'#E1F5EE',textColor:'#0F6E56',success:92.7,response:'3.1s',convos:412,cost:124,trend:[15,18,20,22,25,28,30,24,32,35,28,38]},
+  {name:'IT Helpdesk',dept:'BT',color:'var(--red-bg)',textColor:'var(--red-text)',success:93.1,response:'1.5s',convos:890,cost:33,trend:[20,25,30,28,35,40,38,42,45,50,48,55]},
+  {name:'Onboarding Bot',dept:'İK',color:'#FBEAF0',textColor:'#993556',success:97.5,response:'0.6s',convos:234,cost:67,trend:[5,8,12,10,15,18,14,20,22,25,28,30]},
+  {name:'Legal Advisor',dept:'Hukuk',color:'#F1EFE8',textColor:'#5F5E5A',success:91.2,response:'2.8s',convos:89,cost:89,trend:[8,6,10,7,12,9,14,11,8,15,12,10]},
+];
+document.getElementById('agentPerfGrid').innerHTML = agentPerfs.map(a => {
+  const maxT = Math.max(...a.trend);
+  return `<div class="agent-perf-card">
+    <div class="agent-perf-head">
+      <div class="agent-perf-icon" style="background:${a.color};color:${a.textColor};font-size:11px">${a.name.split(' ').map(w=>w[0]).join('')}</div>
+      <div><div class="agent-perf-name">${a.name}</div><div class="agent-perf-dept">${a.dept}</div></div>
+      <span class="agent-perf-status badge ${a.success>=95?'badge-green':a.success>=90?'badge-blue':'badge-amber'}">${a.success}%</span>
+    </div>
+    <div class="agent-perf-metrics">
+      <div class="apm"><div class="apm-val">${(a.convos/1000).toFixed(1)}K</div><div class="apm-label">Konuşma</div></div>
+      <div class="apm"><div class="apm-val">${a.response}</div><div class="apm-label">Yanıt</div></div>
+      <div class="apm"><div class="apm-val">$${a.cost}</div><div class="apm-label">Maliyet</div></div>
+      <div class="apm"><div class="apm-val">${a.success}%</div><div class="apm-label">Başarı</div></div>
+    </div>
+    <div class="spark-row">${a.trend.map(v => `<div class="spark-bar" style="height:${v/maxT*100}%"></div>`).join('')}</div>
+  </div>`;
+}).join('');
+
+// Gauges
+const gauges = [
+  {label:'CPU Kullanımı',value:42,unit:'%',sub:'8 core / 3.2 GHz',color:'var(--primary)'},
+  {label:'RAM Kullanımı',value:67,unit:'%',sub:'21.4 / 32 GB',color:'var(--amber)'},
+  {label:'Disk Kullanımı',value:78,unit:'%',sub:'312 / 400 GB SSD',color:'var(--red)'},
+  {label:'GPU Kullanımı',value:23,unit:'%',sub:'NVIDIA A100 40GB',color:'var(--green)'},
+];
+document.getElementById('gaugeGrid').innerHTML = gauges.map(g => {
+  const r = 35;
+  const circumference = Math.PI * r;
+  const filled = (g.value / 100) * circumference;
+  const gap = circumference - filled;
+  const statusColor = g.value < 50 ? 'var(--green)' : g.value < 75 ? 'var(--amber)' : 'var(--red)';
+  const useColor = g.color === 'auto' ? statusColor : g.color;
+  return `<div class="gauge-card">
+    <svg class="gauge-svg" viewBox="0 0 100 62">
+      <path d="M15 55 A35 35 0 0 1 85 55" fill="none" stroke="#E3E8EE" stroke-width="7" stroke-linecap="round"/>
+      <path d="M15 55 A35 35 0 0 1 85 55" fill="none" stroke="${useColor}" stroke-width="7" stroke-linecap="round" stroke-dasharray="${filled.toFixed(1)} ${gap.toFixed(1)}"/>
+    </svg>
+    <div class="gauge-value">${g.value}${g.unit}</div>
+    <div class="gauge-label">${g.label}</div>
+    <div class="gauge-sub">${g.sub}</div>
+  </div>`;
+}).join('');
+</script>
+</body>
+</html>
